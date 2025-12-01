@@ -1,0 +1,8 @@
+{
+  "name": "E-Cycle",
+  "description": "Una aplicación moderna de reciclaje para gestionar depósitos de residuos electrónicos y ganar recompensas.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+
+  <!-- Primary Meta Tags -->
+  <title>E-Cycle - Recicla Electrónicos, Gana Recompensas</title>
+  <meta name="title" content="E-Cycle - Recicla Electrónicos, Gana Recompensas" />
+  <meta name="description"
+    content="Encuentra puntos de reciclaje cercanos, deposita tus dispositivos electrónicos antiguos y gana recompensas. Contribuye al medio ambiente mientras acumulas beneficios." />
+  <meta name="keywords"
+    content="reciclaje electrónico, e-waste, reciclaje, puntos de reciclaje, recompensas ecológicas, medio ambiente, sustentabilidad" />
+
+  <!-- PWA Theme Colors -->
+  <meta name="theme-color" content="#047A6C" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121212" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://e-cycle.vercel.app/" />
+  <meta property="og:title" content="E-Cycle - Recicla Electrónicos, Gana Recompensas" />
+  <meta property="og:description"
+    content="Encuentra puntos de reciclaje cercanos, deposita tus dispositivos electrónicos antiguos y gana recompensas." />
+  <meta property="og:image" content="https://e-cycle.vercel.app/og-image.png" />
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://e-cycle.vercel.app/" />
+  <meta property="twitter:title" content="E-Cycle - Recicla Electrónicos, Gana Recompensas" />
+  <meta property="twitter:description"
+    content="Encuentra puntos de reciclaje cercanos, deposita tus dispositivos electrónicos antiguos y gana recompensas." />
+  <meta property="twitter:image" content="https://e-cycle.vercel.app/og-image.png" />
+
+  <!-- Manifest -->
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            primary: '#047A6C',
+            'primary-dark': '#035e53',
+            secondary: '#A6F8F2',
+            text: '#151515',
+            background: '#F5F8F8',
+            points: '#FFC107',
+            'points-bg': '#FFF8E1',
+            // Dark mode specifics
+            'dark-bg': '#121212',
+            'dark-surface': '#1E1E1E',
+            'dark-border': '#333333',
+            'dark-text': '#E2E2E2',
+            'dark-text-secondary': '#A0A0A0',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html,
+    body,
+    #root {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      /* App handles scrolling internally */
+      background-color: #F5F8F8;
+      overscroll-behavior: none;
+      transition: background-color 0.3s ease;
+    }
+
+    html.dark body,
+    html.dark #root {
+      background-color: #121212;
+    }
+
+    .material-symbols-rounded {
+      font-family: 'Material Symbols Rounded';
+      font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24;
+    }
+
+    .filled-icon {
+      font-variation-settings: 'FILL' 1;
+    }
+
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      /* IE and Edge */
+      scrollbar-width: none;
+      /* Firefox */
+    }
+
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    @keyframes scan {
+
+      0%,
+      100% {
+        top: 0%;
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 1;
+      }
+
+      90% {
+        opacity: 1;
+      }
+
+      100% {
+        top: 100%;
+        opacity: 0;
+      }
+    }
+
+    @keyframes bounce-short {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-15%);
+      }
+    }
+
+    .animate-bounce-short {
+      animation: bounce-short 1s infinite;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
+</html>
