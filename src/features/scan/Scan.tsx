@@ -47,46 +47,16 @@ const Scan: React.FC<ScanProps> = ({ onGoToRedeem }) => {
         if (step === 'validating') {
             setTimeout(async () => {
                 const total = getTotalPoints();
-                // Pass BASE points to deposit, API handles multiplier? 
-                // Wait, API service logic I wrote applies multiplier AGAIN if I pass base points?
-                // In apiService I wrote: const finalPoints = Math.round(basePoints * newMultiplier);
-                // So I should pass BASE points to deposit if I want API to calculate it based on NEW multiplier.
-                // BUT, user sees points calculated with CURRENT multiplier.
-                // Let's align:
-                // 1. UI shows points with CURRENT multiplier.
-                // 2. We send calculated total to deposit? Or base?
-                // apiService.submitDropoff(user, items, points) -> points argument name.
-                // In apiService: const finalPoints = Math.round(basePoints * newMultiplier);
-                // It treats the argument as BASE points.
-
-                // So here in Scan.tsx, getTotalPoints returns the DISPLAY points (multiplied).
-                // But deposit() expects BASE points?
-                // Let's check apiService again.
-                // apiService.submitDropoff signature: (user, items, basePoints)
-                // Yes.
-
-                // So I need to calculate base points separately.
+                // Calculate base points (without multiplier) for the API.
+                // The API expects base points and will apply the active multiplier server-side.
                 const basePoints = Object.entries(items).reduce((acc, [key, count]) => {
                     const category = RECYCLE_CATEGORIES.find(c => c.id === key);
                     return acc + (category ? category.pointsPerUnit * (count as number) : 0);
                 }, 0);
 
-                // The API will calculate final points based on (potentially new) multiplier.
-                // But for UI consistency, we should probably show what the API will likely give.
-                // If API updates multiplier BEFORE calculation, we might get more points than shown.
-                // That's a "nice surprise".
-                // If API uses current multiplier, it matches.
+                // For UI consistency, we show what the API will likely give (based on current multiplier).
+                // If the API updates the multiplier before calculation, the user might get more points.
 
-                // Let's pass basePoints to deposit.
-                const updatedUser = await deposit(items, basePoints); // deposit now returns updated user? No, void in context.
-                // Wait, context deposit returns void.
-                // Let's check AuthContext.
-
-                // In AuthProvider:
-                // const deposit = async (items, points) => { ... setUser(updatedUser) }
-                // It calls apiService.submitDropoff(user, items, points)
-
-                // So I should pass BASE points.
                 const totalItems = Object.values(items).reduce((a: number, b: number) => a + b, 0);
                 analytics.scanItemsEntered(items, totalItems, total);
 
