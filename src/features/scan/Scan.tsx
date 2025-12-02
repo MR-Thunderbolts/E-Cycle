@@ -11,9 +11,10 @@ import { analytics } from '@/utils';
 
 interface ScanProps {
     onGoToRedeem: () => void;
+    onBack: () => void;
 }
 
-const Scan: React.FC<ScanProps> = ({ onGoToRedeem }) => {
+const Scan: React.FC<ScanProps> = ({ onGoToRedeem, onBack }) => {
     const { user, deposit } = useAuth();
     const [step, setStep] = useState<ScanStep>('camera');
     const [items, setItems] = useState<Record<string, number>>({});
@@ -77,10 +78,13 @@ const Scan: React.FC<ScanProps> = ({ onGoToRedeem }) => {
             <AnimatePresence mode="wait">
 
                 {step === 'camera' && (
-                    <ScanCamera onSimulate={() => {
-                        analytics.scanStarted();
-                        setStep('analyzing');
-                    }} />
+                    <ScanCamera
+                        onSimulate={() => {
+                            analytics.scanStarted();
+                            setStep('analyzing');
+                        }}
+                        onBack={onBack}
+                    />
                 )}
 
                 {/* LOADING STEPS */}

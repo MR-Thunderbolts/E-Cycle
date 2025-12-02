@@ -4,9 +4,10 @@ import { motion } from 'framer-motion';
 
 interface ScanCameraProps {
     onSimulate: () => void;
+    onBack: () => void;
 }
 
-const ScanCamera: React.FC<ScanCameraProps> = ({ onSimulate }) => {
+const ScanCamera: React.FC<ScanCameraProps> = ({ onSimulate, onBack }) => {
     return (
         <motion.div
             key="camera"
@@ -17,7 +18,7 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onSimulate }) => {
         >
             {/* Top Header */}
             <div className="p-6 pt-10 flex justify-between items-center z-20 shrink-0">
-                <span className="material-symbols-rounded text-white p-2 bg-white/10 rounded-full">arrow_back</span>
+                <button onClick={onBack} className="material-symbols-rounded text-white p-2 bg-white/10 rounded-full active:scale-95 transition-transform">arrow_back</button>
                 <h2 className="text-white font-semibold">Escanea el QR</h2>
                 <span className="material-symbols-rounded text-white p-2 bg-white/10 rounded-full">flash_on</span>
             </div>

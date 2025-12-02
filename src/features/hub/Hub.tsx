@@ -356,12 +356,7 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
         <div className="h-full flex flex-col bg-background dark:bg-dark-bg transition-colors duration-300">
             {/* Header */}
             <div className="pt-6 pb-2 px-6 flex items-center justify-between bg-background dark:bg-dark-bg shrink-0">
-                <div className="flex items-center gap-3">
-                    <button className="w-8 h-8 flex items-center justify-center text-gray-500 dark:text-gray-400">
-                        <span className="material-symbols-rounded">arrow_back</span>
-                    </button>
-                    <h1 className="text-xl font-bold text-text dark:text-dark-text">E-Hub</h1>
-                </div>
+                <h1 className="text-xl font-bold text-text dark:text-dark-text">E-Hub</h1>
                 <div className="bg-[#D0EBE8] dark:bg-primary/20 px-3 py-1.5 rounded-full flex items-center gap-1">
                     <span className="material-symbols-rounded filled-icon text-primary-dark dark:text-primary text-sm">bolt</span>
                     <span className="font-bold text-primary-dark dark:text-primary text-sm">{user.points.toLocaleString()}</span>
