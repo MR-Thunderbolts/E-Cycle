@@ -1,18 +1,32 @@
-import React, { useState } from 'react';
-import { MobileLayout } from '@/components';
+import React, { useState, useContext, useEffect } from 'react';
+import { MobileLayout, Onboarding } from '@/components';
+import { SplashScreen } from '@/components/ui';
 import { Home } from '@/features/home';
 import { Scan } from '@/features/scan';
 import { Hub } from '@/features/hub';
 import { Pickup } from '@/features/pickup';
 import { Profile } from '@/features/profile';
+import { Register } from '@/features/auth';
 import { TabType, HubTab } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import { analytics } from '@/utils';
+import { AuthContext } from '@/context';
 
 export const AppRouter: React.FC = () => {
+    const [showSplash, setShowSplash] = useState(true);
     const [currentTab, setCurrentTab] = useState<TabType>('explorar');
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isRegisterOpen, setIsRegisterOpen] = useState(false);
     const [hubInitialTab, setHubInitialTab] = useState<HubTab>('beneficios');
+
+    const auth = useContext(AuthContext);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setShowSplash(false);
+        }, 4000);
+        return () => clearTimeout(timer);
+    }, []);
 
     const handleGoToRedeem = () => {
         setHubInitialTab('usar');
@@ -37,8 +51,19 @@ export const AppRouter: React.FC = () => {
 
     return (
         <div className="h-full w-full">
+            <AnimatePresence>
+                {showSplash && <SplashScreen />}
+            </AnimatePresence>
+
+            <Onboarding
+                onNavigateToRegister={() => setIsRegisterOpen(true)}
+                onNavigateToLogin={() => {
+                    console.log('Navigate to login');
+                }}
+            />
+
             {/* Main Layout Wrapping Navigation */}
-            <MobileLayout currentTab={currentTab} onTabChange={handleTabChange} showNav={!isProfileOpen}>
+            <MobileLayout currentTab={currentTab} onTabChange={handleTabChange} showNav={!isProfileOpen && !isRegisterOpen}>
                 {renderContent()}
             </MobileLayout>
 
@@ -67,6 +92,19 @@ export const AppRouter: React.FC = () => {
                             }} />
                         </motion.div>
                     </div>
+                )}
+            </AnimatePresence>
+
+            {/* Register Overlay */}
+            <AnimatePresence>
+                {isRegisterOpen && (
+                    <Register
+                        onClose={() => setIsRegisterOpen(false)}
+                        onLogin={() => {
+                            console.log('Navigate to login');
+                            setIsRegisterOpen(false);
+                        }}
+                    />
                 )}
             </AnimatePresence>
         </div>

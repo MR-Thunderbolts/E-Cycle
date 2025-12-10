@@ -49,13 +49,17 @@ export const LevelIndicator: React.FC<LevelIndicatorProps> = ({ user, className 
     return (
         <div className={`bg-white dark:bg-dark-surface rounded-[32px] p-6 shadow-sm border border-gray-100 dark:border-dark-border relative overflow-hidden transition-colors duration-300 ${className}`}>
             <div className="flex items-center gap-4 mb-5 relative z-10">
-                <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-white border-4 border-white dark:border-gray-700 shadow-lg shrink-0 relative">
-                    <span className="material-symbols-rounded filled-icon text-3xl text-primary-dark dark:text-primary">workspace_premium</span>
-                    {!isMaxLevel && (
-                        <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-secondary text-primary-dark rounded-full flex items-center justify-center text-[10px] font-bold border-2 border-white dark:border-gray-700">
-                            {currentThresholdIndex}
-                        </div>
-                    )}
+                <div className="relative">
+                    {/* Glow effect behind badge */}
+                    <div className="absolute inset-0 bg-primary/30 blur-xl rounded-full scale-150" />
+                    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-white border-4 border-white dark:border-gray-700 shadow-lg shrink-0 relative z-10">
+                        <span className="material-symbols-rounded filled-icon text-3xl text-primary-dark dark:text-primary">workspace_premium</span>
+                        {!isMaxLevel && (
+                            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-secondary text-primary-dark rounded-full flex items-center justify-center text-[10px] font-bold border-2 border-white dark:border-gray-700">
+                                {currentThresholdIndex}
+                            </div>
+                        )}
+                    </div>
                 </div>
                 <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center mb-1">
@@ -97,9 +101,6 @@ export const LevelIndicator: React.FC<LevelIndicatorProps> = ({ user, className 
                     </div>
                 </div>
             </div>
-
-            {/* Decorative background element */}
-            <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-white/5 dark:to-white/0 rounded-full opacity-50 z-0"></div>
         </div>
     );
 };

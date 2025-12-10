@@ -64,6 +64,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
     };
 
+    const loginAsGuest = () => {
+        setUser({
+            uid: 'guest',
+            name: 'Invitado',
+            email: '',
+            points: 0,
+            level: 'Descubridor',
+            itemsThisMonth: 0,
+            activeMultiplier: 1,
+            impact: { co2: 0, trees: 0 },
+            history: [],
+            achievements: []
+        });
+    };
+
+    const register = (name: string, email: string) => {
+        setUser({
+            uid: 'user-' + Date.now(),
+            name,
+            email,
+            points: 0,
+            level: 'Descubridor',
+            itemsThisMonth: 0,
+            activeMultiplier: 1,
+            impact: { co2: 0, trees: 0 },
+            history: [],
+            achievements: []
+        });
+    };
+
     return (
         <AuthContext.Provider value={{
             user,
@@ -76,7 +106,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setIsDarkMode(newMode);
                 analytics.themeToggled(newMode);
             },
-            isDarkMode
+            isDarkMode,
+            loginAsGuest,
+            register
         }}>
             {children}
         </AuthContext.Provider>

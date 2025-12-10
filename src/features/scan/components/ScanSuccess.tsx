@@ -27,57 +27,23 @@ const ScanSuccess: React.FC<ScanSuccessProps> = ({ earnedPoints, onRedeem, onCon
             <p className="text-gray-500 text-center mb-8 max-w-xs">Has reciclado correctamente tus residuos.</p>
 
             {/* ULTRA SIMPLIFIED POINTS DISPLAY */}
-            <div style={{
-                width: '100%',
-                backgroundColor: '#ffffff',
-                border: 'none',
-                borderRadius: '20px',
-                padding: '20px',
-                marginBottom: '24px',
-                textAlign: 'center',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
-            }}>
-                <div style={{
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    color: '#999',
-                    marginBottom: '10px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1.5px'
-                }}>
+            {/* ULTRA SIMPLIFIED POINTS DISPLAY */}
+            <div className="w-full bg-white dark:bg-dark-surface rounded-[20px] p-5 mb-6 text-center shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+                <div className="text-xs font-bold text-[#999] dark:text-gray-400 mb-2.5 uppercase tracking-[1.5px]">
                     Has ganado
                 </div>
 
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    margin: '10px 0'
-                }}>
-                    <span className="material-symbols-rounded filled-icon" style={{
-                        fontSize: '36px',
-                        color: '#00796B'
-                    }}>bolt</span>
+                <div className="flex items-center justify-center gap-1.5 my-2.5">
+                    <span className="material-symbols-rounded filled-icon text-4xl text-[#00796B] dark:text-secondary">
+                        bolt
+                    </span>
 
-                    <div style={{
-                        fontSize: '40px',
-                        fontWeight: '900',
-                        color: '#00796B',
-                        lineHeight: '1',
-                        fontFamily: 'system-ui, -apple-system, sans-serif'
-                    }}>
+                    <div className="text-[40px] font-black text-[#00796B] dark:text-secondary leading-none font-sans">
                         {earnedPoints || 0}
                     </div>
                 </div>
 
-                <div style={{
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    color: '#00796B',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px'
-                }}>
+                <div className="text-sm font-bold text-[#00796B] dark:text-secondary uppercase tracking-[1px]">
                     E-Points
                 </div>
             </div>

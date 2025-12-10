@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { RecyclePoint } from '@/types';
 import { useAuth } from '@/hooks';
 import mapBg from '@/assets/map-bg.jpg';
+import mapBgLight from '@/assets/map-bg-light.jpg';
 
 interface InteractiveMapProps {
     points: RecyclePoint[];
@@ -86,7 +87,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
             >
                 {/* Map Background Image - Dynamic based on theme */}
                 <img
-                    src={isDarkMode ? mapBg : '/map-bg-light.jpg'}
+                    src={isDarkMode ? mapBg : mapBgLight}
                     alt="Map Background"
                     className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-90"
                 />

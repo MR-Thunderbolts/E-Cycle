@@ -10,6 +10,8 @@ export interface AuthContextType {
     redeem: (cost: number) => Promise<boolean>;
     toggleTheme: () => void;
     isDarkMode: boolean;
+    loginAsGuest: () => void;
+    register: (name: string, email: string) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
