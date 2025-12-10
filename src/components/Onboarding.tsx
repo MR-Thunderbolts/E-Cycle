@@ -42,21 +42,21 @@ const Onboarding: React.FC<OnboardingProps> = ({ onNavigateToRegister, onNavigat
             image: (
                 <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-dark-surface rounded-t-3xl relative overflow-hidden">
                     {/* Ambient Background Glow */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/20 blur-[80px] rounded-full pointer-events-none" />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-teal-600/20 dark:bg-primary/20 blur-[80px] rounded-full pointer-events-none" />
 
                     <div className="relative z-10">
                         {/* Recycling Icon */}
                         <div className="relative">
                             <div className="absolute inset-0 bg-primary/30 blur-2xl rounded-full scale-[2] animate-pulse" />
-                            <div className="w-24 h-24 bg-secondary/10 rounded-full flex items-center justify-center relative z-10 border border-white/10 backdrop-blur-sm">
+                            <div className="w-24 h-24 bg-white dark:bg-secondary/10 rounded-full flex items-center justify-center relative z-10 border border-gray-100 dark:border-white/10 backdrop-blur-sm shadow-xl dark:shadow-none">
                                 <span className="material-symbols-rounded text-6xl text-primary drop-shadow-[0_4px_8px_rgba(4,122,108,0.4)]">recycling</span>
                             </div>
                         </div>
 
                         {/* Leaf */}
                         <div className="absolute -top-2 -right-2 z-20">
-                            <div className="absolute inset-0 bg-secondary/40 blur-md rounded-full scale-125 animate-pulse" />
-                            <span className="relative material-symbols-rounded text-4xl text-secondary drop-shadow-[0_0_10px_rgba(166,248,242,0.8)]">eco</span>
+                            <div className="absolute inset-0 bg-primary/40 blur-md rounded-full scale-125 animate-pulse" />
+                            <span className="relative material-symbols-rounded text-4xl text-primary drop-shadow-[0_0_10px_rgba(4,122,108,0.8)]">eco</span>
                         </div>
                     </div>
                 </div>
@@ -71,7 +71,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onNavigateToRegister, onNavigat
                     <div className="absolute inset-0 opacity-20 bg-[url('/map-bg-light.jpg')] bg-cover bg-center" />
 
                     {/* Ambient Background Glow */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/20 blur-[80px] rounded-full pointer-events-none" />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-teal-600/20 dark:bg-primary/20 blur-[80px] rounded-full pointer-events-none" />
 
                     <div className="relative z-10 flex flex-col items-center gap-6">
                         {/* Pin */}
@@ -81,13 +81,13 @@ const Onboarding: React.FC<OnboardingProps> = ({ onNavigateToRegister, onNavigat
                         </div>
 
                         {/* Validado Badge */}
-                        <div className="bg-[#1E1E1E]/90 backdrop-blur-md border border-white/10 p-3 px-5 rounded-2xl shadow-2xl flex items-center gap-3 transform rotate-[-4deg] hover:rotate-0 transition-transform duration-300">
-                            <div className="bg-white/10 p-1.5 rounded-lg">
-                                <span className="material-symbols-rounded text-2xl text-white">qr_code_2</span>
+                        <div className="bg-white/90 dark:bg-[#1E1E1E]/90 backdrop-blur-md border border-gray-200 dark:border-white/10 p-3 px-5 rounded-2xl shadow-xl dark:shadow-2xl flex items-center gap-3 transform rotate-[-4deg] hover:rotate-0 transition-transform duration-300">
+                            <div className="bg-gray-100 dark:bg-white/10 p-1.5 rounded-lg">
+                                <span className="material-symbols-rounded text-2xl text-gray-800 dark:text-white">qr_code_2</span>
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-[10px] text-gray-400 uppercase tracking-wider font-bold leading-none mb-0.5">Estado</span>
-                                <span className="text-base font-bold text-secondary tracking-wide">Validado</span>
+                                <span className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider font-bold leading-none mb-0.5">Estado</span>
+                                <span className="text-base font-bold text-primary tracking-wide">Validado</span>
                             </div>
                             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse ml-1" />
                         </div>
@@ -140,24 +140,49 @@ const Onboarding: React.FC<OnboardingProps> = ({ onNavigateToRegister, onNavigat
             image: (
                 <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-dark-surface rounded-t-3xl relative overflow-hidden">
                     {/* Ambient Background Glow */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/20 blur-[80px] rounded-full pointer-events-none" />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-teal-600/20 dark:bg-primary/20 blur-[80px] rounded-full pointer-events-none" />
 
-                    {/* Background decorative icons */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-20">
-                        <div className="grid grid-cols-3 gap-6">
-                            <span className="material-symbols-rounded text-5xl text-primary">sentiment_satisfied</span>
-                            <span className="material-symbols-rounded text-5xl text-secondary">sentiment_very_satisfied</span>
-                            <span className="material-symbols-rounded text-5xl text-primary">sentiment_satisfied_alt</span>
-                            <span className="material-symbols-rounded text-5xl text-secondary">emoji_emotions</span>
-                            <span className="material-symbols-rounded text-5xl text-primary">mood</span>
-                            <span className="material-symbols-rounded text-5xl text-secondary">sentiment_content</span>
+                    {/* Background decorative icons pattern */}
+                    <div className="absolute inset-0 overflow-hidden opacity-20 dark:opacity-10">
+                        <div className="absolute -top-10 -left-10 right-0 bottom-0 grid grid-cols-6 gap-8 transform rotate-12 scale-125">
+                            {/* Row 1 */}
+                            <span className="material-symbols-rounded text-4xl text-primary">devices</span>
+                            <span className="material-symbols-rounded text-4xl text-gray-400 dark:text-secondary">smartphone</span>
+                            <span className="material-symbols-rounded text-4xl text-primary">laptop</span>
+                            <span className="material-symbols-rounded text-4xl text-gray-400 dark:text-secondary">headphones</span>
+                            <span className="material-symbols-rounded text-4xl text-primary">memory</span>
+                            <span className="material-symbols-rounded text-4xl text-gray-400 dark:text-secondary">router</span>
+
+                            {/* Row 2 */}
+                            <span className="material-symbols-rounded text-4xl text-gray-400 dark:text-secondary">mouse</span>
+                            <span className="material-symbols-rounded text-4xl text-primary">keyboard</span>
+                            <span className="material-symbols-rounded text-4xl text-gray-400 dark:text-secondary">tablet</span>
+                            <span className="material-symbols-rounded text-4xl text-primary">watch</span>
+                            <span className="material-symbols-rounded text-4xl text-gray-400 dark:text-secondary">print</span>
+                            <span className="material-symbols-rounded text-4xl text-primary">speaker</span>
+
+                            {/* Row 3 */}
+                            <span className="material-symbols-rounded text-4xl text-primary">tv</span>
+                            <span className="material-symbols-rounded text-4xl text-gray-400 dark:text-secondary">videogame_asset</span>
+                            <span className="material-symbols-rounded text-4xl text-primary">battery_charging_full</span>
+                            <span className="material-symbols-rounded text-4xl text-gray-400 dark:text-secondary">cable</span>
+                            <span className="material-symbols-rounded text-4xl text-primary">sim_card</span>
+                            <span className="material-symbols-rounded text-4xl text-gray-400 dark:text-secondary">hard_drive</span>
+
+                            {/* Row 4 */}
+                            <span className="material-symbols-rounded text-4xl text-gray-400 dark:text-secondary">developer_board</span>
+                            <span className="material-symbols-rounded text-4xl text-primary">monitor</span>
+                            <span className="material-symbols-rounded text-4xl text-gray-400 dark:text-secondary">earbuds</span>
+                            <span className="material-symbols-rounded text-4xl text-primary">power</span>
+                            <span className="material-symbols-rounded text-4xl text-gray-400 dark:text-secondary">usb</span>
+                            <span className="material-symbols-rounded text-4xl text-primary">wifi</span>
                         </div>
                     </div>
 
                     {/* Glowing Check Circle */}
                     <div className="relative z-10">
                         <div className="absolute inset-0 bg-primary/30 blur-2xl rounded-full scale-[2] animate-pulse" />
-                        <div className="bg-[#1E1E1E]/80 backdrop-blur-md border border-white/10 p-5 rounded-full relative z-10">
+                        <div className="bg-white/80 dark:bg-[#1E1E1E]/80 backdrop-blur-md border border-gray-200 dark:border-white/10 p-5 rounded-full relative z-10 shadow-xl dark:shadow-none">
                             <span className="material-symbols-rounded text-6xl text-primary drop-shadow-[0_4px_12px_rgba(4,122,108,0.5)]">check_circle</span>
                         </div>
                     </div>
@@ -271,7 +296,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onNavigateToRegister, onNavigat
                         ) : (
                             <button
                                 onClick={handleNext}
-                                className="w-full py-3.5 bg-text dark:bg-white text-white dark:text-black font-bold rounded-xl hover:opacity-90 transition-all active:scale-[0.98]"
+                                className="w-full py-3.5 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl shadow-lg shadow-primary/25 transition-all active:scale-[0.98]"
                             >
                                 Siguiente
                             </button>
