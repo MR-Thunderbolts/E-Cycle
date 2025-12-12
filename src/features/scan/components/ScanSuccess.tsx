@@ -34,16 +34,16 @@ const ScanSuccess: React.FC<ScanSuccessProps> = ({ earnedPoints, onRedeem, onCon
                 </div>
 
                 <div className="flex items-center justify-center gap-1.5 my-2.5">
-                    <span className="material-symbols-rounded filled-icon text-4xl text-[#00796B] dark:text-secondary">
+                    <span className="material-symbols-rounded filled-icon text-4xl text-primary dark:text-accent">
                         bolt
                     </span>
 
-                    <div className="text-[40px] font-black text-[#00796B] dark:text-secondary leading-none font-sans">
+                    <div className="text-[40px] font-black text-primary dark:text-accent leading-none font-sans">
                         {earnedPoints || 0}
                     </div>
                 </div>
 
-                <div className="text-sm font-bold text-[#00796B] dark:text-secondary uppercase tracking-[1px]">
+                <div className="text-sm font-bold text-primary dark:text-accent uppercase tracking-[1px]">
                     E-Points
                 </div>
             </div>

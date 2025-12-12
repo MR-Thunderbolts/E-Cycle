@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '@/types';
+import { DEFAULT_ACHIEVEMENTS } from '@/constants';
 import { apiService } from '@/services';
 import { AuthContext } from './AuthContext';
 import { initializeAnalytics, detectMazeSession, analytics } from '@/utils';
@@ -75,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             activeMultiplier: 1,
             impact: { co2: 0, trees: 0 },
             history: [],
-            achievements: []
+            achievements: DEFAULT_ACHIEVEMENTS
         });
     };
 
@@ -90,7 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             activeMultiplier: 1,
             impact: { co2: 0, trees: 0 },
             history: [],
-            achievements: []
+            achievements: DEFAULT_ACHIEVEMENTS
         });
     };
 
