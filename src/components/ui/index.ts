@@ -7,3 +7,5 @@ export type { LevelIndicatorProps } from './LevelIndicator';
 export { BackButton } from './BackButton';
 
 export { SplashScreen } from './SplashScreen';
+
+export { SpecialMissionCard } from './SpecialMissionCard';

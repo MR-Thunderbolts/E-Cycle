@@ -26,11 +26,11 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ currentTab, onTabCha
                             <button
                                 onClick={() => onTabChange(tab.id)}
                                 className={`flex flex-col items-center justify-center transition-all duration-300 ${isActive
-                                        ? 'bg-[#D0EBE8] dark:bg-primary/20 text-primary-dark dark:text-primary w-[72px] h-[72px] rounded-[24px] border border-primary/20 dark:border-primary/10 shadow-sm -translate-y-2'
-                                        : 'text-gray-400 dark:text-gray-500 w-16 h-16 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 rounded-2xl'
+                                    ? 'bg-[#E0F2F1] dark:bg-teal-400/10 text-[#00695C] dark:text-[#1DE9B6] w-[72px] h-[72px] rounded-[24px] border border-teal-100 dark:border-teal-400/20 -translate-y-2'
+                                    : 'text-gray-400 dark:text-gray-500 w-16 h-16 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 rounded-2xl'
                                     }`}
                             >
-                                <span className={`material-symbols-rounded text-[28px] mb-0.5 transition-transform duration-300 ${isActive ? 'filled-icon scale-105' : ''}`}>
+                                <span className={`material-symbols-rounded text-[28px] mb-0.5 transition-transform duration-300 ${isActive ? 'filled-icon scale-105 drop-shadow-[0_0_8px_rgba(0,121,107,0.5)]' : ''}`}>
                                     {tab.icon}
                                 </span>
                                 <span className={`text-[10px] font-bold tracking-tight leading-none ${isActive ? 'block' : 'font-semibold'}`}>

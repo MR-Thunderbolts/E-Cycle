@@ -41,11 +41,23 @@ export const AppRouter: React.FC = () => {
 
     const renderContent = () => {
         switch (currentTab) {
-            case 'explorar': return <Home onOpenProfile={() => setIsProfileOpen(true)} />;
+            case 'explorar': return <Home
+                onOpenProfile={() => setIsProfileOpen(true)}
+                onNavigateToHub={(tab) => {
+                    setHubInitialTab(tab);
+                    handleTabChange('ehub');
+                }}
+            />;
             case 'escaner': return <Scan onGoToRedeem={handleGoToRedeem} onBack={() => handleTabChange('explorar')} />;
             case 'ehub': return <Hub initialTab={hubInitialTab} />;
             case 'retiro': return <Pickup />;
-            default: return <Home onOpenProfile={() => setIsProfileOpen(true)} />;
+            default: return <Home
+                onOpenProfile={() => setIsProfileOpen(true)}
+                onNavigateToHub={(tab) => {
+                    setHubInitialTab(tab);
+                    handleTabChange('ehub');
+                }}
+            />;
         }
     };
 

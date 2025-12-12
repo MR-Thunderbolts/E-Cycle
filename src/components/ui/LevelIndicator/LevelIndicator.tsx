@@ -53,7 +53,7 @@ export const LevelIndicator: React.FC<LevelIndicatorProps> = ({ user, className 
                     {/* Glow effect behind badge */}
                     <div className="absolute inset-0 bg-teal-600/20 dark:bg-primary/30 blur-xl rounded-full scale-150" />
                     <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-white border-4 border-white dark:border-gray-700 shadow-lg shrink-0 relative z-10">
-                        <span className="material-symbols-rounded filled-icon text-3xl text-primary-dark dark:text-primary">workspace_premium</span>
+                        <span className="material-symbols-rounded filled-icon text-3xl text-primary-dark dark:text-accent">workspace_premium</span>
                         {!isMaxLevel && (
                             <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-secondary text-primary-dark rounded-full flex items-center justify-center text-[10px] font-bold border-2 border-white dark:border-gray-700">
                                 {currentThresholdIndex}
@@ -64,7 +64,7 @@ export const LevelIndicator: React.FC<LevelIndicatorProps> = ({ user, className 
                 <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center mb-1">
                         <h4 className="font-bold text-text dark:text-dark-text text-lg truncate">{user.level}</h4>
-                        <div className="bg-[#D0EBE8] dark:bg-primary/20 px-2.5 py-1 rounded-full text-xs font-bold text-primary-dark dark:text-primary-light flex items-center gap-1 shrink-0">
+                        <div className="bg-[#D0EBE8] dark:bg-primary/20 px-2.5 py-1 rounded-full text-xs font-bold text-primary-dark dark:text-accent flex items-center gap-1 shrink-0">
                             <span className="material-symbols-rounded filled-icon text-sm">bolt</span> {user.points.toLocaleString()}
                         </div>
                     </div>

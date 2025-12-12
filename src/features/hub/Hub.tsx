@@ -33,10 +33,35 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
     const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
     const [redemptionStatus, setRedemptionStatus] = useState<RedemptionStatus>('idle');
 
+    // Countdown timer for monthly perks
+    const [timeLeft, setTimeLeft] = useState('');
+
     // Update tab if initialTab prop changes
     useEffect(() => {
         setActiveTab(initialTab);
     }, [initialTab]);
+
+    // Calculate time left in month
+    useEffect(() => {
+        const calculateTimeLeft = () => {
+            const now = new Date();
+            const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+            const diff = endOfMonth.getTime() - now.getTime();
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+            return `${days}d ${hours}h ${minutes}m`;
+        };
+
+        setTimeLeft(calculateTimeLeft());
+        const timer = setInterval(() => {
+            setTimeLeft(calculateTimeLeft());
+        }, 60000);
+
+        return () => clearInterval(timer);
+    }, []);
 
     const handleCouponClick = (coupon: Coupon) => {
         if (!user) return;
@@ -96,36 +121,56 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
                     </div>
                 </div>
 
-                <div className={`flex gap-3 overflow-x-auto no-scrollbar py-4 transition-opacity -mx-6 px-6 ${isMultipliersLocked ? 'opacity-50 pointer-events-none blur-[1px]' : ''}`}>
+                <div className={`flex gap-4 overflow-x-auto no-scrollbar py-4 transition-opacity -mx-6 px-6 ${isMultipliersLocked ? 'opacity-50 pointer-events-none blur-[1px]' : ''}`}>
                     {/* Card 1x (Default) */}
-                    <div className={`min-w-[110px] flex-1 border rounded-[24px] p-4 flex flex-col items-center justify-center text-center shadow-sm shrink-0 transition-all ${user.activeMultiplier === 1 ? 'border-primary/50 bg-[#D0EBE8] dark:bg-primary/20 ring-2 ring-primary ring-offset-2 dark:ring-offset-dark-bg' : 'border-gray-200 dark:border-dark-border bg-white dark:bg-dark-surface opacity-60'}`}>
-                        <div className={`text-2xl font-black mb-1 ${user.activeMultiplier === 1 ? 'text-primary-dark dark:text-primary' : 'text-gray-400'}`}>1x</div>
-                        <div className="text-[10px] font-bold text-gray-400">0-4 ítems /<br />mes</div>
-                    </div>
-
-                    {/* Card 1.2x */}
-                    <div className={`min-w-[110px] flex-1 border rounded-[24px] p-4 flex flex-col items-center justify-center text-center shadow-sm shrink-0 transition-all relative overflow-hidden ${user.activeMultiplier === 1.2 ? 'border-primary/50 bg-[#D0EBE8] dark:bg-primary/20 ring-2 ring-primary ring-offset-2 dark:ring-offset-dark-bg' : (user.itemsThisMonth >= 5 ? 'border-primary/20 bg-white dark:bg-dark-surface' : 'border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface/50 opacity-60')}`}>
-                        {user.activeMultiplier === 1.2 && <div className="absolute top-0 right-0 w-4 h-4 bg-primary rounded-bl-lg"></div>}
-                        <div className={`text-2xl font-black mb-1 ${user.activeMultiplier === 1.2 ? 'text-primary-dark dark:text-primary' : (user.itemsThisMonth >= 5 ? 'text-primary' : 'text-gray-400')}`}>1.2x</div>
-                        <div className="text-[10px] font-bold text-gray-400">5-10 ítems /<br />mes</div>
-                        {user.itemsThisMonth < 5 && <span className="material-symbols-rounded text-gray-300 text-lg absolute top-2 right-2">lock</span>}
-                    </div>
+                    {(() => {
+                        const isActive = user.activeMultiplier === 1;
+                        return (
+                            <div className={`min-w-[100px] flex-1 border-2 rounded-[24px] p-4 flex flex-col items-center justify-center text-center shrink-0 transition-all relative overflow-hidden
+                                ${isActive
+                                    ? 'border-primary dark:border-accent bg-white dark:bg-accent/10 shadow-md dark:shadow-[0_0_15px_rgba(29,233,182,0.25)]'
+                                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-dark-surface opacity-50'}`}>
+                                <div className={`text-3xl font-black mb-1 transition-all ${isActive ? 'text-primary dark:text-accent drop-shadow-[0_0_8px_rgba(4,122,108,0.5)] dark:drop-shadow-[0_0_8px_rgba(29,233,182,0.5)]' : 'text-gray-400'}`}>1x</div>
+                                <div className="text-[10px] font-bold text-gray-400">0-4 ítems</div>
+                            </div>
+                        );
+                    })()}
 
                     {/* Card 1.5x */}
-                    <div className={`min-w-[110px] flex-1 border rounded-[24px] p-4 flex flex-col items-center justify-center text-center shadow-sm shrink-0 transition-all relative overflow-hidden ${user.activeMultiplier === 1.5 ? 'border-primary/50 bg-[#D0EBE8] dark:bg-primary/20 ring-2 ring-primary ring-offset-2 dark:ring-offset-dark-bg' : (user.itemsThisMonth >= 11 ? 'border-primary/20 bg-white dark:bg-dark-surface' : 'border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface/50 opacity-60')}`}>
-                        {user.activeMultiplier === 1.5 && <div className="absolute top-0 right-0 w-4 h-4 bg-primary rounded-bl-lg"></div>}
-                        <div className={`text-2xl font-black mb-1 ${user.activeMultiplier === 1.5 ? 'text-primary-dark dark:text-primary' : (user.itemsThisMonth >= 11 ? 'text-primary' : 'text-gray-400')}`}>1.5x</div>
-                        <div className="text-[10px] font-bold text-gray-400">11-20 ítems /<br />mes</div>
-                        {user.itemsThisMonth < 11 && <span className="material-symbols-rounded text-gray-300 text-lg absolute top-2 right-2">lock</span>}
-                    </div>
+                    {(() => {
+                        const isActive = user.activeMultiplier === 1.5;
+                        const isUnlocked = user.itemsThisMonth >= 5;
+                        return (
+                            <div className={`min-w-[100px] flex-1 border-2 rounded-[24px] p-4 flex flex-col items-center justify-center text-center shrink-0 transition-all relative overflow-hidden
+                                ${isActive
+                                    ? 'border-primary dark:border-accent bg-white dark:bg-accent/10 shadow-md dark:shadow-[0_0_15px_rgba(29,233,182,0.25)]'
+                                    : isUnlocked
+                                        ? 'border-gray-200 dark:border-gray-700 bg-white dark:bg-dark-surface'
+                                        : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-dark-surface/50 opacity-50'}`}>
+                                {!isUnlocked && <span className="material-symbols-rounded text-gray-300 text-lg absolute top-2 right-2">lock</span>}
+                                <div className={`text-3xl font-black mb-1 transition-all ${isActive ? 'text-primary dark:text-accent drop-shadow-[0_0_8px_rgba(4,122,108,0.5)] dark:drop-shadow-[0_0_8px_rgba(29,233,182,0.5)]' : isUnlocked ? 'text-gray-400 dark:text-gray-500' : 'text-gray-400'}`}>1.5x</div>
+                                <div className="text-[10px] font-bold text-gray-400">5-9 ítems</div>
+                            </div>
+                        );
+                    })()}
 
                     {/* Card 2x */}
-                    <div className={`min-w-[110px] flex-1 border rounded-[24px] p-4 flex flex-col items-center justify-center text-center shadow-sm shrink-0 transition-all relative overflow-hidden ${user.activeMultiplier === 2 ? 'border-primary/50 bg-[#D0EBE8] dark:bg-primary/20 ring-2 ring-primary ring-offset-2 dark:ring-offset-dark-bg' : (user.itemsThisMonth >= 21 ? 'border-primary/20 bg-white dark:bg-dark-surface' : 'border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-surface/50 opacity-60')}`}>
-                        {user.activeMultiplier === 2 && <div className="absolute top-0 right-0 w-4 h-4 bg-primary rounded-bl-lg"></div>}
-                        <div className={`text-2xl font-black mb-1 ${user.activeMultiplier === 2 ? 'text-primary-dark dark:text-primary' : (user.itemsThisMonth >= 21 ? 'text-primary' : 'text-gray-400')}`}>2x</div>
-                        <div className="text-[10px] font-bold text-gray-400">21+ ítems /<br />mes</div>
-                        {user.itemsThisMonth < 21 && <span className="material-symbols-rounded text-gray-300 text-lg absolute top-2 right-2">lock</span>}
-                    </div>
+                    {(() => {
+                        const isActive = user.activeMultiplier === 2;
+                        const isUnlocked = user.itemsThisMonth >= 10;
+                        return (
+                            <div className={`min-w-[100px] flex-1 border-2 rounded-[24px] p-4 flex flex-col items-center justify-center text-center shrink-0 transition-all relative overflow-hidden
+                                ${isActive
+                                    ? 'border-primary dark:border-accent bg-white dark:bg-accent/10 shadow-md dark:shadow-[0_0_15px_rgba(29,233,182,0.25)]'
+                                    : isUnlocked
+                                        ? 'border-gray-200 dark:border-gray-700 bg-white dark:bg-dark-surface'
+                                        : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-dark-surface/50 opacity-50'}`}>
+                                {!isUnlocked && <span className="material-symbols-rounded text-gray-300 text-lg absolute top-2 right-2">lock</span>}
+                                <div className={`text-3xl font-black mb-1 transition-all ${isActive ? 'text-primary dark:text-accent drop-shadow-[0_0_8px_rgba(4,122,108,0.5)] dark:drop-shadow-[0_0_8px_rgba(29,233,182,0.5)]' : isUnlocked ? 'text-gray-400 dark:text-gray-500' : 'text-gray-400'}`}>2x</div>
+                                <div className="text-[10px] font-bold text-gray-400">10+ ítems</div>
+                            </div>
+                        );
+                    })()}
                 </div>
 
                 {isMultipliersLocked && (
@@ -140,32 +185,122 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
 
             {/* Perks Section */}
             <section>
-                <h3 className="font-bold text-lg text-text dark:text-dark-text mb-4">Perks</h3>
-                <div className="space-y-3">
-                    <div className="bg-white dark:bg-dark-surface p-4 rounded-[24px] flex items-center gap-4 border border-gray-100 dark:border-dark-border shadow-sm">
-                        <div className="w-12 h-12 rounded-full bg-[#D0EBE8] dark:bg-primary/20 flex items-center justify-center text-primary-dark dark:text-primary">
-                            <span className="material-symbols-rounded filled-icon">potted_plant</span>
-                        </div>
-                        <div className="flex-1">
-                            <div className="font-bold text-text dark:text-dark-text">Eco-Semilla</div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">Recicla 5 ítems</div>
-                        </div>
-                        <span className="material-symbols-rounded text-primary filled-icon">check_circle</span>
-                    </div>
-
-                    <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-[24px] flex items-center gap-4 border border-gray-100 dark:border-gray-700 opacity-60">
-                        <div className="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-500">
-                            <span className="material-symbols-rounded">local_cafe</span>
-                        </div>
-                        <div className="flex-1">
-                            <div className="font-bold text-gray-600 dark:text-gray-400">Café Gratis</div>
-                            <div className="text-xs text-gray-500">Nivel Gold Saver</div>
-                        </div>
-                        <span className="material-symbols-rounded text-gray-400">lock</span>
-                    </div>
+                <div className="mb-4">
+                    <h3 className="font-bold text-lg text-text dark:text-dark-text mb-1">Tus Perks</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs leading-relaxed max-w-[280px]">
+                        Cada mes hay un nuevo perk disponible. Desbloquéalo y úsalo por 30 días. ¡Combínalos con perks anteriores!
+                    </p>
                 </div>
-            </section>
-        </div>
+                <div className="space-y-3">
+                    {COUPONS.filter(c => c.isPerk).map((perk) => {
+                        // Real completion logic for Cazador de Circuitos
+                        // Simulates: 1 computer OR 2 phones recycled
+                        const computersRecycled = user.computersRecycled || 0;
+                        const phonesRecycled = user.phonesRecycled || 0;
+                        const batteriesRecycled = user.batteriesRecycled || 0;
+                        const cablesRecycled = user.cablesRecycledKg || 0;
+
+                        let isLocked = true;
+                        if (perk.id === 'p1') { // Minero de Litio
+                            isLocked = batteriesRecycled < 50;
+                        } else if (perk.id === 'p2') { // Cazador de Circuitos
+                            isLocked = !(computersRecycled >= 1 || phonesRecycled >= 2);
+                        } else if (perk.id === 'p3') { // Guardián del Cobre
+                            isLocked = cablesRecycled < 15;
+                        }
+
+                        // Color palette based on perkColor
+                        const colorMap = {
+                            green: {
+                                border: 'border-emerald-400/50 ring-emerald-400/30',
+                                bg: 'bg-emerald-50 dark:bg-emerald-500/10',
+                                glow: 'shadow-[0_0_15px_rgba(16,185,129,0.4)]',
+                                iconBg: 'bg-emerald-100 dark:bg-emerald-500/20',
+                                iconText: 'text-emerald-700 dark:text-emerald-400',
+                                gradient: 'from-emerald-500/5',
+                                badge: 'bg-emerald-100 text-emerald-700'
+                            },
+                            purple: {
+                                border: 'border-purple-400/50 ring-purple-400/30',
+                                bg: 'bg-purple-50 dark:bg-purple-500/10',
+                                glow: 'shadow-[0_0_15px_rgba(168,85,247,0.4)]',
+                                iconBg: 'bg-purple-100 dark:bg-purple-500/20',
+                                iconText: 'text-purple-700 dark:text-purple-400',
+                                gradient: 'from-purple-500/5',
+                                badge: 'bg-purple-100 text-purple-700'
+                            },
+                            orange: {
+                                border: 'border-orange-400/50 ring-orange-400/30',
+                                bg: 'bg-orange-50 dark:bg-orange-500/10',
+                                glow: 'shadow-[0_0_15px_rgba(251,146,60,0.4)]',
+                                iconBg: 'bg-orange-100 dark:bg-orange-500/20',
+                                iconText: 'text-orange-700 dark:text-orange-400',
+                                gradient: 'from-orange-500/5',
+                                badge: 'bg-orange-100 text-orange-700'
+                            }
+                        };
+
+                        const colors = colorMap[perk.perkColor || 'green'];
+
+                        return (
+                            <div key={perk.id} className="relative group mt-6">
+                                {/* Perk del Mes Badge - Floating outside the card */}
+                                {perk.isCurrentMonthPerk && (
+                                    <div className={`absolute -top-3 left-4 ${colors.badge} text-[10px] font-bold px-3 py-1 rounded-full shadow-md border-2 border-white dark:border-dark-surface whitespace-nowrap z-20`}>
+                                        Perk del Mes
+                                    </div>
+                                )}
+
+                                <div
+                                    className={`relative p-4 rounded-[24px] flex items-center gap-4 border shadow-sm overflow-hidden transition-all
+                                        ${isLocked
+                                            ? 'bg-gray-50 dark:bg-dark-surface/50 border-gray-200 dark:border-dark-border opacity-70 grayscale'
+                                            : `bg-white dark:bg-dark-surface ${colors.border} ring-1`
+                                        }`}
+                                >
+                                    {/* Icon Container */}
+                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 relative overflow-hidden transition-all ${isLocked ? 'bg-gray-200 dark:bg-gray-700' : `${colors.iconBg} ${colors.glow}`}`}>
+                                        <span className={`material-symbols-rounded text-3xl relative z-10 ${isLocked ? 'text-gray-400' : `${colors.iconText} drop-shadow-sm`}`}>
+                                            {perk.image}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex-1 z-10">
+                                        <div className="flex justify-between items-start">
+                                            <div className={`font-bold text-base mb-0.5 ${isLocked ? 'text-gray-500' : 'text-text dark:text-dark-text'}`}>
+                                                {perk.title}
+                                            </div>
+                                            {!isLocked && (
+                                                <div className="flex flex-col items-end gap-0.5">
+                                                    <span className={`px-2 py-0.5 ${colors.badge} text-[10px] font-bold rounded-full`}>Activo</span>
+                                                    <span className="text-[9px] text-gray-400 font-mono">{timeLeft}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 leading-tight">
+                                            {perk.description}
+                                        </div>
+
+                                        {isLocked && (
+                                            <div className="flex items-center gap-1 text-[10px] font-bold text-gray-400 mt-1 bg-gray-200 dark:bg-gray-700/50 px-2 py-1 rounded-lg w-fit">
+                                                <span className="material-symbols-rounded text-xs">lock</span>
+                                                Misión: {perk.unlockMission}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Decorative Gradient for Active State */}
+                                    {!isLocked && (
+                                        <div className={`absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l ${colors.gradient} to-transparent pointer-events-none`}></div>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </section >
+        </div >
     );
 
     const renderProgreso = () => {
@@ -209,7 +344,7 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
                                                 <span className={`text-[10px] font-bold ${ach.completed ? 'text-yellow-600' : 'text-gray-400'}`}>Medalla</span>
                                             </div>
                                         ) : (
-                                            <div className={`px-2 py-1 rounded-full text-xs font-bold flex items-center gap-0.5 ${ach.completed ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-[#D0EBE8] dark:bg-primary/20 text-primary-dark dark:text-primary'}`}>
+                                            <div className={`px-2 py-1 rounded-full text-xs font-bold flex items-center gap-0.5 ${ach.completed ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-[#D0EBE8] dark:bg-primary/20 text-primary-dark dark:text-accent'}`}>
                                                 <span className="material-symbols-rounded text-sm filled-icon">bolt</span> {ach.reward}
                                             </div>
                                         )}
@@ -246,6 +381,7 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
         const categories = ['Gift Card', 'Descuento', 'Producto', 'Donación'];
 
         const filteredCoupons = COUPONS.filter(coupon => {
+            if (coupon.isPerk) return false; // Exclude perks from this section
             const matchesSearch = coupon.title.toLowerCase().includes(searchQuery.toLowerCase());
             const matchesCategory = activeCategory ? coupon.category === activeCategory : true;
             return matchesSearch && matchesCategory;
@@ -347,8 +483,9 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
                     <div className="text-center py-12 text-gray-400 text-sm">
                         No se encontraron resultados.
                     </div>
-                )}
-            </div>
+                )
+                }
+            </div >
         );
     };
 
@@ -358,8 +495,8 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
             <div className="pt-6 pb-2 px-6 flex items-center justify-between bg-background dark:bg-dark-bg shrink-0">
                 <h1 className="text-xl font-bold text-text dark:text-dark-text">E-Hub</h1>
                 <div className="bg-[#D0EBE8] dark:bg-primary/20 px-3 py-1.5 rounded-full flex items-center gap-1">
-                    <span className="material-symbols-rounded filled-icon text-primary-dark dark:text-primary text-sm">bolt</span>
-                    <span className="font-bold text-primary-dark dark:text-primary text-sm">{user.points.toLocaleString()}</span>
+                    <span className="material-symbols-rounded filled-icon text-primary dark:text-accent text-sm">bolt</span>
+                    <span className="font-bold text-primary dark:text-accent text-sm">{user.points.toLocaleString()}</span>
                 </div>
                 <button className="text-gray-400">
                     <span className="material-symbols-rounded">more_vert</span>
@@ -375,37 +512,37 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
                 <div className="flex border-b border-gray-200 dark:border-gray-800 mb-6 relative">
                     <button
                         onClick={() => setActiveTab('usar')}
-                        className={`flex-1 pb-3 text-sm font-bold transition-colors relative z-10 ${activeTab === 'usar' ? 'text-primary' : 'text-gray-400'}`}
+                        className={`flex-1 pb-3 text-sm font-bold transition-colors relative z-10 ${activeTab === 'usar' ? 'text-primary dark:text-accent' : 'text-gray-400'}`}
                     >
                         Usar Puntos
                         {activeTab === 'usar' && (
                             <motion.div
                                 layoutId="activeTab"
-                                className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-t-full"
+                                className="absolute bottom-0 left-0 w-full h-0.5 bg-primary dark:bg-accent rounded-t-full"
                             />
                         )}
                     </button>
                     <button
                         onClick={() => setActiveTab('beneficios')}
-                        className={`flex-1 pb-3 text-sm font-bold transition-colors relative z-10 ${activeTab === 'beneficios' ? 'text-primary' : 'text-gray-400'}`}
+                        className={`flex-1 pb-3 text-sm font-bold transition-colors relative z-10 ${activeTab === 'beneficios' ? 'text-primary dark:text-accent' : 'text-gray-400'}`}
                     >
                         Beneficios
                         {activeTab === 'beneficios' && (
                             <motion.div
                                 layoutId="activeTab"
-                                className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-t-full"
+                                className="absolute bottom-0 left-0 w-full h-0.5 bg-primary dark:bg-accent rounded-t-full"
                             />
                         )}
                     </button>
                     <button
                         onClick={() => setActiveTab('progreso')}
-                        className={`flex-1 pb-3 text-sm font-bold transition-colors relative z-10 ${activeTab === 'progreso' ? 'text-primary' : 'text-gray-400'}`}
+                        className={`flex-1 pb-3 text-sm font-bold transition-colors relative z-10 ${activeTab === 'progreso' ? 'text-primary dark:text-accent' : 'text-gray-400'}`}
                     >
                         Progreso
                         {activeTab === 'progreso' && (
                             <motion.div
                                 layoutId="activeTab"
-                                className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-t-full"
+                                className="absolute bottom-0 left-0 w-full h-0.5 bg-primary dark:bg-accent rounded-t-full"
                             />
                         )}
                     </button>

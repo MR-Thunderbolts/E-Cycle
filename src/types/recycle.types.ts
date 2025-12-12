@@ -13,6 +13,13 @@ export interface RecyclePoint {
     logo?: string;
     promoText?: string;
     materials?: string[];
+    specialMission?: {
+        multiplier: number;
+        bonusPoints: number;
+        logo: string;
+        title: string;
+        subtitle: string;
+    };
 }
 
 export interface ItemCategory {
@@ -28,4 +35,11 @@ export interface Coupon {
     cost: number;
     image: string;
     category: string;
+    isPerk?: boolean;
+    perkDuration?: string;
+    description?: string;
+    unlockMission?: string;
+    perkColor?: 'green' | 'purple' | 'orange';
+    perkCategory?: 'flash' | 'items_valor' | 'cantidades';
+    isCurrentMonthPerk?: boolean;
 }

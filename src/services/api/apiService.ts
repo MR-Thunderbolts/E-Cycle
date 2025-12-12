@@ -11,6 +11,11 @@ const MOCK_USER: User = {
     level: 'Descubridor',
     itemsThisMonth: 4, // Starts close to unlocking 1.2x
     activeMultiplier: 1,
+    // Recycling stats for perk completion
+    computersRecycled: 0,
+    phonesRecycled: 2, // Unlocks Cazador de Circuitos (needs 1 computer OR 2 phones)
+    batteriesRecycled: 5,
+    cablesRecycledKg: 2,
     impact: { co2: 85, trees: 4 },
     history: [
         { id: 'tx_init_1', type: 'deposit', title: 'Reciclaje Inicial', date: 'Oct 28, 2025', points: 50, icon: 'eco' }
@@ -24,9 +29,8 @@ const MOCK_USER: User = {
 };
 
 const getMultiplier = (items: number): number => {
-    if (items >= 21) return 2;
-    if (items >= 11) return 1.5;
-    if (items >= 5) return 1.2;
+    if (items >= 10) return 2;
+    if (items >= 5) return 1.5;
     return 1;
 };
 
@@ -101,12 +105,23 @@ export const apiService = {
             const newTotalPoints = currentUser.points + finalPoints;
             const newLevel = calculateLevel(newTotalPoints, completedCount);
 
+            // Update perk-related recycling stats
+            const newPhonesRecycled = (currentUser.phonesRecycled || 0) + (items['celulares'] || 0);
+            const newComputersRecycled = (currentUser.computersRecycled || 0) + (items['laptops'] || 0);
+            const newBatteriesRecycled = (currentUser.batteriesRecycled || 0) + (items['baterias'] || 0);
+            const newCablesRecycledKg = (currentUser.cablesRecycledKg || 0) + (items['cables'] || 0); // Assuming 1 cable = 1 kg estimate
+
             const updatedUser: User = {
                 ...currentUser,
                 points: newTotalPoints,
                 level: newLevel,
                 itemsThisMonth: newItemsThisMonth,
                 activeMultiplier: newMultiplier,
+                // Perk stats
+                phonesRecycled: newPhonesRecycled,
+                computersRecycled: newComputersRecycled,
+                batteriesRecycled: newBatteriesRecycled,
+                cablesRecycledKg: newCablesRecycledKg,
                 history: [...newTransactions, ...currentUser.history],
                 achievements: updatedAchievements,
                 impact: {

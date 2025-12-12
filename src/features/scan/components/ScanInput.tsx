@@ -51,7 +51,7 @@ const ScanInput: React.FC<ScanInputProps> = ({ items, onUpdateQty, onBack, onCon
                     {RECYCLE_CATEGORIES.map(cat => (
                         <motion.div layout key={cat.id} className="bg-white dark:bg-dark-surface py-2 px-4 rounded-[28px] shadow-[0_4px_16px_rgba(0,0,0,0.04)] dark:shadow-none flex justify-between items-center border border-transparent dark:border-white/5">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-[#D0EBE8] dark:bg-primary/20 flex items-center justify-center text-primary-dark dark:text-primary shrink-0">
+                                <div className="w-12 h-12 rounded-full bg-[#D0EBE8] dark:bg-primary/20 flex items-center justify-center text-primary-dark dark:text-accent shrink-0">
                                     <span className="material-symbols-rounded filled-icon text-xl">{cat.iconName}</span>
                                 </div>
                                 <div>
@@ -86,7 +86,7 @@ const ScanInput: React.FC<ScanInputProps> = ({ items, onUpdateQty, onBack, onCon
                             <div className="text-gray-500 font-bold text-sm">Puntos Totales:</div>
                             {multiplier > 1 && <div className="text-[10px] text-primary font-bold">Incluye {multiplier}x bonus</div>}
                         </div>
-                        <div className="bg-[#D0EBE8] dark:bg-primary/20 text-primary-dark dark:text-primary font-black px-4 py-2 rounded-full text-xl flex items-center gap-1">
+                        <div className="bg-[#D0EBE8] dark:bg-primary/20 text-primary-dark dark:text-accent font-black px-4 py-2 rounded-full text-xl flex items-center gap-1">
                             <span className="material-symbols-rounded filled-icon">bolt</span> {totalPoints}
                         </div>
                     </div>

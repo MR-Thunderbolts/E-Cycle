@@ -18,7 +18,14 @@ export const RECYCLE_POINTS: RecyclePoint[] = [
         coordinates: { lat: -33.505, lng: -70.61 },
         type: 'Punto Limpio',
         promoText: 'Obtén 500 puntos',
-        materials: ['celulares', 'baterias', 'cables']
+        materials: ['celulares', 'baterias', 'cables'],
+        specialMission: {
+            multiplier: 1.5,
+            bonusPoints: 2000,
+            logo: 'https://ui-avatars.com/api/?name=Copec&background=00796B&color=fff&size=128',
+            title: 'Obten 2000 puntos',
+            subtitle: 'Por reciclar con Copec'
+        }
     },
     {
         id: '2',

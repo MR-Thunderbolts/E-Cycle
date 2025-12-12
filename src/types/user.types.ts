@@ -30,6 +30,11 @@ export interface User {
   level: UserLevel;
   itemsThisMonth: number; // Track items deposited this month for multipliers
   activeMultiplier: number; // Current active multiplier (1, 1.2, 1.5, or 2)
+  // Recycling stats for perk completion
+  computersRecycled?: number;
+  phonesRecycled?: number;
+  batteriesRecycled?: number;
+  cablesRecycledKg?: number;
   impact: {
     co2: number; // kg
     trees: number;

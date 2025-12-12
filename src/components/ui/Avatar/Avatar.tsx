@@ -20,7 +20,7 @@ export const Avatar: React.FC<AvatarProps> = ({
     };
 
     return (
-        <div className={`rounded-full border-primary border-solid bg-white dark:bg-dark-surface flex items-center justify-center overflow-hidden shrink-0 aspect-square shadow-sm ${sizeClasses[size]} ${className}`}>
+        <div className={`rounded-full border-primary dark:border-accent border-solid bg-white dark:bg-dark-surface flex items-center justify-center overflow-hidden shrink-0 aspect-square shadow-sm ${sizeClasses[size]} ${className}`}>
             <img
                 src={src}
                 alt={alt}

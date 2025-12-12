@@ -76,12 +76,12 @@ export const Register: React.FC<RegisterProps> = ({ onClose, onLogin }) => {
                 {/* Header Image */}
                 <div className="h-40 relative bg-primary/10 overflow-hidden shrink-0">
                     {/* Ambient Background Glow */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-primary/20 blur-[60px] rounded-full pointer-events-none" />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-primary/20 dark:bg-accent/20 blur-[60px] rounded-full pointer-events-none" />
 
                     <div className="absolute inset-0 flex items-center justify-center">
                         <div className="relative">
-                            <div className="absolute inset-0 bg-primary/30 blur-xl rounded-full scale-150 animate-pulse" />
-                            <span className="relative material-symbols-rounded text-6xl text-primary drop-shadow-lg">person_add</span>
+                            <div className="absolute inset-0 bg-primary/30 dark:bg-accent/30 blur-xl rounded-full scale-150 animate-pulse" />
+                            <span className="relative material-symbols-rounded text-6xl text-primary dark:text-accent drop-shadow-lg">person_add</span>
                         </div>
                     </div>
 

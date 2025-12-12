@@ -28,7 +28,7 @@ export const SplashScreen: React.FC = () => {
                         }}
                         className="relative z-10 w-full h-full bg-white dark:bg-[#1E1E1E] rounded-3xl shadow-2xl flex items-center justify-center border border-gray-100 dark:border-white/5"
                     >
-                        <span className="material-symbols-rounded text-6xl text-primary">recycling</span>
+                        <span className="material-symbols-rounded text-6xl text-primary dark:text-accent">recycling</span>
                     </motion.div>
                 </div>
 

@@ -123,10 +123,25 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
                             animate={{ scale: isSelected ? 1.2 : 1 }}
                         >
                             <div className="relative flex flex-col items-center justify-center">
-                                {/* Marker Icon - No background, relying on map contrast */}
-                                <span className={`relative z-10 material-symbols-rounded text-5xl drop-shadow-xl filled-icon leading-none transition-colors ${point.type === 'Punto Limpio' ? 'text-[#00796B]' : 'text-[#FB8C00]'}`}>
-                                    location_on
-                                </span>
+                                {/* Marker Icon */}
+                                {point.specialMission ? (
+                                    <div className="relative z-10 flex justify-center items-center">
+                                        <div className="absolute inset-0 bg-primary/50 dark:bg-accent/50 rounded-full blur-md animate-pulse"></div>
+                                        <div className="absolute -inset-4 bg-primary/20 dark:bg-accent/20 rounded-full blur-xl animate-pulse delay-75"></div>
+                                        <span className="relative material-symbols-rounded text-7xl drop-shadow-xl filled-icon leading-none text-primary dark:text-accent transition-transform hover:scale-110">
+                                            location_on
+                                        </span>
+                                        {/* Piggy Icon inside the pin hole with background to fill it */}
+                                        <div className="absolute top-[18%] left-1/2 transform -translate-x-1/2 z-20 pointer-events-none w-8 h-8 bg-primary dark:bg-accent rounded-full flex items-center justify-center">
+                                            <span className="material-symbols-rounded text-xl font-bold text-accent dark:text-primary filled-icon">savings</span>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <span className="relative z-10 material-symbols-rounded text-5xl drop-shadow-xl filled-icon leading-none transition-colors text-[#00796B]">
+                                        location_on
+                                    </span>
+                                )}
+
                                 {isSelected && (
                                     <motion.div
                                         initial={{ opacity: 0, y: 5 }}
