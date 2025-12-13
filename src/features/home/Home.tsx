@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { RECYCLE_POINTS, RECYCLE_CATEGORIES } from '@/constants';
 import { RecyclePoint } from '@/types';
-import { Avatar, SpecialMissionCard } from '@/components';
+import { Avatar, SpecialMissionCard, Button, IconButton } from '@/components';
 import { useAuth } from '@/hooks';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import InteractiveMap from './components/InteractiveMap';
@@ -69,9 +69,13 @@ const Home: React.FC<HomeProps> = ({ onOpenProfile, onNavigateToHub }) => {
                         className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F7] dark:bg-dark-bg"
                     >
                         <div className="px-6 pt-6 pb-2 flex justify-between items-center bg-transparent shrink-0">
-                            <button onClick={() => setIsSearchOpen(false)} className="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-dark-surface shadow-sm text-text dark:text-white">
-                                <span className="material-symbols-rounded text-lg">close</span>
-                            </button>
+                            <IconButton
+                                icon="close"
+                                onClick={() => setIsSearchOpen(false)}
+                                variant="default"
+                                className="bg-white dark:bg-dark-surface shadow-sm"
+                                ariaLabel="Cerrar búsqueda"
+                            />
                             <div className="text-sm font-bold underline decoration-text dark:decoration-dark-text underline-offset-4 text-text dark:text-dark-text">Búsqueda</div>
                             <div className="w-10"></div>
                         </div>
@@ -126,10 +130,20 @@ const Home: React.FC<HomeProps> = ({ onOpenProfile, onNavigateToHub }) => {
 
                         {/* Footer Search Button */}
                         <div className="p-4 bg-white dark:bg-dark-surface border-t border-gray-100 dark:border-dark-border flex justify-between items-center shrink-0 pb-safe-bottom">
-                            <button onClick={() => { setSearchQuery(''); setSelectedMaterials([]); setActiveSearchTab('donde'); }} className="font-bold text-sm underline px-4 text-primary dark:text-white">Limpiar todo</button>
-                            <button onClick={() => setIsSearchOpen(false)} className="bg-primary text-white font-bold px-8 py-4 rounded-full flex items-center gap-2 shadow-lg">
-                                <span className="material-symbols-rounded font-bold text-xl">search</span> Buscar
-                            </button>
+                            <Button
+                                onClick={() => { setSearchQuery(''); setSelectedMaterials([]); setActiveSearchTab('donde'); }}
+                                variant="ghost"
+                                className="underline"
+                            >
+                                Limpiar todo
+                            </Button>
+                            <Button
+                                onClick={() => setIsSearchOpen(false)}
+                                icon="search"
+                                className="shadow-lg px-8 py-4 h-auto"
+                            >
+                                Buscar
+                            </Button>
                         </div>
                     </motion.div>
                 )}
@@ -222,7 +236,12 @@ const Home: React.FC<HomeProps> = ({ onOpenProfile, onNavigateToHub }) => {
                     <button onClick={() => setMapZoom(z => Math.min(z + 0.5, 4))} className="w-12 h-12 flex items-center justify-center text-primary dark:text-accent border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-white/5 rounded-t-[32px] transition-colors"><span className="material-symbols-rounded text-2xl">add</span></button>
                     <button onClick={() => setMapZoom(z => Math.max(z - 0.5, 0.5))} className="w-12 h-12 flex items-center justify-center text-primary dark:text-accent hover:bg-gray-50 dark:hover:bg-white/5 rounded-b-[32px] transition-colors"><span className="material-symbols-rounded text-2xl">remove</span></button>
                 </div>
-                <button onClick={() => { setCenterMapOnUser(true); setMapZoom(1.5); }} className="w-12 h-12 bg-white dark:bg-dark-surface rounded-full shadow-lg flex items-center justify-center text-primary dark:text-accent hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"><span className="material-symbols-rounded filled-icon text-2xl">my_location</span></button>
+                <IconButton
+                    icon="my_location"
+                    onClick={() => { setCenterMapOnUser(true); setMapZoom(1.5); }}
+                    className="bg-white dark:bg-dark-surface shadow-lg text-primary dark:text-accent w-12 h-12 !text-2xl"
+                    ariaLabel="Centrar mapa"
+                />
             </motion.div>
 
             {/* Point Details Bottom Sheet */}
@@ -351,12 +370,22 @@ const Home: React.FC<HomeProps> = ({ onOpenProfile, onNavigateToHub }) => {
                             </div>
 
                             <div className="absolute bottom-0 left-0 right-0 p-4 bg-white dark:bg-dark-surface border-t border-gray-50 dark:border-dark-border flex gap-3 z-30 pb-8 rounded-t-[20px]">
-                                <button disabled className="flex-1 bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-600 py-4 rounded-full font-bold text-sm flex items-center justify-center gap-2 cursor-not-allowed">
-                                    <span className="material-symbols-rounded text-xl">qr_code_scanner</span> Escanear QR
-                                </button>
-                                <button disabled className="flex-1 bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-600 py-4 rounded-full font-bold text-sm flex items-center justify-center gap-2 cursor-not-allowed">
-                                    <span className="material-symbols-rounded text-xl filled-icon">near_me</span> Indicaciones
-                                </button>
+                                <Button
+                                    disabled
+                                    variant="secondary"
+                                    icon="qr_code_scanner"
+                                    fullWidth
+                                >
+                                    Escanear QR
+                                </Button>
+                                <Button
+                                    disabled
+                                    variant="secondary"
+                                    icon="near_me"
+                                    fullWidth
+                                >
+                                    Indicaciones
+                                </Button>
                             </div>
                         </motion.div>
                     </>

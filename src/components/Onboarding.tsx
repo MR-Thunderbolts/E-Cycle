@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Button, IconButton } from './ui';
 
 interface OnboardingProps {
     onNavigateToRegister?: () => void;
@@ -197,30 +198,35 @@ const Onboarding: React.FC<OnboardingProps> = ({ onNavigateToRegister, onNavigat
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="w-full max-w-md bg-white dark:bg-[#1E1E1E] rounded-3xl shadow-2xl overflow-hidden flex flex-col h-auto max-h-[90vh] md:h-[600px] relative"
+                className="w-full max-w-md bg-surface dark:bg-dark-surface rounded-3xl shadow-2xl overflow-hidden flex flex-col h-auto max-h-[90vh] md:h-[600px] relative"
             >
                 {/* Back Button */}
                 {currentStep > 0 && (
-                    <button
-                        onClick={handleBack}
-                        className="absolute top-4 left-4 z-20 p-2 text-gray-500 dark:text-gray-400 hover:text-primary transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-white/10"
-                    >
-                        <span className="material-symbols-rounded text-2xl">arrow_back</span>
-                    </button>
+                    <div className="absolute top-4 left-4 z-20">
+                        <IconButton
+                            icon="arrow_back"
+                            onClick={handleBack}
+                            ariaLabel="Volver"
+                            variant="ghost"
+                        />
+                    </div>
                 )}
 
                 {/* Skip Button */}
                 {currentStep < 3 && (
-                    <button
-                        onClick={handleSkip}
-                        className="absolute top-4 right-4 z-20 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary transition-colors"
-                    >
-                        Saltar
-                    </button>
+                    <div className="absolute top-4 right-4 z-20">
+                        <Button
+                            onClick={handleSkip}
+                            variant="ghost"
+                            size="sm"
+                        >
+                            Saltar
+                        </Button>
+                    </div>
                 )}
 
                 {/* Image Section (Flexible height) */}
-                <div className="flex-1 relative bg-gray-50 dark:bg-[#121212] min-h-[200px]">
+                <div className="flex-1 relative bg-background dark:bg-dark-bg min-h-[200px]">
                     <AnimatePresence mode='wait'>
                         <motion.div
                             key={currentStep}
@@ -236,7 +242,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onNavigateToRegister, onNavigat
                 </div>
 
                 {/* Content Section (Auto height based on content) */}
-                <div className="shrink-0 p-6 md:p-8 flex flex-col bg-white dark:bg-[#1E1E1E]">
+                <div className="shrink-0 p-6 md:p-8 flex flex-col bg-surface dark:bg-dark-surface">
                     <div className="text-center mb-4">
                         <AnimatePresence mode='wait'>
                             <motion.div
@@ -246,10 +252,10 @@ const Onboarding: React.FC<OnboardingProps> = ({ onNavigateToRegister, onNavigat
                                 exit={{ opacity: 0, y: -10 }}
                                 transition={{ duration: 0.3, delay: 0.1 }}
                             >
-                                <h1 className="text-2xl font-bold text-text dark:text-white mb-3 leading-tight">
+                                <h1 className="text-2xl font-bold text-text dark:text-dark-text mb-3 leading-tight">
                                     {steps[currentStep].title}
                                 </h1>
-                                <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
+                                <p className="text-text-secondary dark:text-dark-text-secondary text-sm leading-relaxed">
                                     {steps[currentStep].body}
                                 </p>
                             </motion.div>
@@ -265,7 +271,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onNavigateToRegister, onNavigat
                                     key={index}
                                     className={`h-2 rounded-full transition-all duration-300 ${index === currentStep
                                         ? 'w-6 bg-primary'
-                                        : 'w-2 bg-gray-300 dark:bg-gray-600'
+                                        : 'w-2 bg-border dark:bg-dark-border'
                                         }`}
                                 />
                             ))}
@@ -274,32 +280,38 @@ const Onboarding: React.FC<OnboardingProps> = ({ onNavigateToRegister, onNavigat
                         {/* Button */}
                         {currentStep === 3 ? (
                             <div className="w-full flex flex-col gap-3">
-                                <button
+                                <Button
                                     onClick={() => {
                                         handleComplete();
                                         if (onNavigateToRegister) onNavigateToRegister();
                                     }}
-                                    className="w-full py-3.5 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl shadow-lg shadow-primary/25 transition-all active:scale-[0.98]"
+                                    variant="primary"
+                                    size="lg"
+                                    fullWidth
                                 >
                                     Crear Cuenta Gratis
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     onClick={() => {
                                         handleComplete();
                                         if (onNavigateToLogin) onNavigateToLogin();
                                     }}
-                                    className="w-full py-2 text-sm font-semibold text-primary hover:text-primary-dark transition-colors"
+                                    variant="ghost"
+                                    size="sm"
+                                    fullWidth
                                 >
                                     Ya tengo cuenta, Iniciar Sesión
-                                </button>
+                                </Button>
                             </div>
                         ) : (
-                            <button
+                            <Button
                                 onClick={handleNext}
-                                className="w-full py-3.5 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl shadow-lg shadow-primary/25 transition-all active:scale-[0.98]"
+                                variant="primary"
+                                size="lg"
+                                fullWidth
                             >
                                 Siguiente
-                            </button>
+                            </Button>
                         )}
                     </div>
                 </div>

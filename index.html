@@ -84,20 +84,42 @@
             sans: ['"Plus Jakarta Sans"', 'sans-serif'],
           },
           colors: {
+            // Brand Colors
             primary: '#004D40',
             'primary-dark': '#00382E',
+            'primary-light': '#00695C',
             accent: '#1DE9B6',
             secondary: '#A6F8F2',
-            text: '#151515',
+
+            // Semantic Colors
             background: '#F5F8F8',
+            surface: '#FFFFFF',
+            text: '#151515',
+            'text-secondary': '#808080',
+            border: '#F3F4F6',
+
+            // Feedback
             points: '#FFC107',
             'points-bg': '#FFF8E1',
-            // Dark mode specifics
+            success: '#4CAF50',
+            error: '#F44336',
+            warning: '#FF9800',
+
+            // Dark Mode
             'dark-bg': '#121212',
             'dark-surface': '#1E1E1E',
             'dark-border': '#333333',
             'dark-text': '#E2E2E2',
             'dark-text-secondary': '#A0A0A0',
+          },
+          animation: {
+            'bounce-gentle': 'bounce-gentle 2s infinite',
+          },
+          keyframes: {
+            'bounce-gentle': {
+              '0%, 100%': { transform: 'translateY(-5%)' },
+              '50%': { transform: 'translateY(0)' },
+            }
           }
         }
       }

@@ -1,0 +1,414 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                    E-CYCLE APP - DESIGN SYSTEM                                 ║
+║                    Designer Reference Guide                                    ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+📅 Created: December 13, 2025
+🎨 Purpose: Complete design system audit for project restructure
+👤 For: UX/UI Designer (Figma-friendly documentation)
+
+═══════════════════════════════════════════════════════════════════════════════
+1. 🎨 COLOR PALETTE
+═══════════════════════════════════════════════════════════════════════════════
+
+LIGHT MODE COLORS
+─────────────────────────────────────────────────────────────────────────────
+Primary Colors:
+  • Primary (Main Brand)         : #004D40  (Teal Dark)
+  • Primary Dark (Hover/Active)  : #00382E  (Darker Teal)
+  • Accent (Highlights)          : #1DE9B6  (Bright Teal/Cyan)
+  • Secondary (Soft Accents)     : #A6F8F2  (Light Teal)
+
+Background & Surface:
+  • Background (Main)            : #F5F8F8  (Very Light Teal Gray)
+  • Surface (Cards/Components)   : #FFFFFF  (White)
+
+Text Colors:
+  • Text (Primary)               : #151515  (Near Black)
+  • Text Secondary               : #808080  (Gray - inferred from usage)
+
+Feedback Colors:
+  • Points Badge                 : #FFC107  (Amber/Gold)
+  • Points Background            : #FFF8E1  (Light Amber)
+
+Borders:
+  • Border Default               : #F3F4F6  (Light Gray - from gray-100)
+  • Border Secondary             : #E5E7EB  (Medium Gray)
+
+
+DARK MODE COLORS
+─────────────────────────────────────────────────────────────────────────────
+Background & Surface:
+  • Dark Background (Main)       : #121212  (Pure Dark)
+  • Dark Surface (Cards)         : #1E1E1E  (Slightly Lighter Dark)
+  • Dark Border                  : #333333  (Dark Gray)
+
+Text Colors:
+  • Dark Text (Primary)          : #E2E2E2  (Light Gray)
+  • Dark Text Secondary          : #A0A0A0  (Medium Gray)
+
+Accent Colors (Dark Mode):
+  • Accent in Dark Mode          : #1DE9B6  (Bright Teal - same as light)
+  • Primary in Dark Mode         : Uses Accent (#1DE9B6)
+
+
+SPECIAL/VARIANT COLORS (Used in Special Components)
+─────────────────────────────────────────────────────────────────────────────
+Mission Card Variants:
+  • Default Mission              : #1DE9B6  (Teal/Accent)
+  • Time-Based Mission           : #7C4DFF  (Deep Purple)
+  • Time-Based Dark              : #651FFF  (Darker Purple)
+  • Perk Mission                 : #A855F7  (Purple)
+
+Material Icon Colors:
+  • Gray Default                 : #9CA3AF  (gray-400)
+  • Teal Active                  : #00695C  (Teal-800)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+2. 📝 TYPOGRAPHY
+═══════════════════════════════════════════════════════════════════════════════
+
+FONT FAMILY
+─────────────────────────────────────────────────────────────────────────────
+  • Primary Font    : "Plus Jakarta Sans" (Google Font)
+  • Fallback        : system sans-serif
+  • Icon Font       : "Material Symbols Rounded" (Google Icons)
+
+  🔗 Import URL:
+     https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap
+
+
+FONT WEIGHTS USED
+─────────────────────────────────────────────────────────────────────────────
+  • 300 - Light
+  • 400 - Regular/Normal
+  • 500 - Medium
+  • 600 - Semi-Bold
+  • 700 - Bold
+  • 800 - Extra Bold
+
+
+TYPOGRAPHY SCALE (Common Usages Found)
+─────────────────────────────────────────────────────────────────────────────
+  Headings:
+    • H1 - Not explicitly used (consider 32-40px, font-bold/800)
+    • H2 - Not explicitly used (consider 24-28px, font-bold)
+    • H3 - 18px (text-lg), font-bold            [Card titles]
+    • H4 - 16px (text-base), font-bold          [Section headers]
+
+  Body Text:
+    • Large    - 16px (text-base)
+    • Regular  - 14px (text-sm)                 [Main content]
+    • Small    - 12px (text-xs)                 [Captions, metadata]
+    • Tiny     - 10px (text-[10px])             [Nav labels]
+
+  Special:
+    • Display numbers - Various sizes with font-bold/800
+
+
+═══════════════════════════════════════════════════════════════════════════════
+3. 📐 SPACING & SIZING
+═══════════════════════════════════════════════════════════════════════════════
+
+SPACING SCALE (Tailwind Default - 4px base)
+─────────────────────────────────────────────────────────────────────────────
+  Most Used Spacing Values:
+    • 0.5  = 2px      (micro spacing)
+    • 1    = 4px      (tiny)
+    • 2    = 8px      (small)
+    • 3    = 12px     (medium-small)
+    • 4    = 16px     (medium)
+    • 5    = 20px     (medium-large)
+    • 6    = 24px     (large)
+    • 8    = 32px     (x-large)
+    • 10   = 40px     (2xl)
+    • 12   = 48px     (3xl)
+
+
+COMPONENT SIZING TOKENS
+─────────────────────────────────────────────────────────────────────────────
+Avatar Sizes:
+  • Small (sm)   : 32px × 32px  (w-8 h-8)
+  • Medium (md)  : 44px × 44px  (w-11 h-11)
+  • Large (lg)   : 64px × 64px  (w-16 h-16)
+
+Logo Container:
+  • Standard    : 80px × 80px  (w-20 h-20)
+
+Bottom Nav Bar:
+  • Height      : 100px (h-[100px])
+  • Tab Button  : 64px × 64px (inactive)
+  • Tab Button  : 72px × 72px (active, with lift)
+
+
+BORDER WIDTHS
+─────────────────────────────────────────────────────────────────────────────
+  • Default     : 1px   (border)
+  • Avatar SM   : 2px   (border-2)
+  • Avatar MD   : 3px   (border-[3px])
+  • Avatar LG   : 4px   (border-4)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+4. 🎭 BORDER RADIUS
+═══════════════════════════════════════════════════════════════════════════════
+
+RADIUS SCALE
+─────────────────────────────────────────────────────────────────────────────
+  • rounded-full  : 9999px        [Circles - avatars, badges]
+  • rounded-[32px]: 32px          [Bottom nav bar top corners]
+  • rounded-[24px]: 24px          [Nav buttons active state, logos]
+  • rounded-2xl   : 16px          [Cards, main components]
+  • rounded-xl    : 12px          [Badges, small elements]
+
+
+═══════════════════════════════════════════════════════════════════════════════
+5. ✨ SHADOWS & EFFECTS
+═══════════════════════════════════════════════════════════════════════════════
+
+BOX SHADOWS
+─────────────────────────────────────────────────────────────────────────────
+  • shadow-sm
+    Used for: Avatars, subtle component depth
+    Value: 0 1px 2px 0 rgb(0 0 0 / 0.05)
+
+  • shadow-[0_-5px_20px_rgba(0,0,0,0.03)]
+    Used for: Bottom nav bar (upward shadow)
+    Value: Custom - soft top shadow
+
+  • shadow-[0_0_10px_rgba(4,122,108,0.5)]
+    Used for: Teal glow effects (light mode)
+    Value: Custom - accent color glow
+
+  • shadow-[0_0_10px_rgba(29,233,182,0.5)]
+    Used for: Teal glow effects (dark mode)
+    Value: Custom - bright accent glow
+
+  • shadow-[0_0_15px_rgba(124,77,255,0.6)]
+    Used for: Purple glow effects (special missions)
+    Value: Custom - purple glow
+
+
+DROP SHADOWS
+─────────────────────────────────────────────────────────────────────────────
+  • drop-shadow-[0_0_8px_rgba(0,121,107,0.5)]
+    Used for: Active nav icons
+    Value: Custom - icon glow effect
+
+
+═══════════════════════════════════════════════════════════════════════════════
+6. 🎬 ANIMATIONS & TRANSITIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+TRANSITION UTILITIES
+─────────────────────────────────────────────────────────────────────────────
+  • transition-colors           : 150ms color transitions
+  • transition-all              : 150ms all properties
+  • transition-transform        : 150ms transform only
+  • duration-300               : 300ms transitions
+
+  Common Usage:
+    - Background color changes (theme switch, hover)
+    - Text color changes
+    - Transform animations (scale, translate)
+
+
+CUSTOM ANIMATIONS
+─────────────────────────────────────────────────────────────────────────────
+@keyframes scan
+  • Duration: continuous loop
+  • Usage: QR code scanner line animation
+  • Effect: Vertical scanning line from 0% to 100%
+  • Opacity fade in/out at start and end
+
+@keyframes bounce-short
+  • Duration: 1s infinite
+  • Usage: Attention-grabbing elements
+  • Effect: Vertical bounce (-15% translateY at 50%)
+  • Class: .animate-bounce-short
+
+
+TRANSFORM EFFECTS
+─────────────────────────────────────────────────────────────────────────────
+  • active:scale-[0.98]         : Press/tap feedback (cards)
+  • scale-105                   : Active state enlargement (icons)
+  • -translate-y-2              : Lift effect (active nav button)
+  • rotate-3                    : Subtle tilt (badges)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+7. 🖼️ ICON SYSTEM
+═══════════════════════════════════════════════════════════════════════════════
+
+ICON LIBRARY
+─────────────────────────────────────────────────────────────────────────────
+  Library: Material Symbols Rounded
+  CDN: https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded
+
+  Default Settings:
+    • Font Variation Settings:
+      - 'FILL' 0    (outline by default)
+      - 'wght' 400  (regular weight)
+      - 'GRAD' 0    (no gradient)
+      - 'opsz' 24   (24px optical size)
+
+  Filled Variant:
+    • Class: .filled-icon
+    • Sets: 'FILL' 1
+
+
+ICON SIZES
+─────────────────────────────────────────────────────────────────────────────
+  • text-xs     : 12px    (metadata icons)
+  • text-2xl    : 24px    (standard UI icons)
+  • text-[28px] : 28px    (navigation icons)
+  • text-4xl    : 36px    (large decorative icons)
+
+
+COMMONLY USED ICONS (Found in Code)
+─────────────────────────────────────────────────────────────────────────────
+Navigation:
+  • explore            : Map/Explore tab
+  • local_shipping     : Pickup/Delivery tab
+  • qr_code_scanner    : Scanner tab
+  • bolt               : E-Hub/Energy tab
+  • arrow_back         : Back button
+
+Status/Feedback:
+  • savings            : Points/Rewards
+  • timer              : Time-based missions
+  • auto_awesome       : Special perks
+  • memory             : Circuit/Tech related
+
+
+═══════════════════════════════════════════════════════════════════════════════
+8. 📱 RESPONSIVE & MOBILE-FIRST
+═══════════════════════════════════════════════════════════════════════════════
+
+VIEWPORT SETTINGS
+─────────────────────────────────────────────────────────────────────────────
+  Meta Viewport:
+    width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0
+
+  Safe Area:
+    • padding-bottom: env(safe-area-inset-bottom)
+    • Class: .safe-bottom
+    • Usage: Bottom navigation bars (iOS compatibility)
+
+
+APP CONSTRAINTS
+─────────────────────────────────────────────────────────────────────────────
+  • Root Element: height: 100%, overflow: hidden
+  • Body: Full viewport height, no scroll (app handles internally)
+  • Overscroll Behavior: none (prevents pull-to-refresh)
+
+
+SCROLLBAR STYLING
+─────────────────────────────────────────────────────────────────────────────
+  • Class: .no-scrollbar
+  • Hides scrollbars while maintaining scroll functionality
+  • Cross-browser support (Webkit, Firefox, IE/Edge)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+9. 🎨 DESIGN TOKENS SUMMARY (For Figma/Design Tools)
+═══════════════════════════════════════════════════════════════════════════════
+
+COLOR TOKENS (Light Mode)
+─────────────────────────────────────────────────────────────────────────────
+bg/background           #F5F8F8
+bg/surface             #FFFFFF
+text/primary           #151515
+text/secondary         #808080
+brand/primary          #004D40
+brand/primary-dark     #00382E
+brand/accent           #1DE9B6
+brand/secondary        #A6F8F2
+feedback/points        #FFC107
+feedback/points-bg     #FFF8E1
+border/default         #F3F4F6
+
+
+COLOR TOKENS (Dark Mode)
+─────────────────────────────────────────────────────────────────────────────
+bg/dark                #121212
+bg/surface-dark        #1E1E1E
+bg/border-dark         #333333
+text/dark-primary      #E2E2E2
+text/dark-secondary    #A0A0A0
+brand/accent-dark      #1DE9B6
+
+
+SPACING TOKENS
+─────────────────────────────────────────────────────────────────────────────
+space/xs               4px
+space/sm               8px
+space/md               16px
+space/lg               24px
+space/xl               32px
+space/2xl              40px
+space/3xl              48px
+
+
+RADIUS TOKENS
+─────────────────────────────────────────────────────────────────────────────
+radius/sm              8px
+radius/md              12px
+radius/lg              16px
+radius/xl              24px
+radius/2xl             32px
+radius/full            9999px
+
+
+TYPOGRAPHY TOKENS
+─────────────────────────────────────────────────────────────────────────────
+font/family            "Plus Jakarta Sans", sans-serif
+font/weight-normal     400
+font/weight-medium     500
+font/weight-semibold   600
+font/weight-bold       700
+font/size-xs           12px
+font/size-sm           14px
+font/size-base         16px
+font/size-lg           18px
+font/size-xl           20px
+
+
+═══════════════════════════════════════════════════════════════════════════════
+10. 📋 NOTES & OBSERVATIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+DESIGN SYSTEM STRENGTHS
+─────────────────────────────────────────────────────────────────────────────
+  ✓ Consistent teal/green color theme throughout
+  ✓ Well-defined dark mode support
+  ✓ Material Design icon system integration
+  ✓ Smooth transitions and micro-interactions
+  ✓ Mobile-first approach with safe area support
+  ✓ Glassmorphism effects (backdrop-blur)
+
+
+AREAS FOR IMPROVEMENT
+─────────────────────────────────────────────────────────────────────────────
+  ! No centralized CSS/design token file (all in index.html)
+  ! Some colors hardcoded in components (e.g., #7C4DFF Purple)
+  ! Inconsistent spacing patterns in some areas
+  ! Missing component documentation
+  ! No design system component library
+
+
+RECOMMENDED NEXT STEPS
+─────────────────────────────────────────────────────────────────────────────
+  1. Create a centralized design tokens file
+  2. Move Tailwind config to tailwind.config.js
+  3. Consolidate all components into organized folders
+  4. Create a component library/storybook
+  5. Document component variants and props
+
+
+═══════════════════════════════════════════════════════════════════════════════
+END OF DESIGN SYSTEM DOCUMENTATION
+Created by: Antigravity AI Assistant
+For: E-Cycle Project Restructure
+═══════════════════════════════════════════════════════════════════════════════

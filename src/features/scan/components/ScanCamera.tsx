@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Button, IconButton } from '@/components';
 
 interface ScanCameraProps {
     onSimulate: () => void;
@@ -18,9 +19,19 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onSimulate, onBack }) => {
         >
             {/* Top Header */}
             <div className="p-6 pt-10 flex justify-between items-center z-20 shrink-0">
-                <button onClick={onBack} className="material-symbols-rounded text-white p-2 bg-white/10 rounded-full active:scale-95 transition-transform">arrow_back</button>
+                <IconButton
+                    icon="arrow_back"
+                    onClick={onBack}
+                    ariaLabel="Regresar"
+                    className="bg-white/10 text-white hover:bg-white/20"
+                />
                 <h2 className="text-white font-semibold">Escanea el QR</h2>
-                <span className="material-symbols-rounded text-white p-2 bg-white/10 rounded-full">flash_on</span>
+                <IconButton
+                    icon="flash_on"
+                    onClick={() => { }}
+                    ariaLabel="Flash"
+                    className="bg-white/10 text-white hover:bg-white/20"
+                />
             </div>
 
             {/* Scanner Content */}
@@ -35,13 +46,13 @@ const ScanCamera: React.FC<ScanCameraProps> = ({ onSimulate, onBack }) => {
 
             {/* Bottom Action */}
             <div className="pb-28 pt-4 flex justify-center shrink-0 z-30">
-                <button
+                <Button
                     onClick={onSimulate}
-                    className="bg-secondary/20 backdrop-blur-lg border border-secondary/50 text-white px-8 py-4 rounded-full font-bold flex items-center gap-3 active:scale-95 transition-all"
+                    icon="qr_code_scanner"
+                    className="bg-secondary/20 backdrop-blur-lg border border-secondary/50 text-white hover:bg-secondary/30"
                 >
-                    <span className="material-symbols-rounded filled-icon">qr_code_scanner</span>
-                    <span className="whitespace-nowrap">Simular Escaneo</span>
-                </button>
+                    Simular Escaneo
+                </Button>
             </div>
         </motion.div>
     );

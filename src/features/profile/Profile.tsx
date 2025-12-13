@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/hooks';
-import { LEVEL_THRESHOLDS } from '@/constants';
-import { LevelIndicator, Avatar } from '@/components';
+import { LevelIndicator, Avatar, Button, IconButton, MenuItem, Toggle, IconBox } from '@/components';
 
 interface ProfileScreenProps {
     onClose: () => void;
@@ -11,16 +10,16 @@ const Profile: React.FC<ProfileScreenProps> = ({ onClose }) => {
     const { user, isDarkMode, toggleTheme } = useAuth();
     const [showSettings, setShowSettings] = useState(false);
 
+    // Render each section efficiently
     const renderSettings = () => (
         <div className="h-full bg-background dark:bg-dark-bg flex flex-col animate-slide-up transform transition-transform duration-300">
             {/* Settings Header */}
             <div className="pt-6 pb-2 px-6 flex items-center gap-4 bg-background dark:bg-dark-bg shrink-0">
-                <button
+                <IconButton
+                    icon="arrow_back"
                     onClick={() => setShowSettings(false)}
-                    className="w-8 h-8 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors"
-                >
-                    <span className="material-symbols-rounded">arrow_back</span>
-                </button>
+                    ariaLabel="Regresar"
+                />
                 <h1 className="text-lg font-bold text-text dark:text-dark-text">Configuración</h1>
             </div>
 
@@ -30,33 +29,9 @@ const Profile: React.FC<ProfileScreenProps> = ({ onClose }) => {
                 <section className="mb-6">
                     <h3 className="font-bold text-gray-500 dark:text-gray-400 text-sm mb-3 uppercase tracking-wide">Cuenta</h3>
                     <div className="bg-white dark:bg-dark-surface rounded-[24px] overflow-hidden shadow-sm border border-gray-100 dark:border-dark-border">
-                        <button className="w-full p-4 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors border-b border-gray-50 dark:border-gray-800">
-                            <div className="w-10 h-10 rounded-full bg-[#D0EBE8] dark:bg-primary/20 flex items-center justify-center text-primary-dark dark:text-accent shrink-0">
-                                <span className="material-symbols-rounded">lock</span>
-                            </div>
-                            <div className="flex-1 text-left">
-                                <span className="text-sm font-medium text-text dark:text-dark-text">Cambiar Contraseña</span>
-                            </div>
-                            <span className="material-symbols-rounded text-gray-400">chevron_right</span>
-                        </button>
-                        <button className="w-full p-4 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors border-b border-gray-50 dark:border-gray-800">
-                            <div className="w-10 h-10 rounded-full bg-[#D0EBE8] dark:bg-primary/20 flex items-center justify-center text-primary-dark dark:text-accent shrink-0">
-                                <span className="material-symbols-rounded">mail</span>
-                            </div>
-                            <div className="flex-1 text-left">
-                                <div className="text-sm font-medium text-text dark:text-dark-text">Actualizar mi correo</div>
-                            </div>
-                            <span className="material-symbols-rounded text-gray-400">chevron_right</span>
-                        </button>
-                        <button className="w-full p-4 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                            <div className="w-10 h-10 rounded-full bg-[#D0EBE8] dark:bg-primary/20 flex items-center justify-center text-primary-dark dark:text-accent shrink-0">
-                                <span className="material-symbols-rounded">map</span>
-                            </div>
-                            <div className="flex-1 text-left">
-                                <div className="text-sm font-medium text-text dark:text-dark-text">Actualizar dirección de residencia</div>
-                            </div>
-                            <span className="material-symbols-rounded text-gray-400">chevron_right</span>
-                        </button>
+                        <MenuItem icon="lock" label="Cambiar Contraseña" />
+                        <MenuItem icon="mail" label="Actualizar mi correo" />
+                        <MenuItem icon="map" label="Actualizar dirección de residencia" border={false} />
                     </div>
                 </section>
 
@@ -64,27 +39,13 @@ const Profile: React.FC<ProfileScreenProps> = ({ onClose }) => {
                 <section className="mb-6">
                     <h3 className="font-bold text-gray-500 dark:text-gray-400 text-sm mb-3 uppercase tracking-wide">Notificaciones</h3>
                     <div className="bg-white dark:bg-dark-surface rounded-[24px] overflow-hidden shadow-sm border border-gray-100 dark:border-dark-border">
-                        <button className="w-full p-4 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors border-b border-gray-50 dark:border-gray-800">
-                            <div className="w-10 h-10 rounded-full bg-[#D0EBE8] dark:bg-primary/20 flex items-center justify-center text-primary-dark dark:text-accent shrink-0">
-                                <span className="material-symbols-rounded">notifications</span>
-                            </div>
-                            <div className="flex-1 text-left">
-                                <span className="text-sm font-medium text-text dark:text-dark-text">Notificaciones dentro de la app</span>
-                            </div>
-                            <span className="material-symbols-rounded text-gray-400">chevron_right</span>
-                        </button>
-                        <div className="w-full p-4 flex items-center gap-4 bg-white dark:bg-dark-surface">
-                            <div className="w-10 h-10 rounded-full bg-[#D0EBE8] dark:bg-primary/20 flex items-center justify-center text-primary-dark dark:text-accent shrink-0">
-                                <span className="material-symbols-rounded">push_pin</span>
-                            </div>
-                            <div className="flex-1 text-left">
-                                <div className="text-sm font-medium text-text dark:text-dark-text">Notificaciones Push</div>
-                            </div>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" className="sr-only peer" />
-                                <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                            </label>
-                        </div>
+                        <MenuItem icon="notifications" label="Notificaciones dentro de la app" />
+                        <MenuItem
+                            icon="push_pin"
+                            label="Notificaciones Push"
+                            rightElement={<Toggle checked={true} onChange={() => { }} />}
+                            border={false}
+                        />
                     </div>
                 </section>
 
@@ -92,23 +53,12 @@ const Profile: React.FC<ProfileScreenProps> = ({ onClose }) => {
                 <section className="mb-6">
                     <h3 className="font-bold text-gray-500 dark:text-gray-400 text-sm mb-3 uppercase tracking-wide">Apariencia</h3>
                     <div className="bg-white dark:bg-dark-surface rounded-[24px] overflow-hidden shadow-sm border border-gray-100 dark:border-dark-border">
-                        <div className="w-full p-4 flex items-center gap-4 bg-white dark:bg-dark-surface">
-                            <div className="w-10 h-10 rounded-full bg-[#D0EBE8] dark:bg-primary/20 flex items-center justify-center text-primary-dark dark:text-accent shrink-0">
-                                <span className="material-symbols-rounded">dark_mode</span>
-                            </div>
-                            <div className="flex-1 text-left">
-                                <div className="text-sm font-medium text-text dark:text-dark-text">Modo Oscuro</div>
-                            </div>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    className="sr-only peer"
-                                    checked={isDarkMode}
-                                    onChange={toggleTheme}
-                                />
-                                <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                            </label>
-                        </div>
+                        <MenuItem
+                            icon="dark_mode"
+                            label="Modo Oscuro"
+                            rightElement={<Toggle checked={isDarkMode} onChange={toggleTheme} />}
+                            border={false}
+                        />
                     </div>
                 </section>
 
@@ -116,33 +66,14 @@ const Profile: React.FC<ProfileScreenProps> = ({ onClose }) => {
                 <section className="mb-6">
                     <h3 className="font-bold text-gray-500 dark:text-gray-400 text-sm mb-3 uppercase tracking-wide">Data y Privacidad</h3>
                     <div className="bg-white dark:bg-dark-surface rounded-[24px] overflow-hidden shadow-sm border border-gray-100 dark:border-dark-border">
-                        <button className="w-full p-4 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors border-b border-gray-50 dark:border-gray-800">
-                            <div className="w-10 h-10 rounded-full bg-[#D0EBE8] dark:bg-primary/20 flex items-center justify-center text-primary-dark dark:text-accent shrink-0">
-                                <span className="material-symbols-rounded">gavel</span>
-                            </div>
-                            <div className="flex-1 text-left">
-                                <span className="text-sm font-medium text-text dark:text-dark-text">Términos de Servicio</span>
-                            </div>
-                            <span className="material-symbols-rounded text-gray-400">chevron_right</span>
-                        </button>
-                        <button className="w-full p-4 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors border-b border-gray-50 dark:border-gray-800">
-                            <div className="w-10 h-10 rounded-full bg-[#D0EBE8] dark:bg-primary/20 flex items-center justify-center text-primary-dark dark:text-accent shrink-0">
-                                <span className="material-symbols-rounded">security</span>
-                            </div>
-                            <div className="flex-1 text-left">
-                                <div className="text-sm font-medium text-text dark:text-dark-text">Política de Privacidad</div>
-                            </div>
-                            <span className="material-symbols-rounded text-gray-400">chevron_right</span>
-                        </button>
-                        <button className="w-full p-4 flex items-center gap-4 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors group">
-                            <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-500 shrink-0">
-                                <span className="material-symbols-rounded">delete</span>
-                            </div>
-                            <div className="flex-1 text-left">
-                                <div className="text-sm font-medium text-text dark:text-dark-text group-hover:text-red-500 transition-colors">Borrar Cuenta</div>
-                            </div>
-                            <span className="material-symbols-rounded text-gray-400 group-hover:text-red-300">chevron_right</span>
-                        </button>
+                        <MenuItem icon="gavel" label="Términos de Servicio" />
+                        <MenuItem icon="security" label="Política de Privacidad" />
+                        <MenuItem
+                            icon="delete"
+                            label="Borrar Cuenta"
+                            variant="danger"
+                            border={false}
+                        />
                     </div>
                 </section>
 
@@ -150,15 +81,7 @@ const Profile: React.FC<ProfileScreenProps> = ({ onClose }) => {
                 <section className="mb-12">
                     <h3 className="font-bold text-gray-500 dark:text-gray-400 text-sm mb-3 uppercase tracking-wide">Soporte</h3>
                     <div className="bg-white dark:bg-dark-surface rounded-[24px] overflow-hidden shadow-sm border border-gray-100 dark:border-dark-border">
-                        <button className="w-full p-4 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                            <div className="w-10 h-10 rounded-full bg-[#D0EBE8] dark:bg-primary/20 flex items-center justify-center text-primary-dark dark:text-accent shrink-0">
-                                <span className="material-symbols-rounded">help</span>
-                            </div>
-                            <div className="flex-1 text-left">
-                                <span className="text-sm font-medium text-text dark:text-dark-text">Ayuda y Soporte</span>
-                            </div>
-                            <span className="material-symbols-rounded text-gray-400">chevron_right</span>
-                        </button>
+                        <MenuItem icon="help" label="Ayuda y Soporte" border={false} />
                     </div>
                 </section>
 
@@ -189,12 +112,12 @@ const Profile: React.FC<ProfileScreenProps> = ({ onClose }) => {
                 <div className="pt-6 pb-2 px-6 flex items-center justify-between bg-background dark:bg-dark-bg shrink-0">
                     <div className="w-8"></div> {/* Spacer to center title */}
                     <h1 className="text-lg font-bold text-text dark:text-dark-text">E-Cycle</h1>
-                    <button
+                    <IconButton
+                        icon="close"
                         onClick={onClose}
-                        className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
-                    >
-                        <span className="material-symbols-rounded">close</span>
-                    </button>
+                        variant="ghost"
+                        ariaLabel="Cerrar perfil"
+                    />
                 </div>
 
                 <div className="flex-1 overflow-y-auto px-6 pb-safe-bottom no-scrollbar">
@@ -209,13 +132,15 @@ const Profile: React.FC<ProfileScreenProps> = ({ onClose }) => {
                     </div>
 
                     {/* Settings Button */}
-                    <button
+                    <Button
                         onClick={() => setShowSettings(true)}
-                        className="w-full py-3.5 rounded-full border border-primary dark:border-accent text-primary dark:text-accent font-bold flex items-center justify-center gap-2 mb-8 bg-[#D0EBE8]/30 dark:bg-primary/10 active:bg-[#D0EBE8] dark:active:bg-primary/20 transition-colors shadow-sm active:scale-[0.98]"
+                        variant="ghost"
+                        fullWidth
+                        icon="settings"
+                        className="mb-8 border border-primary dark:border-accent !text-primary dark:!text-accent bg-[#D0EBE8]/30 dark:bg-primary/10 hover:bg-[#D0EBE8] dark:hover:bg-primary/20"
                     >
-                        <span className="material-symbols-rounded filled-icon">settings</span>
                         Configuración
-                    </button>
+                    </Button>
 
                     {/* Impact Section */}
                     <h3 className="font-bold text-gray-500 dark:text-gray-400 text-sm mb-4 uppercase tracking-wide pl-1">Tu Impacto</h3>
@@ -273,9 +198,7 @@ const Profile: React.FC<ProfileScreenProps> = ({ onClose }) => {
                     {user.achievements.filter(a => a.completed).length > 0 ? (
                         user.achievements.filter(a => a.completed).map(ach => (
                             <div key={ach.id} className="bg-white dark:bg-dark-surface rounded-[32px] p-4 flex items-center gap-4 shadow-sm border border-gray-100 dark:border-dark-border mb-4">
-                                <div className="w-14 h-14 rounded-full bg-[#D0EBE8] dark:bg-primary/20 flex items-center justify-center text-primary-dark dark:text-accent shrink-0">
-                                    <span className="material-symbols-rounded text-2xl filled-icon">{ach.icon}</span>
-                                </div>
+                                <IconBox icon={ach.icon} size="xl" />
                                 <div className="flex-1">
                                     <h4 className="font-bold text-text dark:text-dark-text text-sm">{ach.title}</h4>
                                     <p className="text-xs text-gray-500 dark:text-gray-400">{ach.description}</p>
@@ -294,9 +217,7 @@ const Profile: React.FC<ProfileScreenProps> = ({ onClose }) => {
                         {user.history.length > 0 ? (
                             user.history.map(tx => (
                                 <div key={tx.id} className="bg-white dark:bg-dark-surface rounded-[32px] p-4 flex items-center gap-4 shadow-sm border border-gray-100 dark:border-dark-border">
-                                    <div className="w-14 h-14 rounded-full bg-[#D0EBE8] dark:bg-primary/20 flex items-center justify-center text-primary-dark dark:text-accent shrink-0">
-                                        <span className="material-symbols-rounded text-2xl">{tx.icon}</span>
-                                    </div>
+                                    <IconBox icon={tx.icon} size="xl" />
                                     <div className="flex-1">
                                         <h4 className="font-bold text-text dark:text-dark-text text-sm">{tx.title}</h4>
                                         <p className="text-xs text-gray-500 dark:text-gray-400">{tx.date}</p>

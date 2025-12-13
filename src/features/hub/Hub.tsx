@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Coupon, HubTab } from '@/types';
 import { useAuth } from '@/hooks';
 import { COUPONS } from '@/constants';
-import { LevelIndicator } from '@/components';
-import { motion } from 'framer-motion';
+import { LevelIndicator, Button, Modal, LoadingSpinner, EmptyState, Chip, Tabs, SearchBar, Tab } from '@/components';
 
 type RedemptionStatus = 'idle' | 'confirm' | 'processing' | 'success';
 type ProgressFilter = 'todos' | 'completadas' | 'diaria' | 'semanal' | 'mensual';
@@ -12,10 +11,7 @@ interface HubScreenProps {
     initialTab?: HubTab;
 }
 
-// Unified Chip Styles
-const CHIP_BASE = "px-4 py-1.5 rounded-full text-xs font-bold capitalize whitespace-nowrap transition-colors flex items-center gap-1 border shrink-0";
-const CHIP_ACTIVE = "bg-primary text-white border-primary shadow-md shadow-primary/20";
-const CHIP_INACTIVE = "bg-white dark:bg-dark-surface text-gray-500 dark:text-gray-400 border-gray-100 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-white/5";
+
 
 const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
     const { user, redeem } = useAuth();
@@ -98,7 +94,11 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
         setShowFilters(false);
     };
 
-    if (!user) return <div className="p-8 flex justify-center"><span className="animate-spin material-symbols-rounded text-primary text-4xl">progress_activity</span></div>;
+    if (!user) return (
+        <div className="p-8 flex justify-center">
+            <LoadingSpinner size="lg" variant="primary" />
+        </div>
+    );
 
     const isMultipliersLocked = user.level === 'Descubridor';
 
@@ -320,13 +320,13 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
                     {/* Filters */}
                     <div className="flex gap-2 mb-4 overflow-x-auto no-scrollbar pb-2 -mx-6 px-6">
                         {filters.map(f => (
-                            <button
+                            <Chip
                                 key={f}
+                                active={activeFilter === f}
                                 onClick={() => setActiveFilter(f)}
-                                className={`${CHIP_BASE} ${activeFilter === f ? CHIP_ACTIVE : CHIP_INACTIVE}`}
                             >
                                 {f}
-                            </button>
+                            </Chip>
                         ))}
                     </div>
 
@@ -369,7 +369,11 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
                                 </div>
                             ))
                         ) : (
-                            <div className="text-center py-8 text-gray-400 text-xs">No hay misiones en esta categoría.</div>
+                            <EmptyState
+                                icon="inbox"
+                                title="No hay misiones en esta categoría"
+                                description="Prueba con otro filtro para ver más misiones."
+                            />
                         )}
                     </div>
                 </section>
@@ -391,42 +395,34 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
             <div className="animate-fade-in pb-8">
 
                 {/* Search Bar */}
-                <div className="mb-4 bg-white dark:bg-dark-surface rounded-2xl border border-gray-200 dark:border-dark-border px-4 py-3 flex items-center gap-2 shadow-sm focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 transition-all">
-                    <span className="material-symbols-rounded text-gray-400">search</span>
-                    <input
-                        type="text"
-                        placeholder="Buscar premios..."
-                        className="flex-1 outline-none text-sm text-text dark:text-dark-text placeholder:text-gray-400 bg-transparent"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                    {searchQuery && (
-                        <button onClick={() => setSearchQuery('')} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                            <span className="material-symbols-rounded text-sm">close</span>
-                        </button>
-                    )}
-                </div>
+                <SearchBar
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    placeholder="Buscar premios..."
+                    className="mb-4"
+                />
 
                 {/* Filters Toggle & Active Category */}
                 <div className="flex gap-2 mb-6 overflow-x-auto no-scrollbar items-center -mx-6 px-6">
-                    <button
+                    <Chip
+                        active={showFilters || !!activeCategory}
                         onClick={() => setShowFilters(!showFilters)}
-                        className={`${CHIP_BASE} ${showFilters || activeCategory ? CHIP_ACTIVE : CHIP_INACTIVE}`}
+                        icon={showFilters ? 'expand_less' : 'expand_more'}
                     >
-                        Filtrar <span className="material-symbols-rounded text-sm">{showFilters ? 'expand_less' : 'expand_more'}</span>
-                    </button>
+                        Filtrar
+                    </Chip>
 
                     {activeCategory && !showFilters && (
-                        <span className={`${CHIP_BASE} ${CHIP_ACTIVE}`}>{activeCategory}</span>
+                        <Chip active={true}>{activeCategory}</Chip>
                     )}
 
                     {(activeCategory || searchQuery) && (
-                        <button
+                        <Chip
                             onClick={clearFilters}
-                            className={`${CHIP_BASE} ${CHIP_INACTIVE}`}
+                            icon="close"
                         >
-                            Limpiar <span className="material-symbols-rounded text-sm">close</span>
-                        </button>
+                            Limpiar
+                        </Chip>
                     )}
                 </div>
 
@@ -434,13 +430,13 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
                 <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showFilters ? 'max-h-20 opacity-100 mb-6' : 'max-h-0 opacity-0 mb-0'}`}>
                     <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 -mx-6 px-6">
                         {categories.map(cat => (
-                            <button
+                            <Chip
                                 key={cat}
+                                active={activeCategory === cat}
                                 onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
-                                className={`${CHIP_BASE} ${activeCategory === cat ? CHIP_ACTIVE : CHIP_INACTIVE}`}
                             >
                                 {cat}
-                            </button>
+                            </Chip>
                         ))}
                     </div>
                 </div>
@@ -480,9 +476,16 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
                         })}
                     </div>
                 ) : (
-                    <div className="text-center py-12 text-gray-400 text-sm">
-                        No se encontraron resultados.
-                    </div>
+                    <EmptyState
+                        icon="search_off"
+                        title="No se encontraron resultados"
+                        description="Intenta con otros términos de búsqueda o limpia los filtros."
+                        action={
+                            <Button variant="primary" size="sm" onClick={clearFilters}>
+                                Limpiar Filtros
+                            </Button>
+                        }
+                    />
                 )
                 }
             </div >
@@ -509,44 +512,16 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
                 <LevelIndicator user={user} className="mb-6 mt-2" />
 
                 {/* Tabs */}
-                <div className="flex border-b border-gray-200 dark:border-gray-800 mb-6 relative">
-                    <button
-                        onClick={() => setActiveTab('usar')}
-                        className={`flex-1 pb-3 text-sm font-bold transition-colors relative z-10 ${activeTab === 'usar' ? 'text-primary dark:text-accent' : 'text-gray-400'}`}
-                    >
-                        Usar Puntos
-                        {activeTab === 'usar' && (
-                            <motion.div
-                                layoutId="activeTab"
-                                className="absolute bottom-0 left-0 w-full h-0.5 bg-primary dark:bg-accent rounded-t-full"
-                            />
-                        )}
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('beneficios')}
-                        className={`flex-1 pb-3 text-sm font-bold transition-colors relative z-10 ${activeTab === 'beneficios' ? 'text-primary dark:text-accent' : 'text-gray-400'}`}
-                    >
-                        Beneficios
-                        {activeTab === 'beneficios' && (
-                            <motion.div
-                                layoutId="activeTab"
-                                className="absolute bottom-0 left-0 w-full h-0.5 bg-primary dark:bg-accent rounded-t-full"
-                            />
-                        )}
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('progreso')}
-                        className={`flex-1 pb-3 text-sm font-bold transition-colors relative z-10 ${activeTab === 'progreso' ? 'text-primary dark:text-accent' : 'text-gray-400'}`}
-                    >
-                        Progreso
-                        {activeTab === 'progreso' && (
-                            <motion.div
-                                layoutId="activeTab"
-                                className="absolute bottom-0 left-0 w-full h-0.5 bg-primary dark:bg-accent rounded-t-full"
-                            />
-                        )}
-                    </button>
-                </div>
+                <Tabs
+                    tabs={[
+                        { id: 'usar', label: 'Usar Puntos' },
+                        { id: 'beneficios', label: 'Beneficios' },
+                        { id: 'progreso', label: 'Progreso' },
+                    ]}
+                    activeTab={activeTab}
+                    onTabChange={(tabId) => setActiveTab(tabId as HubTab)}
+                    className="mb-6"
+                />
 
                 {/* Content */}
                 {activeTab === 'usar' && renderUsarPuntos()}
@@ -554,70 +529,83 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
                 {activeTab === 'progreso' && renderProgreso()}
             </div>
 
-            {/* Redemption Overlay */}
-            {selectedCoupon && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in">
-                    <div className="bg-white dark:bg-dark-surface w-full max-w-sm rounded-[40px] p-6 shadow-2xl relative animate-slide-up">
-
-                        {redemptionStatus === 'confirm' && (
-                            <div className="text-center">
-                                <div className="w-20 h-20 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-yellow-600 dark:text-yellow-400">
-                                    <span className="material-symbols-rounded filled-icon text-4xl">help</span>
-                                </div>
-                                <h2 className="text-2xl font-bold text-text dark:text-dark-text mb-2">Canjear cupón?</h2>
-                                <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm">
-                                    Estás a punto de gastar {selectedCoupon.cost} E-Points por <span className="font-bold text-text dark:text-dark-text">{selectedCoupon.title}</span>
-                                </p>
-                                <div className="flex gap-3">
-                                    <button onClick={closeRedemption} className="flex-1 py-3.5 rounded-full border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 text-red-500 font-bold text-sm">
-                                        Cancelar
-                                    </button>
-                                    <button onClick={confirmRedemption} className="flex-1 py-3.5 rounded-full bg-primary text-white font-bold text-sm shadow-lg shadow-primary/20">
-                                        Canjear
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-
-                        {redemptionStatus === 'processing' && (
-                            <div className="text-center py-8">
-                                <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-                                <h2 className="text-xl font-bold text-text dark:text-dark-text">Procesando...</h2>
-                            </div>
-                        )}
-
-                        {redemptionStatus === 'success' && (
-                            <div className="text-center">
-                                <h2 className="text-lg font-bold text-text dark:text-dark-text mb-2">Cupón Canjeado!</h2>
-                                <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-2 ring-4 ring-[#D0EBE8] dark:ring-primary/20">
-                                    <span className="material-symbols-rounded filled-icon text-white text-3xl">check</span>
-                                </div>
-                                <div className="font-bold text-text dark:text-dark-text text-base mb-0.5">Has canjeado tu cupón exitosamente!</div>
-                                <div className="text-gray-500 text-xs mb-3">{selectedCoupon.title}</div>
-
-                                <div className="bg-white p-2 rounded-xl border border-gray-100 shadow-sm mx-auto w-32 h-32 mb-1">
-                                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${selectedCoupon.id}-${Date.now()}`} alt="QR" className="w-full h-full" />
-                                </div>
-                                <div className="text-[10px] text-gray-400 mb-3">Código de validación</div>
-
-                                <div className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-2 flex justify-between items-center mb-3">
-                                    <span className="font-mono text-gray-600 dark:text-gray-300 font-bold tracking-widest text-sm">GGE-1A2B3C-XYZ</span>
-                                    <span className="material-symbols-rounded text-gray-400 text-base">content_copy</span>
-                                </div>
-
-                                <div className="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-100 dark:border-yellow-900/30 rounded-xl p-2 mb-4">
-                                    <div className="text-yellow-700 dark:text-yellow-500 font-bold text-xs">Expira en 24:59:59</div>
-                                    <div className="text-yellow-600/70 dark:text-yellow-500/70 text-[10px]">Válido hasta - - / - - / - - .</div>
-                                </div>
-
-                                <button onClick={closeRedemption} className="w-full py-3 rounded-full bg-[#00796B] text-white font-bold text-sm shadow-lg">
-                                    Continuar
-                                </button>
-                            </div>
-                        )}
+            {/* Redemption Modal */}
+            <Modal
+                open={!!selectedCoupon}
+                onClose={closeRedemption}
+                size="sm"
+            >
+                {redemptionStatus === 'confirm' && selectedCoupon && (
+                    <div className="text-center">
+                        <div className="w-20 h-20 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-yellow-600 dark:text-yellow-400">
+                            <span className="material-symbols-rounded filled-icon text-4xl">help</span>
+                        </div>
+                        <h2 className="text-2xl font-bold text-text dark:text-dark-text mb-2">¿Canjear cupón?</h2>
+                        <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm">
+                            Estás a punto de gastar {selectedCoupon.cost} E-Points por <span className="font-bold text-text dark:text-dark-text">{selectedCoupon.title}</span>
+                        </p>
+                        <div className="flex gap-3">
+                            <Button
+                                onClick={closeRedemption}
+                                variant="danger"
+                                size="lg"
+                                className="flex-1"
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                onClick={confirmRedemption}
+                                variant="primary"
+                                size="lg"
+                                className="flex-1"
+                            >
+                                Canjear
+                            </Button>
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
+
+                {redemptionStatus === 'processing' && (
+                    <div className="text-center py-8">
+                        <LoadingSpinner size="lg" text="Procesando..." />
+                    </div>
+                )}
+
+                {redemptionStatus === 'success' && selectedCoupon && (
+                    <div className="text-center">
+                        <h2 className="text-lg font-bold text-text dark:text-dark-text mb-2 pt-4">¡Cupón Canjeado!</h2>
+                        <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-2 ring-4 ring-[#D0EBE8] dark:ring-primary/20">
+                            <span className="material-symbols-rounded filled-icon text-white text-3xl">check</span>
+                        </div>
+                        <div className="font-bold text-text dark:text-dark-text text-base mb-0.5">¡Canje exitoso!</div>
+                        <div className="text-gray-500 text-xs mb-3">{selectedCoupon.title}</div>
+
+                        <div className="bg-white p-2 rounded-xl border border-gray-100 shadow-sm mx-auto w-32 h-32 mb-1">
+                            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${selectedCoupon.id}-${Date.now()}`} alt="QR" className="w-full h-full" />
+                        </div>
+                        <div className="text-[10px] text-gray-400 mb-3">Código de validación</div>
+
+                        <div className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-2 flex justify-between items-center mb-3">
+                            <span className="font-mono text-gray-600 dark:text-gray-300 font-bold tracking-widest text-sm">GGE-1A2B3C-XYZ</span>
+                            <span className="material-symbols-rounded text-gray-400 text-base">content_copy</span>
+                        </div>
+
+                        <div className="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-100 dark:border-yellow-900/30 rounded-xl p-2 mb-4">
+                            <div className="text-yellow-700 dark:text-yellow-500 font-bold text-xs">Expira en 24h</div>
+                            <div className="text-yellow-600/70 dark:text-yellow-500/70 text-[10px]">Válido hasta mañana</div>
+                        </div>
+
+                        <Button
+                            onClick={closeRedemption}
+                            variant="primary"
+                            size="lg"
+                            fullWidth
+                        >
+                            Continuar
+                        </Button>
+                    </div>
+                )}
+            </Modal>
         </div>
     );
 };

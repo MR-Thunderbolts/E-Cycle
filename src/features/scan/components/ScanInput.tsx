@@ -2,6 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { RECYCLE_CATEGORIES } from '@/constants';
+import { Button, IconButton, IconBox } from '@/components';
 
 interface ScanInputProps {
     items: Record<string, number>;
@@ -24,9 +25,11 @@ const ScanInput: React.FC<ScanInputProps> = ({ items, onUpdateQty, onBack, onCon
         >
             <div className="px-6 py-4 flex justify-between items-center sticky top-0 bg-background dark:bg-dark-bg z-30 shrink-0">
                 <div className="flex items-center gap-3">
-                    <button onClick={onBack} className="rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                        <span className="material-symbols-rounded text-gray-500">arrow_back</span>
-                    </button>
+                    <IconButton
+                        icon="arrow_back"
+                        onClick={onBack}
+                        ariaLabel="Regresar"
+                    />
                     <span className="font-bold text-lg text-text dark:text-dark-text">Depositar Items</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -36,9 +39,13 @@ const ScanInput: React.FC<ScanInputProps> = ({ items, onUpdateQty, onBack, onCon
                             <span className="text-xs font-black text-primary">{multiplier}x Activo</span>
                         </div>
                     )}
-                    <button className="w-10 h-10 flex items-center justify-center text-gray-400">
-                        <span className="material-symbols-rounded">help</span>
-                    </button>
+                    <IconButton
+                        icon="help"
+                        onClick={() => { }}
+                        variant="ghost"
+                        size="sm"
+                        ariaLabel="Ayuda"
+                    />
                 </div>
             </div>
 
@@ -51,29 +58,31 @@ const ScanInput: React.FC<ScanInputProps> = ({ items, onUpdateQty, onBack, onCon
                     {RECYCLE_CATEGORIES.map(cat => (
                         <motion.div layout key={cat.id} className="bg-white dark:bg-dark-surface py-2 px-4 rounded-[28px] shadow-[0_4px_16px_rgba(0,0,0,0.04)] dark:shadow-none flex justify-between items-center border border-transparent dark:border-white/5">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-[#D0EBE8] dark:bg-primary/20 flex items-center justify-center text-primary-dark dark:text-accent shrink-0">
-                                    <span className="material-symbols-rounded filled-icon text-xl">{cat.iconName}</span>
-                                </div>
+                                <IconBox icon={cat.iconName} size="lg" />
                                 <div>
                                     <div className="font-bold text-base text-text dark:text-dark-text">{cat.label}</div>
                                     <div className="text-[10px] text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-md inline-block">+{cat.pointsPerUnit} pts</div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3 bg-gray-50 dark:bg-black/20 rounded-full p-1 shadow-inner">
-                                <button
+                                <IconButton
+                                    icon="remove"
                                     onClick={() => onUpdateQty(cat.id, -1)}
                                     disabled={!items[cat.id]}
-                                    className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 disabled:opacity-30 hover:bg-white dark:hover:bg-white/10 shadow-sm transition-all"
-                                >
-                                    <span className="material-symbols-rounded text-lg">remove</span>
-                                </button>
+                                    size="sm"
+                                    variant="ghost"
+                                    className="bg-white dark:bg-white/10 hover:bg-white dark:hover:bg-white/20 shadow-sm"
+                                    ariaLabel="Disminuir cantidad"
+                                />
                                 <span className="w-4 text-center font-bold text-lg dark:text-dark-text">{items[cat.id] || 0}</span>
-                                <button
+                                <IconButton
+                                    icon="add"
                                     onClick={() => onUpdateQty(cat.id, 1)}
-                                    className="w-8 h-8 flex items-center justify-center rounded-full bg-primary text-white shadow-md active:scale-90 transition-transform"
-                                >
-                                    <span className="material-symbols-rounded text-lg">add</span>
-                                </button>
+                                    size="sm"
+                                    variant="primary"
+                                    className="bg-primary hover:bg-primary-dark text-white shadow-md"
+                                    ariaLabel="Aumentar cantidad"
+                                />
                             </div>
                         </motion.div>
                     ))}
@@ -90,16 +99,24 @@ const ScanInput: React.FC<ScanInputProps> = ({ items, onUpdateQty, onBack, onCon
                             <span className="material-symbols-rounded filled-icon">bolt</span> {totalPoints}
                         </div>
                     </div>
-                    <button
+                    <Button
                         onClick={onConfirm}
                         disabled={totalPoints === 0}
-                        className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-4 rounded-full shadow-lg shadow-primary/30 active:scale-[0.98] disabled:opacity-50 disabled:shadow-none transition-all mb-3"
+                        fullWidth
+                        size="lg"
+                        className="mb-3 shadow-lg shadow-primary/30"
                     >
                         Confirmar y Ganar Puntos
-                    </button>
-                    <button onClick={onBack} className="w-full py-2 text-gray-400 font-bold text-sm hover:text-gray-600 transition-colors">
+                    </Button>
+                    <Button
+                        onClick={onBack}
+                        variant="ghost"
+                        fullWidth
+                        size="sm"
+                        className="text-gray-400 hover:text-gray-600"
+                    >
                         Cancelar
-                    </button>
+                    </Button>
                 </div>
             </div>
         </motion.div>

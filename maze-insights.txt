@@ -1,0 +1,153 @@
+# E-Cycle Maze Integration - Insights & Data Collection Documentation
+
+## Overview
+
+This document describes all the insights and data collected through the Maze integration in the E-Cycle prototype application. The integration enables usability testing and tracking of user behavior during Maze-hosted prototype sessions.
+
+---
+
+## Maze Universal Snippet
+
+**API Key**: `19ed62ae-59e7-4408-940a-278ba17eac8c`
+
+The Maze Universal Snippet is loaded in `index.html` and provides:
+- Automatic session tracking for Maze-hosted tests
+- Session ID persistence via `sessionStorage` (`maze-us` key)
+- Overlay UI for recording user interactions and feedback
+
+---
+
+## Analytics Events Tracked
+
+The following events are tracked via `src/utils/analytics.ts` using Google Analytics 4 (production) and console logging (development). Each event is also captured by Maze when a session is active.
+
+### 1. Session Detection
+
+| Event Name | Properties | Purpose |
+|------------|------------|---------|
+| `maze_session_started` | `test_id`, `utm_source`, `timestamp` | Detects when a user arrives from a Maze test link (via `?utm_source=maze` or `?test_id=X`) |
+
+**Session Storage Keys:**
+- `maze_session`: `"true"` if in a Maze session
+- `maze_test_id`: The test ID from the URL
+
+---
+
+### 2. Navigation Events
+
+| Event Name | Properties | Purpose |
+|------------|------------|---------|
+| `tab_changed` | `from_tab`, `to_tab` | Tracks navigation between main tabs (explorar, escaner, ehub, retiro) |
+| `profile_opened` | - | User opened the profile modal |
+
+---
+
+### 3. Map Interactions
+
+| Event Name | Properties | Purpose |
+|------------|------------|---------|
+| `recycling_point_clicked` | `point_id`, `point_name` | User tapped on a recycling point marker on the map |
+| `material_filter_applied` | `materials` (comma-separated), `num_results` | User applied material filters in the search/filter UI |
+
+---
+
+### 4. Scanning Flow (Drop-off Flow)
+
+| Event Name | Properties | Purpose |
+|------------|------------|---------|
+| `scan_started` | - | User initiated the QR scanning process |
+| `scan_items_entered` | `items` (JSON), `total_items`, `estimated_points` | User entered item quantities in the deposit form |
+| `dropoff_completed` | `points_earned`, `items_count`, `multiplier_active` | User successfully completed a drop-off and earned points |
+
+---
+
+### 5. Rewards & E-Hub
+
+| Event Name | Properties | Purpose |
+|------------|------------|---------|
+| `coupon_viewed` | `coupon_id`, `brand`, `cost` | User viewed details of a coupon/reward |
+| `coupon_redeemed` | `coupon_id`, `points_spent`, `remaining_points` | User redeemed a coupon using their E-Points |
+
+---
+
+### 6. Achievements
+
+| Event Name | Properties | Purpose |
+|------------|------------|---------|
+| `achievements_viewed` | `completed_count`, `total_count` | User opened the achievements section |
+| `achievement_unlocked` | `achievement_id`, `reward_points` | User unlocked a new achievement (milestone) |
+
+---
+
+### 7. Profile & Settings
+
+| Event Name | Properties | Purpose |
+|------------|------------|---------|
+| `theme_toggled` | `theme` ("dark" or "light") | User toggled the dark/light mode in settings |
+
+---
+
+## Key Insights Enabled
+
+With the above tracking, Maze studies can gather the following insights:
+
+### Task Completion Metrics
+- **Scan Flow Success Rate**: Percentage of users who complete `scan_started` → `scan_items_entered` → `dropoff_completed`
+- **Coupon Redemption Rate**: Percentage of users who go from viewing a coupon (`coupon_viewed`) to redeeming it (`coupon_redeemed`)
+
+### Navigation Patterns
+- **Tab Usage Distribution**: Which tabs are most visited
+- **Navigation Friction**: Where users backtrack or drop off
+
+### Feature Discovery
+- **Map Engagement**: How often users interact with recycling points
+- **Filter Usage**: Whether users use material filters to find specific points
+
+### Gamification Effectiveness
+- **Achievement Engagement**: How often users view and unlock achievements
+- **Points Economy**: Average points earned and spent per session
+
+### User Preferences
+- **Theme Preference**: Light vs. dark mode adoption
+
+---
+
+## How to Access Data
+
+### During Maze Testing
+- Maze automatically records screen interactions (clicks, scrolls, navigation)
+- Task completion is measured by Maze's mission system
+- Heatmaps and click maps are generated per screen
+
+### In Google Analytics (Production)
+1. Go to GA4 Console → Reports → Engagement → Events
+2. Filter by event names listed above
+3. Use custom funnels to trace user journeys
+
+### In Development (Local Testing)
+- Open browser DevTools → Console
+- All events are logged with `[Analytics Event]` prefix
+- Page views are logged with `[Analytics Page View]` prefix
+
+---
+
+## Maze Dashboard Access
+
+To view collected insights from your Maze tests:
+1. Go to [maze.co](https://maze.co) and log in
+2. Navigate to your E-Cycle project
+3. Open the specific test you ran
+4. View:
+   - Task completion rates
+   - Heatmaps and click maps
+   - User session recordings
+   - Usability metrics (time on task, misclick rate, etc.)
+
+---
+
+## Notes
+
+- Maze integration does NOT require any backend changes
+- All tracking is client-side and respects browser privacy settings
+- The API key in the snippet is tied to your Maze workspace
+- Google Analytics tracking only activates in production builds with a valid `VITE_GA_MEASUREMENT_ID`
