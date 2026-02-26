@@ -36,7 +36,7 @@ const Scan: React.FC<ScanProps> = ({ onGoToRedeem, onBack }) => {
     };
 
     useEffect(() => {
-        let timer: any = null;
+        let timer: ReturnType<typeof setInterval> | null = null;
         if (step === 'analyzing') {
             let i = 0;
             timer = setInterval(() => {

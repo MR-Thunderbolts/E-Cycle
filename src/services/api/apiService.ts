@@ -48,7 +48,7 @@ export const apiService = {
                 if (stored) {
                     const parsedUser = JSON.parse(stored);
                     // Recalc level ensures consistency
-                    const completed = parsedUser.achievements.filter((a: any) => a.completed).length;
+                    const completed = parsedUser.achievements.filter((a: { completed: boolean }) => a.completed).length;
                     parsedUser.level = calculateLevel(parsedUser.points, completed);
                     // Ensure new fields exist
                     if (parsedUser.itemsThisMonth === undefined) parsedUser.itemsThisMonth = 4;
