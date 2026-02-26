@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { RECYCLE_POINTS, RECYCLE_CATEGORIES } from '@/constants';
 import { RecyclePoint } from '@/types';
-import { Avatar, SpecialMissionCard, Button, IconButton } from '@/components';
+import { Avatar, SpecialMissionCard, Button, IconButton, ImageWithSkeleton } from '@/components';
 import { useAuth } from '@/hooks';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import InteractiveMap from './components/InteractiveMap';
@@ -183,6 +183,7 @@ const Home: React.FC<HomeProps> = ({ onOpenProfile, onNavigateToHub }) => {
                     setSelectedPoint(point);
                 }}
                 zoom={mapZoom}
+                onZoomChange={setMapZoom}
                 centerOnUser={centerMapOnUser}
                 onCenterComplete={() => setCenterMapOnUser(false)}
             />
@@ -234,14 +235,9 @@ const Home: React.FC<HomeProps> = ({ onOpenProfile, onNavigateToHub }) => {
             >
                 <div className="bg-white dark:bg-dark-surface rounded-[32px] shadow-lg flex flex-col">
                     <button onClick={() => setMapZoom(z => Math.min(z + 0.5, 4))} className="w-12 h-12 flex items-center justify-center text-primary dark:text-accent border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-white/5 rounded-t-[32px] transition-colors"><span className="material-symbols-rounded text-2xl">add</span></button>
-                    <button onClick={() => setMapZoom(z => Math.max(z - 0.5, 0.5))} className="w-12 h-12 flex items-center justify-center text-primary dark:text-accent hover:bg-gray-50 dark:hover:bg-white/5 rounded-b-[32px] transition-colors"><span className="material-symbols-rounded text-2xl">remove</span></button>
+                    <button onClick={() => setMapZoom(z => Math.max(z - 0.5, 0.5))} className="w-12 h-12 flex items-center justify-center text-primary dark:text-accent border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"><span className="material-symbols-rounded text-2xl">remove</span></button>
+                    <button onClick={() => { setCenterMapOnUser(true); setMapZoom(1.5); }} className="w-12 h-12 flex items-center justify-center text-primary dark:text-accent hover:bg-gray-50 dark:hover:bg-white/5 rounded-b-[32px] transition-colors" aria-label="Centrar mapa"><span className="material-symbols-rounded text-2xl">my_location</span></button>
                 </div>
-                <IconButton
-                    icon="my_location"
-                    onClick={() => { setCenterMapOnUser(true); setMapZoom(1.5); }}
-                    className="bg-white dark:bg-dark-surface shadow-lg text-primary dark:text-accent w-12 h-12 !text-2xl"
-                    ariaLabel="Centrar mapa"
-                />
             </motion.div>
 
             {/* Point Details Bottom Sheet */}
@@ -299,7 +295,7 @@ const Home: React.FC<HomeProps> = ({ onOpenProfile, onNavigateToHub }) => {
                                 ) : (
                                     <div className="bg-[#F8F9FA] dark:bg-white/5 p-4 rounded-[24px] flex items-center gap-4 mb-6 shadow-sm">
                                         <div className="w-14 h-14 bg-white dark:bg-dark-surface rounded-2xl flex items-center justify-center p-2 shadow-sm shrink-0">
-                                            {selectedPoint.logo ? <img src={selectedPoint.logo} alt="brand" className="w-full h-full object-contain" /> : <span className="material-symbols-rounded text-gray-400">storefront</span>}
+                                            {selectedPoint.logo ? <ImageWithSkeleton src={selectedPoint.logo} alt="brand" className="w-full h-full" skeletonClassName="rounded-xl" /> : <span className="material-symbols-rounded text-gray-400">storefront</span>}
                                         </div>
                                         <div className="flex-1">
                                             <div className="font-bold text-[#00695C] dark:text-[#4DB6AC] text-sm mb-0.5">{selectedPoint.promoText}</div>

@@ -1,14 +1,68 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks';
-import { LevelIndicator, Avatar, Button, IconButton, MenuItem, Toggle, IconBox } from '@/components';
+import { LevelIndicator, Avatar, Button, IconButton, MenuItem, Toggle, IconBox, Skeleton } from '@/components';
 
 interface ProfileScreenProps {
     onClose: () => void;
 }
 
 const Profile: React.FC<ProfileScreenProps> = ({ onClose }) => {
-    const { user, isDarkMode, toggleTheme } = useAuth();
+    const { user, loading, isDarkMode, toggleTheme } = useAuth();
     const [showSettings, setShowSettings] = useState(false);
+
+    if (loading || !user) {
+        return (
+            <div className="h-full bg-background dark:bg-dark-bg flex flex-col overflow-hidden pt-6 px-6">
+                {/* Header skeleton */}
+                <div className="flex items-center justify-between pb-2 mb-4 shrink-0">
+                    <div className="w-8" />
+                    <Skeleton className="h-5 w-20" />
+                    <Skeleton circle className="w-8 h-8" />
+                </div>
+                {/* User card skeleton */}
+                <div className="bg-white dark:bg-dark-surface rounded-[32px] p-5 flex items-center gap-4 shadow-sm border border-gray-100 dark:border-dark-border mb-6">
+                    <Skeleton circle className="w-14 h-14 shrink-0" />
+                    <div className="flex-1 space-y-2">
+                        <Skeleton className="h-5 w-32" />
+                        <Skeleton className="h-3 w-48" />
+                    </div>
+                </div>
+                {/* Settings button skeleton */}
+                <Skeleton className="h-12 w-full rounded-full mb-8" />
+                {/* Section label */}
+                <Skeleton className="h-3 w-20 mb-4" />
+                {/* Points card skeleton */}
+                <div className="bg-white dark:bg-dark-surface rounded-[32px] p-6 shadow-sm border border-gray-100 dark:border-dark-border mb-4">
+                    <Skeleton className="h-4 w-28 mb-3" />
+                    <Skeleton className="h-10 w-24 mb-2" />
+                    <Skeleton className="h-5 w-36 rounded-full" />
+                </div>
+                {/* Stats grid skeleton */}
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                    <Skeleton className="h-40 rounded-[32px]" />
+                    <Skeleton className="h-40 rounded-[32px]" />
+                </div>
+                {/* History skeleton items */}
+                <Skeleton className="h-3 w-40 mb-4" />
+                <div className="space-y-3">
+                    {[1, 2, 3].map(i => (
+                        <div key={i} className="bg-white dark:bg-dark-surface rounded-[32px] p-4 flex items-center gap-4 shadow-sm border border-gray-100 dark:border-dark-border">
+                            <Skeleton circle className="w-12 h-12 shrink-0" />
+                            <div className="flex-1 space-y-2">
+                                <Skeleton className="h-4 w-32" />
+                                <Skeleton className="h-3 w-20" />
+                            </div>
+                            <Skeleton className="h-4 w-10" />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    // Determine multiplier display based on level
+    const multiplier = user.level === 'Reactivador' ? '2x' : user.level === 'Recolector' ? '1.5x' : user.level === 'Ensamblador' ? '1.2x' : '1x';
+    const showMultiplier = user.level !== 'Descubridor';
 
     // Render each section efficiently
     const renderSettings = () => (
@@ -89,12 +143,6 @@ const Profile: React.FC<ProfileScreenProps> = ({ onClose }) => {
             </div>
         </div>
     );
-
-    if (!user) return null;
-
-    // Determine multiplier display based on level
-    const multiplier = user.level === 'Reactivador' ? '2x' : user.level === 'Recolector' ? '1.5x' : user.level === 'Ensamblador' ? '1.2x' : '1x';
-    const showMultiplier = user.level !== 'Descubridor';
 
     return (
         <div className="h-full bg-background dark:bg-dark-bg flex flex-col overflow-hidden animate-fade-in relative transition-colors duration-300">

@@ -18,10 +18,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Theme State
     const [isDarkMode, setIsDarkMode] = useState(() => {
         if (typeof window !== 'undefined') {
-            return localStorage.getItem('theme') === 'dark' ||
-                (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            // If user has a saved preference, respect it
+            if ('theme' in localStorage) {
+                return localStorage.getItem('theme') === 'dark';
+            }
+            // Default to dark mode for new users
+            return true;
         }
-        return false;
+        return true;
     });
 
     useEffect(() => {

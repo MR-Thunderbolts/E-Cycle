@@ -10,23 +10,92 @@ interface InteractiveMapProps {
     selectedPointId: string | null;
     onPointSelect: (point: RecyclePoint) => void;
     zoom: number;
+    onZoomChange: (zoom: number) => void;
     centerOnUser: boolean;
     onCenterComplete: () => void;
 }
 
 const MAP_SIZE = 2000;
 const USER_POS = { x: 1000, y: 1000 };
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 4;
+const clampZoom = (z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));
 
 const InteractiveMap: React.FC<InteractiveMapProps> = ({
     points,
     selectedPointId,
     onPointSelect,
     zoom,
+    onZoomChange,
     centerOnUser,
     onCenterComplete
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const { isDarkMode } = useAuth();
+
+    // Mirror zoom into a ref so event handler closures never go stale
+    const zoomRef = useRef(zoom);
+    useEffect(() => { zoomRef.current = zoom; }, [zoom]);
+
+    // Stores initial pinch state: distance between fingers + zoom at gesture start
+    const pinchRef = useRef<{ dist: number; startZoom: number } | null>(null);
+
+    // Attach touch and wheel event listeners for pinch-to-zoom / scroll-to-zoom
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const getDistance = (touches: TouchList) => {
+            const dx = touches[0].clientX - touches[1].clientX;
+            const dy = touches[0].clientY - touches[1].clientY;
+            return Math.hypot(dx, dy);
+        };
+
+        const onTouchStart = (e: TouchEvent) => {
+            if (e.touches.length === 2) {
+                pinchRef.current = {
+                    dist: getDistance(e.touches),
+                    startZoom: zoomRef.current,
+                };
+            }
+        };
+
+        const onTouchMove = (e: TouchEvent) => {
+            if (e.touches.length === 2 && pinchRef.current) {
+                // Prevent the browser from scrolling the page during a pinch
+                e.preventDefault();
+                const newDist = getDistance(e.touches);
+                const scale = newDist / pinchRef.current.dist;
+                onZoomChange(clampZoom(pinchRef.current.startZoom * scale));
+            }
+        };
+
+        const onTouchEnd = (e: TouchEvent) => {
+            // Reset when any finger lifts (pinch ended)
+            if (e.touches.length < 2) {
+                pinchRef.current = null;
+            }
+        };
+
+        // Scroll wheel zoom for desktop / emulators
+        const onWheel = (e: WheelEvent) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -0.15 : 0.15;
+            onZoomChange(clampZoom(zoomRef.current + delta));
+        };
+
+        container.addEventListener('touchstart', onTouchStart, { passive: true });
+        container.addEventListener('touchmove', onTouchMove, { passive: false });
+        container.addEventListener('touchend', onTouchEnd, { passive: true });
+        container.addEventListener('wheel', onWheel, { passive: false });
+
+        return () => {
+            container.removeEventListener('touchstart', onTouchStart);
+            container.removeEventListener('touchmove', onTouchMove);
+            container.removeEventListener('touchend', onTouchEnd);
+            container.removeEventListener('wheel', onWheel);
+        };
+    }, [onZoomChange]);
 
     // Calculate initial position to center user
     const getInitialPosition = () => {
@@ -55,7 +124,6 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
                 x: (offsetWidth / 2) - USER_POS.x,
                 y: (offsetHeight / 2) - USER_POS.y
             });
-            // Small delay to let animation start before calling complete
             setTimeout(onCenterComplete, 100);
         }
     }, [centerOnUser, onCenterComplete]);
@@ -131,7 +199,6 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
                                         <span className="relative material-symbols-rounded text-7xl drop-shadow-xl filled-icon leading-none text-primary dark:text-accent transition-transform hover:scale-110">
                                             location_on
                                         </span>
-                                        {/* Piggy Icon inside the pin hole with background to fill it */}
                                         <div className="absolute top-[18%] left-1/2 transform -translate-x-1/2 z-20 pointer-events-none w-8 h-8 bg-primary dark:bg-accent rounded-full flex items-center justify-center">
                                             <span className="material-symbols-rounded text-xl font-bold text-accent dark:text-primary filled-icon">savings</span>
                                         </div>

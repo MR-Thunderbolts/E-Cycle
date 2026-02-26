@@ -135,9 +135,14 @@
       padding: 0;
       overflow: hidden;
       /* App handles scrolling internally */
-      background-color: #F5F8F8;
+      background-color: #121212;
       overscroll-behavior: none;
       transition: background-color 0.3s ease;
+    }
+
+    html.light body,
+    html.light #root {
+      background-color: #F5F8F8;
     }
 
     html.dark body,
@@ -145,6 +150,32 @@
       background-color: #121212;
     }
 
+    @keyframes shimmer {
+      0% {
+        background-position: -200% 0;
+      }
+
+      100% {
+        background-position: 200% 0;
+      }
+    }
+
+    .skeleton-shimmer {
+      background: linear-gradient(90deg, #2a2a2a 25%, #333333 50%, #2a2a2a 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    html.light .skeleton-shimmer {
+      background: linear-gradient(90deg, #e8e8e8 25%, #f0f0f0 50%, #e8e8e8 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    /* ─── Material Symbols FOUT Fix ─────────────────────────────────────────
+       Icons start invisible; fade in once the icon font has loaded.
+       This prevents showing raw text (e.g. 'recycling', 'location_on').
+    ────────────────────────────────────────────────────────────────────────── */
     .material-symbols-rounded {
       font-family: 'Material Symbols Rounded';
       font-variation-settings:
@@ -152,6 +183,13 @@
         'wght' 400,
         'GRAD' 0,
         'opsz' 24;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    /* Once document.fonts.ready resolves, this class is added to <html> */
+    html.fonts-loaded .material-symbols-rounded {
+      opacity: 1;
     }
 
     .filled-icon {
@@ -219,6 +257,12 @@
 <body>
   <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
+  <!-- FOUT fix: add .fonts-loaded to <html> once Material Symbols font resolves -->
+  <script>
+    document.fonts.ready.then(function () {
+      document.documentElement.classList.add('fonts-loaded');
+    });
+  </script>
 </body>
 
 </html>

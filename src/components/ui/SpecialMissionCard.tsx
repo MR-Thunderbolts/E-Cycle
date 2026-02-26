@@ -1,4 +1,5 @@
 import React from 'react';
+import { ImageWithSkeleton } from '@/components';
 
 interface SpecialMissionCardProps {
     title: string;
@@ -101,7 +102,7 @@ export const SpecialMissionCard: React.FC<SpecialMissionCardProps> = ({
                 {isPerk ? (
                     <span className="material-symbols-rounded text-4xl" style={{ color: mainColor }}>{logo}</span>
                 ) : (
-                    <img src={logo} alt="Brand Logo" className="w-full h-full object-contain" />
+                    <ImageWithSkeleton src={logo} alt="Brand Logo" className="w-full h-full" skeletonClassName="rounded-xl" />
                 )}
             </div>
 

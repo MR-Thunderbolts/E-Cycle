@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Coupon, HubTab } from '@/types';
 import { useAuth } from '@/hooks';
 import { COUPONS } from '@/constants';
-import { LevelIndicator, Button, Modal, LoadingSpinner, EmptyState, Chip, Tabs, SearchBar, Tab } from '@/components';
+import { LevelIndicator, Button, Modal, LoadingSpinner, EmptyState, Chip, Tabs, SearchBar, Tab, Skeleton, ImageWithSkeleton } from '@/components';
 
 type RedemptionStatus = 'idle' | 'confirm' | 'processing' | 'success';
 type ProgressFilter = 'todos' | 'completadas' | 'diaria' | 'semanal' | 'mensual';
@@ -95,8 +95,33 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
     };
 
     if (!user) return (
-        <div className="p-8 flex justify-center">
-            <LoadingSpinner size="lg" variant="primary" />
+        <div className="h-full flex flex-col bg-background dark:bg-dark-bg">
+            {/* Header skeleton */}
+            <div className="pt-6 pb-2 px-6 flex items-center justify-between shrink-0">
+                <Skeleton className="h-6 w-16" />
+                <Skeleton className="h-8 w-20 rounded-full" />
+                <Skeleton circle className="w-8 h-8" />
+            </div>
+            <div className="flex-1 overflow-y-auto px-6 no-scrollbar">
+                {/* Level indicator skeleton */}
+                <Skeleton className="h-20 w-full rounded-[24px] mt-2 mb-6" />
+                {/* Tabs skeleton */}
+                <div className="flex gap-2 mb-6">
+                    <Skeleton className="h-9 flex-1 rounded-full" />
+                    <Skeleton className="h-9 flex-1 rounded-full" />
+                    <Skeleton className="h-9 flex-1 rounded-full" />
+                </div>
+                {/* Coupon grid skeleton */}
+                <div className="grid grid-cols-2 gap-4">
+                    {[1, 2, 3, 4, 5, 6].map(i => (
+                        <div key={i} className="flex flex-col gap-2">
+                            <Skeleton className="aspect-square rounded-[32px]" />
+                            <Skeleton className="h-4 w-3/4" />
+                            <Skeleton className="h-3 w-1/2" />
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 
@@ -452,7 +477,7 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
                                         onClick={() => canAfford && handleCouponClick(coupon)}
                                         className={`aspect-square rounded-[32px] overflow-hidden relative group ${canAfford ? 'cursor-pointer active:scale-[0.98] transition-transform' : 'grayscale opacity-70 cursor-not-allowed'}`}
                                     >
-                                        <img src={coupon.image} alt={coupon.title} className="w-full h-full object-cover" />
+                                        <ImageWithSkeleton src={coupon.image} alt={coupon.title} className="w-full h-full" />
                                         {!canAfford && (
                                             <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
                                                 <div className="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center backdrop-blur-sm">
@@ -581,7 +606,11 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
                         <div className="text-gray-500 text-xs mb-3">{selectedCoupon.title}</div>
 
                         <div className="bg-white p-2 rounded-xl border border-gray-100 shadow-sm mx-auto w-32 h-32 mb-1">
-                            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${selectedCoupon.id}-${Date.now()}`} alt="QR" className="w-full h-full" />
+                            <ImageWithSkeleton
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${selectedCoupon.id}-${Date.now()}`}
+                                alt="QR"
+                                className="w-full h-full"
+                            />
                         </div>
                         <div className="text-[10px] text-gray-400 mb-3">Código de validación</div>
 
