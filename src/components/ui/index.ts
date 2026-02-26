@@ -15,6 +15,7 @@ export * from './IconButton';
 export * from './LoadingSpinner';
 export * from './ProgressBar';
 export * from './EmptyState';
+export * from './Skeleton';
 
 // Additional components (Option B)
 export * from './Chip';
@@ -23,3 +24,4 @@ export * from './SearchBar';
 export * from './Toggle';
 export * from './IconBox';
 export * from './MenuItem';
+

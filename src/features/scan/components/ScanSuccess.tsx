@@ -14,7 +14,7 @@ const ScanSuccess: React.FC<ScanSuccessProps> = ({ earnedPoints, onRedeem, onCon
             key="success"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="h-full flex flex-col items-center justify-center p-8 text-center bg-background dark:bg-dark-bg z-20"
+            className="absolute inset-0 flex flex-col items-center justify-center p-8 pb-12 text-center bg-background dark:bg-dark-bg z-50 overflow-y-auto"
         >
             <div className="w-32 h-32 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-6 animate-bounce-gentle">
                 <span className="material-symbols-rounded filled-icon text-6xl text-green-600 dark:text-green-400">check_circle</span>

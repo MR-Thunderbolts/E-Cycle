@@ -1,5 +1,4 @@
-import React, { ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
 
 export interface Tab {
     id: string;
@@ -51,16 +50,50 @@ export const Tabs: React.FC<TabsProps> = ({
         );
     }
 
-    // Default underline tabs
+    // Default underline tabs — single sliding indicator
+    return <SlidingTabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} className={className} />;
+};
+
+/** Separate component so hooks run unconditionally (pills variant bails out early above). */
+const SlidingTabs: React.FC<Required<Omit<TabsProps, 'variant'>>> = ({
+    tabs,
+    activeTab,
+    onTabChange,
+    className,
+}) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
+    const [indicator, setIndicator] = useState({ left: 0, width: 0, ready: false });
+
+    useEffect(() => {
+        const activeIdx = tabs.findIndex(t => t.id === activeTab);
+        const btn = buttonRefs.current[activeIdx];
+        if (btn) {
+            setIndicator({ left: btn.offsetLeft, width: btn.offsetWidth, ready: true });
+        }
+    }, [activeTab, tabs]);
+
     return (
-        <div className={`flex border-b border-gray-200 dark:border-gray-800 relative ${className}`}>
-            {tabs.map((tab) => {
+        <div ref={containerRef} className={`flex border-b border-gray-200 dark:border-gray-800 relative ${className}`}>
+            {/* Single indicator that slides between tabs */}
+            <span
+                className="absolute bottom-0 h-0.5 bg-primary dark:bg-accent rounded-t-full"
+                style={{
+                    left: indicator.left,
+                    width: indicator.width,
+                    opacity: indicator.ready ? 1 : 0,
+                    transition: 'left 0.25s ease, width 0.25s ease, opacity 0.15s ease',
+                }}
+            />
+
+            {tabs.map((tab, idx) => {
                 const isActive = activeTab === tab.id;
                 return (
                     <button
                         key={tab.id}
+                        ref={el => { buttonRefs.current[idx] = el; }}
                         onClick={() => onTabChange(tab.id)}
-                        className={`flex-1 pb-3 text-sm font-bold transition-colors relative z-10 flex items-center justify-center gap-1.5
+                        className={`flex-1 pb-3 text-sm font-bold transition-colors relative flex items-center justify-center gap-1.5
                             ${isActive
                                 ? 'text-primary dark:text-accent'
                                 : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
@@ -72,12 +105,6 @@ export const Tabs: React.FC<TabsProps> = ({
                             </span>
                         )}
                         {tab.label}
-                        {isActive && (
-                            <motion.div
-                                layoutId="activeTab"
-                                className="absolute bottom-0 left-0 w-full h-0.5 bg-primary dark:bg-accent rounded-t-full"
-                            />
-                        )}
                     </button>
                 );
             })}
