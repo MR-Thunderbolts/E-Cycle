@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks';
 import { LevelIndicator, Avatar, Button, IconButton, MenuItem, Toggle, IconBox, Skeleton } from '@/components';
+import { ECyclerProfileBadgeOverlay } from './ECyclerProfileBadgeOverlay';
 
 interface ProfileScreenProps {
     onClose: () => void;
@@ -9,6 +10,7 @@ interface ProfileScreenProps {
 const Profile: React.FC<ProfileScreenProps> = ({ onClose }) => {
     const { user, loading, isDarkMode, toggleTheme } = useAuth();
     const [showSettings, setShowSettings] = useState(false);
+    const [showProfileOverlay, setShowProfileOverlay] = useState(false);
 
     if (loading || !user) {
         return (
@@ -170,13 +172,9 @@ const Profile: React.FC<ProfileScreenProps> = ({ onClose }) => {
 
                 <div className="flex-1 overflow-y-auto px-6 pb-safe-bottom no-scrollbar">
 
-                    {/* User Card */}
-                    <div className="bg-white dark:bg-dark-surface rounded-[32px] p-5 flex items-center gap-4 shadow-sm border border-gray-100 dark:border-dark-border mb-6 mt-2">
-                        <Avatar size="lg" />
-                        <div className="flex-1 overflow-hidden">
-                            <h2 className="font-bold text-text dark:text-dark-text text-lg truncate">{user.name}</h2>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
-                        </div>
+                    {/* Unified Level & Identity Section (Clickable) */}
+                    <div onClick={() => setShowProfileOverlay(true)} className="cursor-pointer active:scale-95 transition-transform origin-center mt-2 mb-6">
+                        <LevelIndicator user={user} showUserIdentity={true} />
                     </div>
 
                     {/* Settings Button */}
@@ -191,75 +189,103 @@ const Profile: React.FC<ProfileScreenProps> = ({ onClose }) => {
                     </Button>
 
                     {/* Impact Section */}
-                    <h3 className="font-bold text-gray-500 dark:text-gray-400 text-sm mb-4 uppercase tracking-wide pl-1">Tu Impacto</h3>
-
-                    {/* Points Balance */}
-                    <div className="bg-white dark:bg-dark-surface rounded-[32px] p-6 shadow-sm border border-gray-100 dark:border-dark-border mb-4 relative overflow-hidden group">
-                        <div className="flex justify-between items-start mb-2">
-                            <span className="text-primary-dark dark:text-accent font-bold text-sm">Balance E-Points</span>
-                            <span className="material-symbols-rounded filled-icon text-primary dark:text-accent text-2xl group-hover:scale-110 transition-transform">bolt</span>
-                        </div>
-                        <div className="text-4xl font-black text-text dark:text-dark-text mb-1 tracking-tight flex items-baseline gap-2">
-                            {user.points.toLocaleString()}
-                            {showMultiplier && (
-                                <span className="text-sm bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-2 py-0.5 rounded-full font-bold align-middle">
-                                    {multiplier} Activo
-                                </span>
-                            )}
-                        </div>
-                        <div className="text-xs text-primary dark:text-accent font-bold bg-[#D0EBE8]/50 dark:bg-primary/20 inline-block px-2 py-1 rounded-md">
-                            +50% más que el último mes
-                        </div>
+                    <div className="mb-4 flex items-center justify-between">
+                        <h3 className="font-bold text-gray-500 dark:text-gray-400 text-sm uppercase tracking-wide pl-1">Residuos Reciclados</h3>
                     </div>
 
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-2 gap-4 mb-8">
-                        <div className="bg-white dark:bg-dark-surface rounded-[32px] p-5 shadow-sm border border-gray-100 dark:border-dark-border flex flex-col justify-between h-40">
+                    {/* Stats Grid: Specific E-Waste Categories */}
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                        {/* Celulares */}
+                        <div className="bg-white dark:bg-dark-surface rounded-[32px] p-5 shadow-sm border border-gray-100 dark:border-dark-border flex flex-col justify-between h-36 group hover:border-primary/30 transition-all">
                             <div className="flex justify-between items-start">
-                                <span className="text-primary-dark dark:text-accent font-bold text-sm leading-tight">CO2<br />Salvado</span>
-                                <span className="material-symbols-rounded text-primary-dark dark:text-accent text-xl">public</span>
+                                <span className="text-sky-600 dark:text-sky-400 font-bold text-xs leading-tight">Celulares<br />y Tablets</span>
+                                <span className="material-symbols-rounded filled-icon text-sky-500 dark:text-sky-400 text-xl group-hover:scale-110 transition-transform">smartphone</span>
                             </div>
                             <div>
-                                <div className="text-3xl font-black text-text dark:text-dark-text mb-1 tracking-tight">{user.impact.co2}kg</div>
-                                <div className="text-[10px] text-primary dark:text-accent font-bold leading-tight">+20% más que el último mes</div>
-                            </div>
-                        </div>
-
-                        <div className="bg-white dark:bg-dark-surface rounded-[32px] p-5 shadow-sm border border-gray-100 dark:border-dark-border flex flex-col justify-between h-40">
-                            <div className="flex justify-between items-start">
-                                <span className="text-primary-dark dark:text-accent font-bold text-sm leading-tight">Árboles<br />plantados</span>
-                                <span className="material-symbols-rounded text-primary-dark dark:text-accent text-xl">forest</span>
-                            </div>
-                            <div>
-                                <div className="text-3xl font-black text-text dark:text-dark-text mb-1 tracking-tight">{user.impact.trees}</div>
-                                <div className="text-[10px] text-primary dark:text-accent font-bold leading-tight">+10% más que el último mes</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Level Section (Reused Component) */}
-                    <h3 className="font-bold text-gray-500 dark:text-gray-400 text-sm mb-4 uppercase tracking-wide pl-1">Tu Nivel Actual</h3>
-                    <LevelIndicator user={user} className="mb-8" />
-
-                    {/* Logros Section */}
-                    <h3 className="font-bold text-gray-500 dark:text-gray-400 text-sm mb-4 uppercase tracking-wide pl-1">Logros Completados</h3>
-                    {user.achievements.filter(a => a.completed).length > 0 ? (
-                        user.achievements.filter(a => a.completed).map(ach => (
-                            <div key={ach.id} className="bg-white dark:bg-dark-surface rounded-[32px] p-4 flex items-center gap-4 shadow-sm border border-gray-100 dark:border-dark-border mb-4">
-                                <IconBox icon={ach.icon} size="xl" />
-                                <div className="flex-1">
-                                    <h4 className="font-bold text-text dark:text-dark-text text-sm">{ach.title}</h4>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">{ach.description}</p>
+                                <div className="text-3xl font-black text-text dark:text-dark-text mb-0.5 tracking-tight">
+                                    {user.phonesRecycled || 0}
                                 </div>
-                                <span className="material-symbols-rounded text-primary dark:text-accent filled-icon text-2xl mr-2">check_circle</span>
+                                <div className="text-[9px] text-gray-400 font-bold uppercase tracking-widest leading-tight">unidades</div>
                             </div>
-                        ))
-                    ) : (
-                        <p className="text-center text-gray-400 text-xs mb-8">Aún no has completado logros.</p>
-                    )}
+                        </div>
+
+                        {/* Computadoras */}
+                        <div className="bg-white dark:bg-dark-surface rounded-[32px] p-5 shadow-sm border border-gray-100 dark:border-dark-border flex flex-col justify-between h-36 group hover:border-primary/30 transition-all">
+                            <div className="flex justify-between items-start">
+                                <span className="text-violet-600 dark:text-violet-400 font-bold text-xs leading-tight">Computadoras<br />y Laptops</span>
+                                <span className="material-symbols-rounded filled-icon text-violet-500 dark:text-violet-400 text-xl group-hover:scale-110 transition-transform">computer</span>
+                            </div>
+                            <div>
+                                <div className="text-3xl font-black text-text dark:text-dark-text mb-0.5 tracking-tight">
+                                    {user.computersRecycled || 0}
+                                </div>
+                                <div className="text-[9px] text-gray-400 font-bold uppercase tracking-widest leading-tight">unidades</div>
+                            </div>
+                        </div>
+
+                        {/* Baterías */}
+                        <div className="bg-white dark:bg-dark-surface rounded-[32px] p-5 shadow-sm border border-gray-100 dark:border-dark-border flex flex-col justify-between h-36 group hover:border-primary/30 transition-all">
+                            <div className="flex justify-between items-start">
+                                <span className="text-amber-600 dark:text-amber-500 font-bold text-xs leading-tight">Baterías<br />y Pilas</span>
+                                <span className="material-symbols-rounded filled-icon text-amber-500 dark:text-amber-400 text-xl group-hover:scale-110 transition-transform">battery_charging_full</span>
+                            </div>
+                            <div>
+                                <div className="text-3xl font-black text-text dark:text-dark-text mb-0.5 tracking-tight">
+                                    {user.batteriesRecycled || 0}
+                                </div>
+                                <div className="text-[9px] text-gray-400 font-bold uppercase tracking-widest leading-tight">unidades</div>
+                            </div>
+                        </div>
+
+                        {/* Cables */}
+                        <div className="bg-white dark:bg-dark-surface rounded-[32px] p-5 shadow-sm border border-gray-100 dark:border-dark-border flex flex-col justify-between h-36 group hover:border-primary/30 transition-all">
+                            <div className="flex justify-between items-start">
+                                <span className="text-emerald-600 dark:text-emerald-500 font-bold text-xs leading-tight">Cables y<br />Periféricos</span>
+                                <span className="material-symbols-rounded filled-icon text-emerald-500 dark:text-emerald-400 text-xl group-hover:scale-110 transition-transform">cable</span>
+                            </div>
+                            <div>
+                                <div className="text-3xl font-black text-text dark:text-dark-text mb-0.5 tracking-tight">
+                                    {user.cablesRecycledKg || 0}
+                                </div>
+                                <div className="text-[9px] text-gray-400 font-bold uppercase tracking-widest leading-tight">kilogramos</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Summary Ecological Impact Footer Widget */}
+                    <div className="bg-primary/5 dark:bg-primary/10 rounded-[32px] p-6 border border-primary/20 dark:border-primary/40 mb-8 relative overflow-hidden flex flex-col sm:flex-row gap-6 items-center">
+                        <div className="flex-1 text-center sm:text-left">
+                            <h4 className="text-[10px] font-black text-primary/70 dark:text-accent/70 uppercase tracking-[0.2em] mb-4">Impacto Ambiental</h4>
+                            <div className="flex justify-center sm:justify-start gap-8">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm">
+                                        <span className="material-symbols-rounded filled-icon text-violet-500 dark:text-violet-400 text-xl">public</span>
+                                    </div>
+                                    <div>
+                                        <div className="text-xl font-black text-text dark:text-dark-text tracking-tight">{user.impact.co2}kg</div>
+                                        <div className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">CO2 Salvado</div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm">
+                                        <span className="material-symbols-rounded filled-icon text-emerald-500 dark:text-emerald-400 text-xl">forest</span>
+                                    </div>
+                                    <div>
+                                        <div className="text-xl font-black text-text dark:text-dark-text tracking-tight">{user.impact.trees}</div>
+                                        <div className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Árboles</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {/* Badge with items count */}
+                        <div className="bg-primary/10 dark:bg-accent/10 p-4 rounded-3xl border border-primary/20 dark:border-accent/20 flex flex-col items-center justify-center min-w-[100px]">
+                            <div className="text-2xl font-black text-primary dark:text-accent ">{user.itemsThisMonth}</div>
+                            <div className="text-[8px] font-black text-primary/70 dark:text-accent/70 uppercase tracking-widest">Este mes</div>
+                        </div>
+                    </div>
 
 
-                    {/* Historial Section */}
+
                     <h3 className="font-bold text-gray-500 dark:text-gray-400 text-sm mb-4 mt-6 uppercase tracking-wide pl-1">Historial de Reciclaje</h3>
                     <div className="space-y-3 mb-12">
                         {user.history.length > 0 ? (
@@ -283,6 +309,13 @@ const Profile: React.FC<ProfileScreenProps> = ({ onClose }) => {
                     <div className="text-center text-[10px] text-gray-300 dark:text-gray-600 pb-8">App Versión 1.0.0</div>
                 </div>
             </div>
+
+            {/* Gamification Profile Overlay */}
+            <ECyclerProfileBadgeOverlay
+                user={user}
+                show={showProfileOverlay}
+                onClose={() => setShowProfileOverlay(false)}
+            />
         </div>
     );
 };

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RECYCLE_POINTS, RECYCLE_CATEGORIES } from '@/constants';
+import { RECYCLE_POINTS, RECYCLE_CATEGORIES, COUPONS } from '@/constants';
 import { RecyclePoint } from '@/types';
 import { Avatar, SpecialMissionCard, Button, IconButton, ImageWithSkeleton } from '@/components';
 import { useAuth } from '@/hooks';
@@ -25,11 +25,12 @@ const Home: React.FC<HomeProps> = ({ onOpenProfile, onNavigateToHub }) => {
     const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
 
     const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-        // Close if dragged down more than 150px or with high velocity
+        // Close sheet if dragged down
         if (info.offset.y > 150 || info.velocity.y > 200) {
             setSelectedPoint(null);
         }
     };
+
 
     const toggleMaterial = (id: string) => {
         const newMaterials = selectedMaterials.includes(id) ? selectedMaterials.filter(m => m !== id) : [...selectedMaterials, id];
@@ -39,21 +40,33 @@ const Home: React.FC<HomeProps> = ({ onOpenProfile, onNavigateToHub }) => {
 
     // Filter Points Logic
     const filteredPoints = RECYCLE_POINTS.filter(point => {
-        // 1. Search Filter (Name or Address)
         const matchesSearch = searchQuery === '' ||
             point.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             point.address.toLowerCase().includes(searchQuery.toLowerCase());
 
-        // 2. Material Filter (OR logic - if point has ANY of the selected materials)
-        // If no materials selected, show all.
         const matchesMaterials = selectedMaterials.length === 0 ||
             (point.materials && point.materials.some(m => selectedMaterials.includes(m)));
 
         return matchesSearch && matchesMaterials;
     });
 
-    // Find a special mission to display (e.g., Copec)
-    const specialMissionPoint = filteredPoints.find(p => p.specialMission);
+    // Special Missions Logic (Home focus: Partner and Perk of Month)
+    const specialPartnerPoint = filteredPoints.find(p => p.specialMission);
+    const currentPerk = COUPONS.find(c => c.isCurrentMonthPerk);
+
+    // Create mission objects for the carousel
+    const priorityMissions = [
+        ...(specialPartnerPoint ? [{
+            id: 'partner_mission',
+            type: 'partner',
+            data: specialPartnerPoint
+        }] : []),
+        ...(currentPerk ? [{
+            id: 'perk_of_month',
+            type: 'perk',
+            data: currentPerk
+        }] : [])
+    ];
 
     return (
         <div className="relative w-full h-full bg-[#F2F1ED] dark:bg-dark-bg overflow-hidden font-sans">
@@ -188,41 +201,50 @@ const Home: React.FC<HomeProps> = ({ onOpenProfile, onNavigateToHub }) => {
                 onCenterComplete={() => setCenterMapOnUser(false)}
             />
 
-            {/* Special Mission Carousel - Floating above Navbar */}
+            {/* Priority Mission Carousel - Special Partner + Monthly Perk */}
             <AnimatePresence>
-                {!selectedPoint && !isSearchOpen && (
+                {!selectedPoint && !isSearchOpen && priorityMissions.length > 0 && (
                     <motion.div
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 50 }}
-                        className="absolute bottom-[80px] left-0 right-0 z-50 overflow-x-auto no-scrollbar pl-4 pb-8 pt-8 pointer-events-none"
+                        className="absolute bottom-[80px] left-0 right-0 z-50 overflow-x-auto no-scrollbar px-4 pb-8 pt-8"
                     >
-                        <div className="flex gap-6 w-max pr-4 pointer-events-auto">
-                            {/* Standard Mission */}
-                            {specialMissionPoint && specialMissionPoint.specialMission && (
-                                <SpecialMissionCard
-                                    title={specialMissionPoint.specialMission.title}
-                                    subtitle={specialMissionPoint.specialMission.subtitle}
-                                    logo={specialMissionPoint.specialMission.logo}
-                                    bonusPoints={specialMissionPoint.specialMission.bonusPoints}
-                                    onClick={() => {
-                                        setSelectedPoint(specialMissionPoint);
-                                        analytics.recyclingPointClicked(specialMissionPoint.id, specialMissionPoint.name);
-                                    }}
-                                    compact
-                                />
-                            )}
-
-                            {/* Perk Mission Example */}
-                            <SpecialMissionCard
-                                title="Cazador de Circuitos"
-                                subtitle="Recicla 1 computador o 2 celulares"
-                                logo="memory"
-                                bonusPoints={0}
-                                variant="perk"
-                                onClick={() => onNavigateToHub('beneficios')}
-                                compact
-                            />
+                        <div className="flex gap-4 w-max">
+                            <AnimatePresence mode="popLayout">
+                                {priorityMissions.map((mission) => (
+                                    <motion.div
+                                        key={mission.id}
+                                        layout
+                                        initial={{ opacity: 1, scale: 1 }}
+                                        className="relative"
+                                    >
+                                        {mission.type === 'partner' ? (
+                                            <SpecialMissionCard
+                                                title={(mission.data as RecyclePoint).specialMission!.title}
+                                                subtitle={(mission.data as RecyclePoint).specialMission!.subtitle}
+                                                logo={(mission.data as RecyclePoint).specialMission!.logo}
+                                                bonusPoints={(mission.data as RecyclePoint).specialMission!.bonusPoints}
+                                                onClick={() => {
+                                                    setSelectedPoint(mission.data as RecyclePoint);
+                                                    analytics.recyclingPointClicked((mission.data as RecyclePoint).id, (mission.data as RecyclePoint).name);
+                                                }}
+                                                compact
+                                            />
+                                        ) : (
+                                            <SpecialMissionCard
+                                                title={(mission.data as any).title}
+                                                subtitle={(mission.data as any).unlockMission}
+                                                logo={(mission.data as any).image}
+                                                bonusPoints={0}
+                                                variant="perk"
+                                                onClick={() => onNavigateToHub('beneficios')}
+                                                compact
+                                            />
+                                        )}
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
                         </div>
                     </motion.div>
                 )}
@@ -351,13 +373,10 @@ const Home: React.FC<HomeProps> = ({ onOpenProfile, onNavigateToHub }) => {
 
                                 {/* Mock Map Preview */}
                                 <div className="mb-6 rounded-[24px] overflow-hidden h-32 relative bg-[#E0F2F1] dark:bg-primary/10 border border-gray-100 dark:border-white/5">
-                                    {/* Mock Map Elements */}
                                     <div className="absolute top-0 bottom-0 left-1/3 w-4 bg-white/50 transform -skew-x-12"></div>
                                     <div className="absolute top-1/2 left-0 right-0 h-3 bg-white/50 transform -translate-y-1/2 rotate-3"></div>
                                     <div className="absolute top-1/4 right-1/4 w-8 h-8 bg-[#B2DFDB] rounded-md"></div>
                                     <div className="absolute bottom-1/4 left-1/4 w-12 h-12 bg-[#B2DFDB] rounded-full opacity-50"></div>
-
-                                    {/* Marker */}
                                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
                                         <span className="material-symbols-rounded filled-icon text-red-500 text-3xl drop-shadow-md">location_on</span>
                                         <div className="w-2 h-1 bg-black/20 rounded-full blur-[1px]"></div>
@@ -366,22 +385,8 @@ const Home: React.FC<HomeProps> = ({ onOpenProfile, onNavigateToHub }) => {
                             </div>
 
                             <div className="absolute bottom-0 left-0 right-0 p-4 bg-white dark:bg-dark-surface border-t border-gray-50 dark:border-dark-border flex gap-3 z-30 pb-8 rounded-t-[20px]">
-                                <Button
-                                    disabled
-                                    variant="secondary"
-                                    icon="qr_code_scanner"
-                                    fullWidth
-                                >
-                                    Escanear QR
-                                </Button>
-                                <Button
-                                    disabled
-                                    variant="secondary"
-                                    icon="near_me"
-                                    fullWidth
-                                >
-                                    Indicaciones
-                                </Button>
+                                <Button disabled variant="secondary" icon="qr_code_scanner" fullWidth>Escanear QR</Button>
+                                <Button disabled variant="secondary" icon="near_me" fullWidth>Indicaciones</Button>
                             </div>
                         </motion.div>
                     </>

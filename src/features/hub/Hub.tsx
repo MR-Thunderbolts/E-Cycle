@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Coupon, HubTab } from '@/types';
 import { useAuth } from '@/hooks';
-import { COUPONS } from '@/constants';
+import { COUPONS, MISSIONS } from '@/constants';
 import { LevelIndicator, Button, Modal, LoadingSpinner, EmptyState, Chip, Tabs, SearchBar, Tab, Skeleton, ImageWithSkeleton } from '@/components';
+import { ECyclerProfileBadgeOverlay } from '../profile';
 
 type RedemptionStatus = 'idle' | 'confirm' | 'processing' | 'success';
-type ProgressFilter = 'todos' | 'completadas' | 'diaria' | 'semanal' | 'mensual';
+type ProgressFilter = 'todos' | 'completadas' | 'diaria' | 'semanal';
 
 interface HubScreenProps {
     initialTab?: HubTab;
@@ -16,6 +17,7 @@ interface HubScreenProps {
 const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
     const { user, redeem } = useAuth();
     const [activeTab, setActiveTab] = useState<HubTab>(initialTab);
+    const [showProfileOverlay, setShowProfileOverlay] = useState(false);
 
     // Progress Filter
     const [activeFilter, setActiveFilter] = useState<ProgressFilter>('todos');
@@ -329,18 +331,21 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
     );
 
     const renderProgreso = () => {
-        const filters: ProgressFilter[] = ['todos', 'completadas', 'diaria', 'semanal', 'mensual'];
+        const filters: ProgressFilter[] = ['todos', 'completadas', 'diaria', 'semanal'];
 
-        const filteredAchievements = user?.achievements.filter(ach => {
+        const currentMissions = MISSIONS.filter(m => {
             if (activeFilter === 'todos') return true;
-            if (activeFilter === 'completadas') return ach.completed;
-            return ach.category === activeFilter;
+            if (activeFilter === 'completadas') return m.completed;
+            return m.category === activeFilter;
         });
 
         return (
             <div className="animate-fade-in space-y-6 pb-8">
                 <section>
-                    <h3 className="font-bold text-lg text-text dark:text-dark-text mb-4">Misiones</h3>
+                    <div className="mb-4">
+                        <h3 className="font-bold text-lg text-text dark:text-dark-text mb-1">Misiones</h3>
+                        <p className="text-gray-500 dark:text-gray-400 text-xs leading-relaxed max-w-[280px]">Completa estas tareas periódicas para ganar E-Points extra. Se reinician {activeFilter === 'diaria' ? 'cada día' : 'cada semana'}.</p>
+                    </div>
 
                     {/* Filters */}
                     <div className="flex gap-2 mb-4 overflow-x-auto no-scrollbar pb-2 -mx-6 px-6">
@@ -356,23 +361,17 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
                     </div>
 
                     <div className="space-y-4">
-                        {filteredAchievements && filteredAchievements.length > 0 ? (
-                            filteredAchievements.map(ach => (
+                        {currentMissions.length > 0 ? (
+                            currentMissions.map(ach => (
                                 <div key={ach.id} className="bg-white dark:bg-dark-surface p-5 rounded-[24px] border border-gray-100 dark:border-dark-border shadow-sm relative overflow-hidden">
                                     <div className="flex justify-between items-start mb-2 relative z-10">
                                         <h4 className="font-bold text-text dark:text-dark-text max-w-[70%]">{ach.title}</h4>
-                                        {ach.isMedal ? (
-                                            <div className="flex flex-col items-center">
-                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-0.5 ${ach.completed ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 dark:bg-gray-700 text-gray-400'}`}>
-                                                    <span className="material-symbols-rounded filled-icon">workspace_premium</span>
-                                                </div>
-                                                <span className={`text-[10px] font-bold ${ach.completed ? 'text-yellow-600' : 'text-gray-400'}`}>Medalla</span>
-                                            </div>
-                                        ) : (
-                                            <div className={`px-2 py-1 rounded-full text-xs font-bold flex items-center gap-0.5 ${ach.completed ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-[#D0EBE8] dark:bg-primary/20 text-primary-dark dark:text-accent'}`}>
-                                                <span className="material-symbols-rounded text-sm filled-icon">bolt</span> {ach.reward}
-                                            </div>
-                                        )}
+                                        <div className={`px-2 py-1 rounded-full text-[10px] font-bold flex items-center gap-0.5 uppercase tracking-wider
+                                            ${ach.category === 'diaria' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                                ach.category === 'semanal' ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400' :
+                                                    'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400'}`}>
+                                            {ach.completed ? 'Completada' : ach.category}
+                                        </div>
                                     </div>
                                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 relative z-10">{ach.description}</p>
 
@@ -531,17 +530,14 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
                 </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-6 pb-32 no-scrollbar">
-
-                {/* Level Indicator (Reused Component) */}
-                <LevelIndicator user={user} className="mb-6 mt-2" />
+            <div className="flex-1 overflow-y-auto px-6 pb-32 no-scrollbar mt-4">
 
                 {/* Tabs */}
                 <Tabs
                     tabs={[
                         { id: 'usar', label: 'Usar Puntos' },
                         { id: 'beneficios', label: 'Beneficios' },
-                        { id: 'progreso', label: 'Progreso' },
+                        { id: 'progreso', label: 'Misiones' },
                     ]}
                     activeTab={activeTab}
                     onTabChange={(tabId) => setActiveTab(tabId as HubTab)}
@@ -635,6 +631,13 @@ const Hub: React.FC<HubScreenProps> = ({ initialTab = 'beneficios' }) => {
                     </div>
                 )}
             </Modal>
+
+            {/* Gamification Profile Overlay */}
+            <ECyclerProfileBadgeOverlay
+                user={user}
+                show={showProfileOverlay}
+                onClose={() => setShowProfileOverlay(false)}
+            />
         </div>
     );
 };

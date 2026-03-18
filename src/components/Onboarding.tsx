@@ -16,7 +16,8 @@ const Onboarding: React.FC<OnboardingProps> = ({ onNavigateToRegister, onNavigat
     };
 
     const handleNext = () => {
-        if (currentStep < 3) {
+        // Hardcoding to 4 here to avoid hoisting issues with the 'steps' array declaration below
+        if (currentStep < 4) {
             setCurrentStep(prev => prev + 1);
         } else {
             handleComplete();
@@ -135,7 +136,39 @@ const Onboarding: React.FC<OnboardingProps> = ({ onNavigateToRegister, onNavigat
             )
         },
         {
-            // Paso 4: La Invitación
+            // Paso 4: ¿Cómo funciona?
+            title: "¿Cómo funciona?",
+            body: "El proceso es simple y rápido.",
+            image: (
+                <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-dark-surface rounded-t-3xl relative overflow-hidden">
+                    {/* Ambient Background Glow */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-teal-600/10 dark:bg-accent/10 blur-[80px] rounded-full pointer-events-none" />
+
+                    <div className="flex flex-col gap-2 md:gap-4 relative z-10 w-[82%] md:w-4/5 max-h-full overflow-y-auto no-scrollbar py-2">
+                        <div className="flex items-center gap-3 md:gap-4 bg-white/60 dark:bg-dark-bg/60 p-2 md:p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-dark-border backdrop-blur-sm">
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#D0EBE8] dark:bg-primary/20 flex items-center justify-center shrink-0">
+                                <span className="material-symbols-rounded text-primary dark:text-accent text-base md:text-lg">location_on</span>
+                            </div>
+                            <span className="text-xs md:text-sm font-bold text-text dark:text-dark-text leading-tight">1. Encuentra un punto en el mapa</span>
+                        </div>
+                        <div className="flex items-center gap-3 md:gap-4 bg-white/60 dark:bg-dark-bg/60 p-2 md:p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-dark-border backdrop-blur-sm">
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#D0EBE8] dark:bg-primary/20 flex items-center justify-center shrink-0">
+                                <span className="material-symbols-rounded text-primary dark:text-accent text-base md:text-lg">qr_code_scanner</span>
+                            </div>
+                            <span className="text-xs md:text-sm font-bold text-text dark:text-dark-text leading-tight">2. Escanea el QR del contenedor inteligente</span>
+                        </div>
+                        <div className="flex items-center gap-3 md:gap-4 bg-white/60 dark:bg-dark-bg/60 p-2 md:p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-dark-border backdrop-blur-sm">
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center shrink-0">
+                                <span className="material-symbols-rounded text-yellow-600 dark:text-yellow-500 text-base md:text-lg">bolt</span>
+                            </div>
+                            <span className="text-xs md:text-sm font-bold text-text dark:text-dark-text leading-tight">3. Declara lo que reciclas y gana E-Points</span>
+                        </div>
+                    </div>
+                </div>
+            )
+        },
+        {
+            // Paso 5: La Invitación
             title: "Únete al cambio hoy.",
             body: "Ya somos miles recuperando valor. Empieza ahora, libera espacio en tu hogar y canjea tu primera recompensa. El futuro es circular y empieza contigo.",
             image: (
@@ -192,17 +225,20 @@ const Onboarding: React.FC<OnboardingProps> = ({ onNavigateToRegister, onNavigat
         }
     ];
 
+
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            {/* Main Modal Container */}
             <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="w-full max-w-md bg-surface dark:bg-dark-surface rounded-3xl shadow-2xl overflow-hidden flex flex-col h-auto max-h-[90vh] md:h-[600px] relative"
+                className="w-full max-w-md bg-surface dark:bg-dark-surface rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[90vh] max-h-[750px] md:h-[600px] relative"
             >
                 {/* Back Button */}
                 {currentStep > 0 && (
-                    <div className="absolute top-4 left-4 z-20">
+                    <div className="absolute top-4 left-4 z-50">
                         <IconButton
                             icon="arrow_back"
                             onClick={handleBack}
@@ -213,8 +249,8 @@ const Onboarding: React.FC<OnboardingProps> = ({ onNavigateToRegister, onNavigat
                 )}
 
                 {/* Skip Button */}
-                {currentStep < 3 && (
-                    <div className="absolute top-4 right-4 z-20">
+                {currentStep < steps.length - 1 && (
+                    <div className="absolute top-4 right-4 z-50">
                         <Button
                             onClick={handleSkip}
                             variant="ghost"
@@ -225,8 +261,8 @@ const Onboarding: React.FC<OnboardingProps> = ({ onNavigateToRegister, onNavigat
                     </div>
                 )}
 
-                {/* Image Section (Flexible height) */}
-                <div className="flex-1 relative bg-background dark:bg-dark-bg min-h-[200px]">
+                {/* Image Section (Flexible height with min-height guarantee) */}
+                <div className="flex-1 min-h-[45vh] md:min-h-[280px] relative bg-background dark:bg-dark-bg shrink-0">
                     <AnimatePresence mode='wait'>
                         <motion.div
                             key={currentStep}
@@ -241,9 +277,9 @@ const Onboarding: React.FC<OnboardingProps> = ({ onNavigateToRegister, onNavigat
                     </AnimatePresence>
                 </div>
 
-                {/* Content Section (Auto height based on content) */}
-                <div className="shrink-0 p-6 md:p-8 flex flex-col bg-surface dark:bg-dark-surface">
-                    <div className="text-center mb-4">
+                {/* Content Section (Auto height based on content, shrinking margins for small screens) */}
+                <div className="shrink-0 p-4 md:p-8 flex flex-col bg-surface dark:bg-dark-surface z-10">
+                    <div className="text-center mb-2 md:mb-4">
                         <AnimatePresence mode='wait'>
                             <motion.div
                                 key={currentStep}
@@ -252,10 +288,10 @@ const Onboarding: React.FC<OnboardingProps> = ({ onNavigateToRegister, onNavigat
                                 exit={{ opacity: 0, y: -10 }}
                                 transition={{ duration: 0.3, delay: 0.1 }}
                             >
-                                <h1 className="text-2xl font-bold text-text dark:text-dark-text mb-3 leading-tight">
+                                <h1 className="text-xl md:text-2xl font-bold text-text dark:text-dark-text mb-2 md:mb-3 leading-tight">
                                     {steps[currentStep].title}
                                 </h1>
-                                <p className="text-text-secondary dark:text-dark-text-secondary text-sm leading-relaxed">
+                                <p className="text-text-secondary dark:text-dark-text-secondary text-xs md:text-sm leading-relaxed max-h-[80px] md:max-h-none overflow-y-auto no-scrollbar">
                                     {steps[currentStep].body}
                                 </p>
                             </motion.div>
@@ -263,7 +299,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onNavigateToRegister, onNavigat
                     </div>
 
                     {/* Navigation */}
-                    <div className="flex flex-col items-center gap-6 mt-auto">
+                    <div className="flex flex-col items-center gap-4 md:gap-6 mt-auto">
                         {/* Dots */}
                         <div className="flex gap-2">
                             {steps.map((_, index) => (
@@ -278,7 +314,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onNavigateToRegister, onNavigat
                         </div>
 
                         {/* Button */}
-                        {currentStep === 3 ? (
+                        {currentStep === steps.length - 1 ? (
                             <div className="w-full flex flex-col gap-3">
                                 <Button
                                     onClick={() => {
