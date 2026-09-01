@@ -22,10 +22,25 @@ export const AppRouter: React.FC = () => {
     const auth = useContext(AuthContext);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setShowSplash(false);
-        }, 4000);
-        return () => clearTimeout(timer);
+        let isMounted = true;
+        const minSplashPromise = new Promise(resolve => setTimeout(resolve, 1500));
+        const fontsPromise = typeof document !== 'undefined' && 'fonts' in document
+            ? document.fonts.ready
+            : Promise.resolve();
+        const maxTimeoutPromise = new Promise(resolve => setTimeout(resolve, 3500));
+
+        Promise.race([
+            Promise.all([minSplashPromise, fontsPromise]),
+            maxTimeoutPromise
+        ]).then(() => {
+            if (isMounted) {
+                setShowSplash(false);
+            }
+        });
+
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     const handleGoToRedeem = () => {

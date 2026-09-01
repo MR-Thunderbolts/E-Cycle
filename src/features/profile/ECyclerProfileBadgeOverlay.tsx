@@ -5,11 +5,56 @@ import { ACHIEVEMENTS, MISSIONS, LEVEL_THRESHOLDS } from '@/constants';
 import { Achievement, User } from '@/types';
 import { Avatar } from '@/components/ui/Avatar/Avatar';
 
-const LEVEL_COLORS: Record<string, { main: string; muted: string; text: string }> = {
-    'Descubridor': { main: 'from-slate-500/20 to-slate-600/10', muted: 'bg-slate-100 dark:bg-slate-900/40', text: 'text-slate-500' },
-    'Ensamblador': { main: 'from-primary/20 to-primary-dark/10', muted: 'bg-[#D0EBE8] dark:bg-primary/20', text: 'text-primary dark:text-accent' },
-    'Recolector': { main: 'from-amber-500/20 to-amber-600/10', muted: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-600 dark:text-amber-500' },
-    'Reactivador': { main: 'from-indigo-500/20 to-indigo-600/10', muted: 'bg-indigo-50 dark:bg-indigo-900/20', text: 'text-indigo-600 dark:text-indigo-400' },
+const LEVEL_COLORS: Record<string, {
+    main: string;
+    muted: string;
+    text: string;
+    icon: string;
+    badge: string;
+    dot: string;
+    lightBg: string;
+    border: string;
+}> = {
+    'Descubridor': {
+        main: 'from-slate-500/20 to-slate-600/10',
+        muted: 'bg-slate-100 dark:bg-slate-900/40',
+        text: 'text-slate-600 dark:text-slate-400',
+        icon: 'text-slate-600 dark:text-slate-400',
+        badge: 'bg-slate-600 text-white',
+        dot: 'bg-slate-600 dark:bg-slate-400',
+        lightBg: 'bg-slate-100 dark:bg-slate-800/60',
+        border: 'border-slate-300 dark:border-slate-700',
+    },
+    'Ensamblador': {
+        main: 'from-primary/20 to-primary-dark/10',
+        muted: 'bg-[#D0EBE8] dark:bg-primary/20',
+        text: 'text-primary dark:text-accent',
+        icon: 'text-primary dark:text-accent',
+        badge: 'bg-primary dark:bg-accent text-white dark:text-primary-dark',
+        dot: 'bg-primary dark:bg-accent',
+        lightBg: 'bg-primary/10 dark:bg-primary/20',
+        border: 'border-teal-300 dark:border-teal-700',
+    },
+    'Recolector': {
+        main: 'from-amber-500/20 to-amber-600/10',
+        muted: 'bg-amber-100/70 dark:bg-amber-900/30',
+        text: 'text-amber-600 dark:text-amber-400',
+        icon: 'text-amber-500 dark:text-amber-400',
+        badge: 'bg-amber-500 text-white',
+        dot: 'bg-amber-500 dark:bg-amber-400',
+        lightBg: 'bg-amber-500/10 dark:bg-amber-500/20',
+        border: 'border-amber-400/60 dark:border-amber-500/40',
+    },
+    'Reactivador': {
+        main: 'from-indigo-500/20 to-indigo-600/10',
+        muted: 'bg-indigo-100/70 dark:bg-indigo-900/30',
+        text: 'text-indigo-600 dark:text-indigo-400',
+        icon: 'text-indigo-500 dark:text-indigo-400',
+        badge: 'bg-indigo-600 text-white',
+        dot: 'bg-indigo-600 dark:bg-indigo-400',
+        lightBg: 'bg-indigo-500/10 dark:bg-indigo-500/20',
+        border: 'border-indigo-400/60 dark:border-indigo-500/40',
+    },
 };
 
 interface ECyclerProfileBadgeOverlayProps {
@@ -166,10 +211,10 @@ export const ECyclerProfileBadgeOverlay: React.FC<ECyclerProfileBadgeOverlayProp
                                     </AnimatePresence>
 
                                     <div className="relative">
-                                        <div className="w-24 h-24 mx-auto bg-white/20 backdrop-blur-md rounded-full border-4 border-white dark:border-gray-800 flex items-center justify-center relative z-10 shadow-2xl">
-                                            <span className={`material-symbols-rounded filled-icon text-5xl text-primary-dark dark:text-accent`}>workspace_premium</span>
+                                        <div className={`w-24 h-24 mx-auto bg-white/40 dark:bg-black/30 backdrop-blur-md rounded-full border-4 ${colors.border} flex items-center justify-center relative z-10 shadow-2xl transition-all duration-300`}>
+                                            <span className={`material-symbols-rounded filled-icon text-5xl ${colors.icon} transition-colors duration-300`}>workspace_premium</span>
                                         </div>
-                                        <div className={`absolute -bottom-1 right-0 w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-black border-4 border-white dark:border-dark-bg z-20 shadow-lg ${isCurrentUserLevel ? 'bg-primary dark:bg-accent' : 'bg-gray-400 dark:bg-gray-600'}`}>
+                                        <div className={`absolute -bottom-1 right-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-black border-4 border-white dark:border-dark-bg z-20 shadow-lg ${colors.badge} transition-colors duration-300`}>
                                             {viewingIndex + 1}
                                         </div>
                                     </div>
@@ -195,7 +240,7 @@ export const ECyclerProfileBadgeOverlay: React.FC<ECyclerProfileBadgeOverlayProp
                                             {sortedLevels.map((_, i) => (
                                                 <div
                                                     key={i}
-                                                    className={`h-1 rounded-full transition-all duration-300 ${i === viewingIndex ? `w-6 ${colors.text.replace('text-', 'bg-')}` : 'w-1.5 bg-gray-300 dark:bg-gray-700'}`}
+                                                    className={`h-1.5 rounded-full transition-all duration-300 ${i === viewingIndex ? `w-7 ${colors.dot}` : 'w-2 bg-gray-300 dark:bg-gray-700'}`}
                                                 />
                                             ))}
                                         </div>
@@ -214,7 +259,7 @@ export const ECyclerProfileBadgeOverlay: React.FC<ECyclerProfileBadgeOverlayProp
                         {/* Rewards Section */}
                         <div className="px-6 py-4 font-bold text-gray-500 dark:text-gray-400 text-sm uppercase tracking-wide flex items-center justify-between border-t border-gray-50 dark:border-white/5">
                             <span>Beneficios del Rango</span>
-                            <span className="material-symbols-rounded text-primary dark:text-accent text-lg">redeem</span>
+                            <span className={`material-symbols-rounded ${colors.icon} text-lg transition-colors`}>redeem</span>
                         </div>
 
                         <section className="px-6 mb-8">
@@ -228,7 +273,7 @@ export const ECyclerProfileBadgeOverlay: React.FC<ECyclerProfileBadgeOverlayProp
                                 >
                                     {(viewingLevel.rewards as any).map((reward: string, idx: number) => (
                                         <div key={idx} className="flex items-center gap-3">
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isCurrentUserLevel || viewingIndex < userLevelIndex ? 'bg-primary/10 text-primary dark:text-accent' : 'bg-gray-100 dark:bg-gray-800 text-gray-400'}`}>
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isCurrentUserLevel || viewingIndex < userLevelIndex ? `${colors.lightBg} ${colors.icon}` : 'bg-gray-100 dark:bg-gray-800 text-gray-400'}`}>
                                                 <span className="material-symbols-rounded text-lg">check_circle</span>
                                             </div>
                                             <span className={`text-sm font-bold ${isCurrentUserLevel || viewingIndex < userLevelIndex ? 'text-text dark:text-dark-text' : 'text-gray-400'}`}>

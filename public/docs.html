@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Cycle - Visualizador de Arquitectura y Diagramas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            primary: '#004D40',
+            'primary-dark': '#00382E',
+            'primary-light': '#00695C',
+            accent: '#1DE9B6',
+            secondary: '#A6F8F2',
+            surface: '#FFFFFF',
+            background: '#F5F8F8',
+            'dark-bg': '#121212',
+            'dark-surface': '#1E1E1E',
+          }
+        }
+      }
+    };
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      securityLevel: 'loose',
+      fontFamily: '"Plus Jakarta Sans", sans-serif',
+      themeVariables: {
+        primaryColor: '#004D40',
+        primaryTextColor: '#FFFFFF',
+        primaryBorderColor: '#00382E',
+        lineColor: '#004D40',
+        secondaryColor: '#E0F2F1',
+        tertiaryColor: '#FFFFFF',
+        actorBkg: '#004D40',
+        actorTextColor: '#FFFFFF',
+        actorBorder: '#00382E',
+        signalColor: '#004D40',
+        signalTextColor: '#0F172A',
+        labelBoxBkgColor: '#E0F2F1',
+        labelBoxBorderColor: '#004D40',
+        labelTextColor: '#004D40',
+        loopTextColor: '#004D40',
+        noteBorderColor: '#004D40',
+        noteBkgColor: '#E0F2F1',
+        noteTextColor: '#004D40',
+        activationBorderColor: '#004D40',
+        activationBkgColor: '#D0EBE8',
+        edgeLabelBackground: '#FFFFFF',
+        nodeBorder: '#94A3B8',
+        clusterBkg: '#F8FAFC',
+        clusterBorder: '#CBD5E1',
+      }
+    });
+  </script>
+  <style>
+    .mermaid {
+      display: flex;
+      justify-content: center;
+      background: white;
+      padding: 2rem;
+      border-radius: 1.5rem;
+      border: 1px solid #CBD5E1;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body class="bg-[#F5F8F8] text-gray-900 font-sans min-h-screen antialiased">
+  <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center text-white font-black text-xl shadow-md">
+          E
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-gray-900 leading-tight">E-Cycle · Documentación Visual</h1>
+          <p class="text-xs text-gray-500 font-medium">Paleta Estandarizada de Alto Contraste (WCAG AAA)</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-[#E0F2F1] text-primary text-xs font-black rounded-full">
+          <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+          17 Diagramas
+        </span>
+        <a href="/" class="text-xs font-bold px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-all">
+          ← Volver a la App
+        </a>
+      </div>
+    </div>
+    
+    <!-- Tab Navigation -->
+    <div class="max-w-6xl mx-auto px-6 flex gap-2 overflow-x-auto border-t border-gray-100 py-2">
+      <button onclick="showTab('tab-ia')" id="btn-tab-ia" class="tab-btn px-4 py-2 text-xs font-bold rounded-full bg-primary text-white transition-all shadow-sm">
+        🗺️ Arquitectura (3)
+      </button>
+      <button onclick="showTab('tab-user')" id="btn-tab-user" class="tab-btn px-4 py-2 text-xs font-bold rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all">
+        👤 Flujos de Usuario (6)
+      </button>
+      <button onclick="showTab('tab-app')" id="btn-tab-app" class="tab-btn px-4 py-2 text-xs font-bold rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all">
+        ⚙️ Diagramas Técnicos (5)
+      </button>
+      <button onclick="showTab('tab-adv')" id="btn-tab-adv" class="tab-btn px-4 py-2 text-xs font-bold rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all">
+        🚀 Diagramas Avanzados (6)
+      </button>
+    </div>
+  </header>
+
+  <!-- Color Palette Pill Legend -->
+  <div class="max-w-6xl mx-auto px-6 pt-6">
+    <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm flex flex-wrap items-center gap-3 text-xs">
+      <span class="font-black text-gray-500 uppercase tracking-wider text-[10px] mr-2">Estandarización Visual:</span>
+      <span class="px-3 py-1 bg-[#004D40] text-white font-bold rounded-full flex items-center gap-1.5 shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-white"></span> Primario / Títulos (#004D40)
+      </span>
+      <span class="px-3 py-1 bg-white border border-gray-300 text-[#0F172A] font-bold rounded-full">
+        Pasos & Pantallas (#FFFFFF)
+      </span>
+      <span class="px-3 py-1 bg-[#E0F2F1] border border-[#004D40] text-[#004D40] font-bold rounded-full">
+        Destaques & Estados Activos (#E0F2F1)
+      </span>
+      <span class="px-3 py-1 bg-[#FEF3C7] border border-[#D97706] text-[#92400E] font-bold rounded-full">
+        Decisiones & Condicionales (#FEF3C7)
+      </span>
+    </div>
+  </div>
+
+  <main class="max-w-6xl mx-auto px-6 py-6">
+
+    <!-- TAB 1: ARQUITECTURA DE LA INFORMACIÓN -->
+    <section id="tab-ia" class="tab-content space-y-10">
+      <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+        <h2 class="text-2xl font-black text-gray-900 mb-2">1. Mapa de Navegación y Jerarquía de Pantallas (Sitemap)</h2>
+        <div class="mermaid">
+graph TD
+    classDef primary fill:#004D40,stroke:#00382E,stroke-width:2px,color:#FFFFFF,font-weight:bold;
+    classDef step fill:#FFFFFF,stroke:#94A3B8,stroke-width:1.5px,color:#0F172A,font-weight:600;
+    classDef highlight fill:#E0F2F1,stroke:#004D40,stroke-width:2px,color:#004D40,font-weight:bold;
+    classDef decision fill:#FEF3C7,stroke:#D97706,stroke-width:2px,color:#92400E,font-weight:bold;
+
+    Root["🚀 App Root"]:::primary --> Splash["SplashScreen (SVG + Font Sync)"]:::highlight
+    Splash --> OnboardingCheck{"¿Primer Ingreso?"}:::decision
+    
+    OnboardingCheck -->|"Sí"| Onboard["Onboarding Walkthrough"]:::step
+    Onboard --> Register["Modal Registro de Usuario"]:::highlight
+    Register --> MainApp["MobileLayout Base"]:::primary
+    
+    OnboardingCheck -->|"No"| MainApp
+    
+    subgraph BottomNav ["🧭 Barra de Navegación Principal"]
+        MainApp --> Tab1["1. Explorar (Home)"]:::primary
+        MainApp --> Tab2["2. Retiro (Pickup)"]:::step
+        MainApp --> Tab3["3. Escáner (Scan)"]:::step
+        MainApp --> Tab4["4. E-Hub (Beneficios)"]:::step
+    end
+
+    subgraph Tab1_Views ["Explorar (Home)"]
+        Tab1 --> SearchOverlay["Búsqueda: Dónde / Materiales"]:::step
+        Tab1 --> PointSheet["Bottom Sheet Detalle Punto"]:::step
+        Tab1 --> MissionBanner["Carrusel Misión Partner"]:::step
+        Tab1 --> ProfileTrigger["Acceso al Perfil"]:::highlight
+    end
+
+    subgraph Tab3_Views ["Módulo Escáner"]
+        Tab3 --> CamView["1. ScanCamera (Visor QR)"]:::step
+        CamView --> Analisis["2. Validación IoT (Analyzing)"]:::step
+        Analisis --> InputView["3. Selector Cantidades (Input)"]:::step
+        InputView --> Validacion["4. Procesamiento (Validating)"]:::step
+        Validacion --> SuccessView["5. Celebración (Success)"]:::highlight
+    end
+
+    subgraph Tab4_Views ["E-Hub"]
+        Tab4 --> SubTab1["Pestaña Beneficios (Multiplicadores)"]:::step
+        Tab4 --> SubTab2["Pestaña Usar Puntos (Cupones)"]:::step
+        Tab4 --> SubTab3["Pestaña Tu Progreso (Misiones)"]:::step
+        SubTab2 --> RedeemModal["Modal Canje de Cupón"]:::highlight
+    end
+        </div>
+      </div>
+
+      <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+        <h2 class="text-2xl font-black text-gray-900 mb-2">2. Modelo de Entidades y Datos (ERD)</h2>
+        <div class="mermaid">
+erDiagram
+    USER ||--o{ USER_ACHIEVEMENT : possesses
+    USER ||--o{ RECYCLE_DEPOSIT : performs
+    USER ||--o{ REDEEMED_COUPON : redeems
+    RECYCLE_POINT ||--o{ RECYCLE_CATEGORY : accepts
+    RECYCLE_POINT ||--o{ SPECIAL_MISSION : hosts
+    COUPON ||--|| PARTNER : belongs_to
+    LEVEL_THRESHOLD ||--o{ USER : classifies
+
+    USER {
+        string id
+        string name
+        string email
+        string commune
+        number points
+        string level
+        number activeMultiplier
+        number itemsThisMonth
+        number phonesRecycled
+        number computersRecycled
+        number batteriesRecycled
+        number cablesRecycledKg
+    }
+
+    RECYCLE_POINT {
+        string id
+        string name
+        string address
+        string commune
+        number lat
+        number lng
+        string_array materials
+        string hours
+        boolean isPartner
+        string specialMission
+    }
+
+    COUPON {
+        string id
+        string title
+        string description
+        string brand
+        number cost
+        string category
+        string imageUrl
+        string discountPercent
+        boolean isCurrentMonthPerk
+        string expiresAt
+    }
+
+    ACHIEVEMENT {
+        string id
+        string title
+        string description
+        number progress
+        number max
+        boolean completed
+        number reward
+        string icon
+        string category
+        boolean isMedal
+    }
+
+    LEVEL_THRESHOLD {
+        string name
+        number points
+        number achievements
+        string_array rewards
+    }
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: FLUJOS DE USUARIO -->
+    <section id="tab-user" class="tab-content hidden space-y-10">
+      
+      <!-- User Flow 1 -->
+      <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Flujo 1: Onboarding y Registro</h3>
+        <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Usuario as 👤 Usuario
+    participant App as 📱 AppRouter
+    participant Onboarding as 📖 Onboarding
+    participant Register as 📝 Registro
+    participant Auth as 🔐 AuthContext
+
+    Usuario->>App: Abre la aplicación
+    App->>Onboarding: Muestra 3 slides introductorios
+    Usuario->>Onboarding: Navega y presiona "Comenzar"
+    Onboarding->>Register: Abre modal de formulario
+    Usuario->>Register: Ingresa Nombre, Email y Comuna
+    Usuario->>Register: Presiona "Crear Cuenta"
+    Register->>Auth: register() inicializa usuario
+    Auth->>Auth: Asigna Rango Descubridor (0 pts)
+    Auth-->>App: Autenticado con éxito
+    App-->>Usuario: Despliega Home (Explorar)
+        </div>
+      </div>
+
+      <!-- User Flow 2 -->
+      <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Flujo 2: Exploración del Mapa y Puntos Limpios</h3>
+        <div class="mermaid">
+graph TD
+    classDef primary fill:#004D40,stroke:#00382E,stroke-width:2px,color:#FFFFFF,font-weight:bold;
+    classDef step fill:#FFFFFF,stroke:#94A3B8,stroke-width:1.5px,color:#0F172A,font-weight:600;
+    classDef highlight fill:#E0F2F1,stroke:#004D40,stroke-width:2px,color:#004D40,font-weight:bold;
+    classDef decision fill:#FEF3C7,stroke:#D97706,stroke-width:2px,color:#92400E,font-weight:bold;
+
+    A["Usuario en 'Explorar'"]:::primary --> B{"Modo de Búsqueda"}:::decision
+    
+    B -->|"Navegación en Mapa"| C["Interactúa con Pins en Mapa"]:::step
+    C --> D["Toca Pin de Punto Limpio"]:::highlight
+    
+    B -->|"Filtro Avanzado"| E["Barra de Búsqueda"]:::step
+    E --> F["Overlay de Búsqueda"]:::step
+    F --> G["Filtra Comuna"]:::step
+    F --> H["Selecciona Chips de Residuos"]:::step
+    G & H --> I["Presiona 'Buscar'"]:::primary
+    I --> J["Mapa filtra los puntos"]:::step
+    J --> D
+
+    B -->|"Misión Especial"| K["Toca Banner de Partner"]:::step
+    K --> D
+
+    D --> L["Bottom Sheet: Detalle del Punto"]:::primary
+    L --> M["Horarios, Dirección y Residuos"]:::step
+    L --> N["Presiona 'Cómo Llegar' (GPS)"]:::step
+    L --> O["Presiona 'Escanear Aquí'"]:::highlight
+        </div>
+      </div>
+
+      <!-- User Flow 3 -->
+      <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Flujo 3: Escaneo QR y Registro de Depósito</h3>
+        <div class="mermaid">
+graph TD
+    classDef primary fill:#004D40,stroke:#00382E,stroke-width:2px,color:#FFFFFF,font-weight:bold;
+    classDef highlight fill:#E0F2F1,stroke:#004D40,stroke-width:2px,color:#004D40,font-weight:bold;
+    classDef step fill:#FFFFFF,stroke:#94A3B8,stroke-width:1.5px,color:#0F172A,font-weight:600;
+    classDef decision fill:#FEF3C7,stroke:#D97706,stroke-width:2px,color:#92400E,font-weight:bold;
+
+    A["Usuario entra a 'Escáner'"]:::primary --> B["ScanCamera Activa"]:::step
+    B --> C["Apunta al código QR"]:::step
+    C --> D["QR Detectado"]:::highlight
+    
+    D --> E["Paso 'Analyzing': 3.6s Validación IoT"]:::step
+    E --> F["Paso 'Input': Selector de Cantidades"]:::step
+    
+    F --> G["Ajusta unidades (+ / -)"]:::step
+    G --> H["Cálculo: Puntos Base × Multiplicador"]:::highlight
+    H --> I["Presiona 'Confirmar Depósito'"]:::primary
+    
+    I --> J["Paso 'Validating': 3.0s Procesamiento"]:::step
+    J --> K["deposit() en AuthContext"]:::primary
+    K --> L["Actualiza Saldo, Logros y Nivel"]:::highlight
+    
+    L --> M["Paso 'Success': Pantalla de Éxito"]:::primary
+    M --> N{"Decisión"}:::decision
+    N -->|"Presiona 'Canjear Puntos'"| O["Redirige a E-Hub ('Usar')"]:::highlight
+    N -->|"Presiona 'Seguir Reciclando'"| P["Reinicia el Escáner"]:::step
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: DIAGRAMAS TÉCNICOS -->
+    <section id="tab-app" class="tab-content hidden space-y-10">
+      
+      <!-- Tech Flow 1 -->
+      <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">1. Ciclo de Vida de Inicialización (Splash & Fonts)</h3>
+        <div class="mermaid">
+flowchart TD
+    classDef primary fill:#004D40,stroke:#00382E,stroke-width:2px,color:#FFFFFF,font-weight:bold;
+    classDef step fill:#FFFFFF,stroke:#94A3B8,stroke-width:1.5px,color:#0F172A,font-weight:600;
+    classDef highlight fill:#E0F2F1,stroke:#004D40,stroke-width:2px,color:#004D40,font-weight:bold;
+    classDef decision fill:#FEF3C7,stroke:#D97706,stroke-width:2px,color:#92400E,font-weight:bold;
+
+    Start(["Apertura de App"]):::primary --> LoadHTML["Carga index.html"]:::step
+    LoadHTML --> Preloads["Preload de Fuentes y Material Symbols"]:::step
+    LoadHTML --> MountSplash["SplashScreen con Logo SVG Inmediato"]:::highlight
+    
+    subgraph Gate ["Sincronización Inteligente de Recursos"]
+        MinTimer["Timer Mínimo: 1.5s"]:::step
+        FontReady["document.fonts.ready"]:::highlight
+        MaxSafety["Safety Timeout: 3.5s"]:::step
+    end
+
+    MountSplash --> MinTimer & FontReady & MaxSafety
+    MinTimer & FontReady --> ReadyResolved["Fuentes 100% Listas"]:::highlight
+    MaxSafety -.->|"Fallback"| ReadyResolved
+
+    ReadyResolved --> AddClass["Añade clase .fonts-loaded"]:::step
+    AddClass --> FadeSplash["Fade Out suave de SplashScreen"]:::primary
+    FadeSplash --> MountApp["AppRouter renderiza vista activa"]:::highlight
+    MountApp --> Done(["UI Renderizada sin FOUT ni Pop-in"]):::primary
+        </div>
+      </div>
+
+      <!-- Tech Flow 2 -->
+      <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">2. Progresión de Niveles y Gamificación</h3>
+        <div class="mermaid">
+flowchart TD
+    classDef primary fill:#004D40,stroke:#00382E,stroke-width:2px,color:#FFFFFF,font-weight:bold;
+    classDef step fill:#FFFFFF,stroke:#94A3B8,stroke-width:1.5px,color:#0F172A,font-weight:600;
+    classDef highlight fill:#E0F2F1,stroke:#004D40,stroke-width:2px,color:#004D40,font-weight:bold;
+    classDef decision fill:#FEF3C7,stroke:#D97706,stroke-width:2px,color:#92400E,font-weight:bold;
+
+    classDef lvlReactivador fill:#EEF2FF,stroke:#6366F1,stroke-width:2px,color:#3730A3,font-weight:bold;
+    classDef lvlRecolector fill:#FEF3C7,stroke:#F59E0B,stroke-width:2px,color:#92400E,font-weight:bold;
+    classDef lvlEnsamblador fill:#E0F2F1,stroke:#004D40,stroke-width:2px,color:#004D40,font-weight:bold;
+    classDef lvlDescubridor fill:#F1F5F9,stroke:#64748B,stroke-width:2px,color:#334155,font-weight:bold;
+
+    A["Depósito Confirmado"]:::primary --> B["Puntos Base = Σ (qty × puntos_unidad)"]:::step
+    B --> C["Puntos Totales = Puntos Base × activeMultiplier"]:::highlight
+    C --> D["Sumar puntos al saldo de Usuario"]:::primary
+    D --> E["Actualizar contadores de unidades recicladas"]:::step
+    E --> F["Evaluar Misiones y Logros"]:::highlight
+    
+    subgraph Algoritmo ["Motor calculateLevel()"]
+        F --> G{"¿Pts >= 5000 y Logros >= 4?"}:::decision
+        G -->|"Sí"| L4["Reactivador (x2.0 VIP)"]:::lvlReactivador
+        G -->|"No"| H{"¿Pts >= 2500 y Logros >= 3?"}:::decision
+        H -->|"Sí"| L3["Recolector (x1.5)"]:::lvlRecolector
+        H -->|"No"| I{"¿Pts >= 1000 y Logros >= 2?"}:::decision
+        I -->|"Sí"| L2["Ensamblador (x1.2)"]:::lvlEnsamblador
+        I -->|"No"| L1["Descubridor (x1.0 Base)"]:::lvlDescubridor
+    end
+
+    L4 & L3 & L2 & L1 --> J["Guardar Estado en LocalStorage"]:::primary
+    J --> K["Actualizar Interfaz y Colores Dinámicos"]:::highlight
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: DIAGRAMAS AVANZADOS -->
+    <section id="tab-adv" class="tab-content hidden space-y-10">
+      
+      <!-- Adv Diagram 1 -->
+      <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">1. Motor de Geolocalización, Filtrado Espacial y Sincronización del Mapa</h3>
+        <div class="mermaid">
+flowchart TD
+    classDef primary fill:#004D40,stroke:#00382E,stroke-width:2px,color:#FFFFFF,font-weight:bold;
+    classDef step fill:#FFFFFF,stroke:#94A3B8,stroke-width:1.5px,color:#0F172A,font-weight:600;
+    classDef highlight fill:#E0F2F1,stroke:#004D40,stroke-width:2px,color:#004D40,font-weight:bold;
+    classDef decision fill:#FEF3C7,stroke:#D97706,stroke-width:2px,color:#92400E,font-weight:bold;
+
+    Start(["Montaje de Home.tsx"]):::primary --> LoadData["Cargar RECYCLE_POINTS (Puntos Limpios)"]:::step
+    LoadData --> CheckTheme{"Tema Activo (isDarkMode)"}:::decision
+    
+    CheckTheme -->|"Oscuro"| DarkMap["Carga Map Asset: map-bg.jpg"]:::step
+    CheckTheme -->|"Claro"| LightMap["Carga Map Asset: map-bg-light.jpg"]:::step
+
+    DarkMap & LightMap --> UserAction{"Interacción del Usuario"}:::decision
+
+    UserAction -->|"Búsqueda por Texto"| TextFilter["Filtra point.name / point.address"]:::step
+    UserAction -->|"Filtro por Materiales"| MatFilter["Filtra point.materials con chips activos"]:::step
+    UserAction -->|"Toca Pin en Mapa"| SelectPin["setSelectedPoint(point)"]:::highlight
+
+    TextFilter & MatFilter --> ApplyFilter["Calcular filteredPoints"]:::highlight
+    ApplyFilter --> RenderMarkers["Renderiza Marcadores Dinámicos en InteractiveMap"]:::step
+
+    SelectPin --> OpenSheet["Despliega Bottom Sheet Animado (Framer Motion)"]:::primary
+    OpenSheet --> SheetActions{"Acciones en Bottom Sheet"}:::decision
+    SheetActions -->|"Cómo Llegar"| OpenGPS["Lanza enlace externo de navegación"]:::step
+    SheetActions -->|"Escanear Aquí"| RedirectScan["Navega a Pestaña 'Escáner'"]:::highlight
+    SheetActions -->|"Arrastra hacia abajo"| DragDismiss["handleDragEnd: Cierra Bottom Sheet"]:::step
+        </div>
+      </div>
+
+      <!-- Adv Diagram 2 -->
+      <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">2. Motor de Métricas de Impacto Ecológico y Huella Ambiental</h3>
+        <div class="mermaid">
+flowchart TD
+    classDef primary fill:#004D40,stroke:#00382E,stroke-width:2px,color:#FFFFFF,font-weight:bold;
+    classDef step fill:#FFFFFF,stroke:#94A3B8,stroke-width:1.5px,color:#0F172A,font-weight:600;
+    classDef highlight fill:#E0F2F1,stroke:#004D40,stroke-width:2px,color:#004D40,font-weight:bold;
+    classDef decision fill:#FEF3C7,stroke:#D97706,stroke-width:2px,color:#92400E,font-weight:bold;
+
+    A["Depósito Confirmado: submitDropoff()"]:::primary --> B["Obtener itemCount = Σ unidades"]:::step
+    B --> C["Calcular Puntos Finales = Round(basePoints × multiplier)"]:::highlight
+
+    subgraph CalculoImpacto ["Fórmulas de Conversión Ambiental"]
+        C --> D["CO₂ Evitado = co2_actual + (itemCount × 0.5 kg)"]:::step
+        C --> E{"¿Puntos Finales > 200?"}:::decision
+        E -->|"Sí"| F["Árboles = trees_actual + 1"]:::highlight
+        E -->|"No"| G["Árboles = trees_actual (sin incremento)"]:::step
+    end
+
+    subgraph DesgloseMateriales ["Métricas Específicas por Residuo"]
+        B --> H["phonesRecycled += celulares"]:::step
+        B --> I["computersRecycled += laptops"]:::step
+        B --> J["batteriesRecycled += baterias"]:::step
+        B --> K["cablesRecycledKg += cables (kg)"]:::step
+    end
+
+    D & F & G & H & I & J & K --> SaveUser["Actualizar Objeto user.impact en LocalStorage"]:::primary
+    SaveUser --> RenderProfile["Visualizar Tarjetas de Impacto en Perfil"]:::highlight
+        </div>
+      </div>
+
+      <!-- Adv Diagram 3 -->
+      <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">3. Jerarquía del Design System (Atomic Design)</h3>
+        <div class="mermaid">
+graph TD
+    classDef primary fill:#004D40,stroke:#00382E,stroke-width:2px,color:#FFFFFF,font-weight:bold;
+    classDef step fill:#FFFFFF,stroke:#94A3B8,stroke-width:1.5px,color:#0F172A,font-weight:600;
+    classDef highlight fill:#E0F2F1,stroke:#004D40,stroke-width:2px,color:#004D40,font-weight:bold;
+
+    subgraph Atomos ["⚛️ Átomos (src/components/ui)"]
+        A1["Avatar"]:::step
+        A2["Badge"]:::step
+        A3["Button / BackButton"]:::step
+        A4["IconButton"]:::step
+        A5["Chip"]:::step
+        A6["Toggle"]:::step
+        A7["Skeleton"]:::step
+        A8["IconBox"]:::step
+        A9["LoadingSpinner"]:::step
+    end
+
+    subgraph Moleculas ["🧬 Moléculas"]
+        M1["LevelIndicator (Badge + Pill)"]:::highlight
+        M2["SearchBar"]:::step
+        M3["MenuItem"]:::step
+        M4["Tabs"]:::step
+        M5["ProgressBar"]:::step
+        M6["CountdownTimer"]:::step
+        M7["Modal"]:::step
+    end
+
+    subgraph Organismos ["🦠 Organismos"]
+        O1["InteractiveMap"]:::highlight
+        O2["ScanCamera"]:::highlight
+        O3["ECyclerProfileBadgeOverlay (3D Flip)"]:::highlight
+        O4["SpecialMissionCard"]:::step
+        O5["BottomNavBar"]:::primary
+        O6["SplashScreen"]:::primary
+    end
+
+    subgraph LayoutsViews ["📱 Layouts y Pantallas"]
+        L1["MobileLayout Base"]:::primary
+        V1["Home (Explorar)"]:::step
+        V2["Scan (Escáner)"]:::step
+        V3["Hub (E-Hub)"]:::step
+        V4["Pickup (Retiro)"]:::step
+        V5["Profile (Drawer)"]:::step
+    end
+
+    Atomos --> Moleculas
+    Moleculas --> Organismos
+    Organismos --> LayoutsViews
+        </div>
+      </div>
+
+      <!-- Adv Diagram 4 -->
+      <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">4. Sistema de Telemetría, Analytics y Detección de Sesión</h3>
+        <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Usuario as 👤 Usuario
+    participant Provider as 🛡️ AuthProvider
+    participant Analytics as 📊 Analytics Utility
+    participant Maze as 🧪 Maze Session Detector
+    participant Features as 📱 Componentes de Vistas
+
+    Provider->>Analytics: initializeAnalytics() al montar App
+    Provider->>Maze: detectMazeSession() (Comprueba test params)
+    
+    Usuario->>Features: Cambia Tema (Dark / Light)
+    Features->>Analytics: analytics.themeToggled(isDarkMode)
+
+    Usuario->>Features: Aplica Filtro de Materiales en Mapa
+    Features->>Analytics: analytics.materialFilterApplied(materials, matchCount)
+
+    Usuario->>Features: Confirma Depósito de Residuos
+    Features->>Analytics: analytics.dropoffConfirmed(itemCount, totalPoints)
+
+    Usuario->>Features: Canjea Cupón de Descuento
+    Features->>Analytics: analytics.couponRedeemed(couponId, cost)
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-primary', 'text-white', 'shadow-sm');
+        btn.classList.add('bg-gray-100', 'text-gray-600');
+      });
+
+      const selectedContent = document.getElementById(tabId);
+      if (selectedContent) {
+        selectedContent.classList.remove('hidden');
+      }
+
+      const activeBtn = document.getElementById('btn-' + tabId);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-gray-100', 'text-gray-600');
+        activeBtn.classList.add('bg-primary', 'text-white', 'shadow-sm');
+      }
+
+      mermaid.contentLoaded();
+    }
+  </script>
+</body>
+</html>
