@@ -40,7 +40,7 @@ src/
 ├── components/
 │   ├── ui/         # Primitivas del Design System v2 (Button, BottomSheet, Toast, MapPin…)
 │   ├── layout/     # MobileLayout, BottomNavBar, TopBar
-│   └── Welcome/    # Tarjeta de bienvenida (primera visita)
+│   └── Welcome/    # Tarjeta de bienvenida (en cada carga)
 ├── features/       # home (Explorar), pickup (Retiro), scan, hub (Beneficios), profile, auth
 ├── context/        # CiudadanoProvider: estado compartido de la capa
 ├── hooks/          # useCiudadano, useIsDesktop, useCanScan
@@ -62,6 +62,6 @@ La carpeta `design-system/` en la raíz es la copia v1, previa a este rediseño.
 
 Mientras no esté conectado el backend, `src/constants/ciudadano.ts` reúne los puntos limpios por comuna, el sector de retiro, la campaña, los premios y una cuenta demo. Tienen la misma forma que tendrán los datos reales, así que el cambio queda en ese archivo.
 
-La tarjeta de bienvenida aparece solo en la primera visita. Para volver a verla, abre la app con `?bienvenida` (por ejemplo, `https://e-cycle-tau.vercel.app/?bienvenida`).
+La tarjeta de bienvenida aparece en cada carga (el handoff la pide solo en la primera visita; en el prototipo se muestra siempre para demos y pruebas).
 
 En la maqueta, el código SMS es `1234`. «Ingresar» abre la cuenta demo (Trinidad Rojas).

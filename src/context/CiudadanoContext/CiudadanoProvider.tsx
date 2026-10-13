@@ -7,9 +7,7 @@ import { storage } from '@/utils/storage';
 import { CiudadanoContext, ConfirmRequest, RegisterMode, ToastState } from './CiudadanoContext';
 
 const KEY_THEME = 'theme';
-const KEY_WELCOME = 'ec-welcome-seen';
 const KEY_GUEST = 'ec-guest-points';
-const PARAM_WELCOME = 'bienvenida';
 
 const LOADING_MS = 3200;
 const WELCOME_MS = 3600;
@@ -59,12 +57,11 @@ export const CiudadanoProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         storage.setRaw(KEY_THEME, dark ? 'dark' : 'light');
     }, [dark]);
 
-    // Skeleton until 3.2 s; welcome card at 3.6 s, only on the first visit.
-    // `?bienvenida` in the URL shows it again (demos, usability tests).
+    // Skeleton until 3.2 s; welcome card at 3.6 s on every load. The handoff shows it only on
+    // the first visit; this high-fidelity prototype shows it always so demos and tests see it.
     useEffect(() => {
-        const forced = new URLSearchParams(window.location.search).has(PARAM_WELCOME);
         const a = setTimeout(() => setLoading(false), LOADING_MS);
-        const b = !forced && storage.get(KEY_WELCOME, false) ? undefined : setTimeout(() => setShowWelcome(true), WELCOME_MS);
+        const b = setTimeout(() => setShowWelcome(true), WELCOME_MS);
         return () => {
             clearTimeout(a);
             clearTimeout(b);
@@ -97,10 +94,7 @@ export const CiudadanoProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         analytics.themeToggled(value);
     };
 
-    const closeWelcome = () => {
-        setShowWelcome(false);
-        storage.set(KEY_WELCOME, true);
-    };
+    const closeWelcome = () => setShowWelcome(false);
 
     const openRegister = (mode: RegisterMode) => {
         setAccount(false);
