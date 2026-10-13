@@ -62,4 +62,6 @@ La carpeta `design-system/` en la raíz es la copia v1, previa a este rediseño.
 
 Mientras no esté conectado el backend, `src/constants/ciudadano.ts` reúne los puntos limpios por comuna, el sector de retiro, la campaña, los premios y una cuenta demo. Tienen la misma forma que tendrán los datos reales, así que el cambio queda en ese archivo.
 
+La tarjeta de bienvenida aparece solo en la primera visita. Para volver a verla, abre la app con `?bienvenida` (por ejemplo, `https://e-cycle-tau.vercel.app/?bienvenida`).
+
 En la maqueta, el código SMS es `1234`. «Ingresar» abre la cuenta demo (Trinidad Rojas).

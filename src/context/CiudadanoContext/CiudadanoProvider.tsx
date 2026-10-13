@@ -9,6 +9,7 @@ import { CiudadanoContext, ConfirmRequest, RegisterMode, ToastState } from './Ci
 const KEY_THEME = 'theme';
 const KEY_WELCOME = 'ec-welcome-seen';
 const KEY_GUEST = 'ec-guest-points';
+const PARAM_WELCOME = 'bienvenida';
 
 const LOADING_MS = 3200;
 const WELCOME_MS = 3600;
@@ -59,9 +60,11 @@ export const CiudadanoProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }, [dark]);
 
     // Skeleton until 3.2 s; welcome card at 3.6 s, only on the first visit.
+    // `?bienvenida` in the URL shows it again (demos, usability tests).
     useEffect(() => {
+        const forced = new URLSearchParams(window.location.search).has(PARAM_WELCOME);
         const a = setTimeout(() => setLoading(false), LOADING_MS);
-        const b = storage.get(KEY_WELCOME, false) ? undefined : setTimeout(() => setShowWelcome(true), WELCOME_MS);
+        const b = !forced && storage.get(KEY_WELCOME, false) ? undefined : setTimeout(() => setShowWelcome(true), WELCOME_MS);
         return () => {
             clearTimeout(a);
             clearTimeout(b);
