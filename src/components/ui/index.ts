@@ -8,6 +8,7 @@ export * from './SplashScreen';
 // New UI primitives
 export * from './Icon';
 export * from './Enter';
+export * from './Counter';
 export * from './Button';
 export * from './Input';
 export * from './Card';
@@ -32,3 +33,4 @@ export * from './Toggle';
 export * from './IconBox';
 export * from './MenuItem';
 
+export { screen } from './screenStyles';
