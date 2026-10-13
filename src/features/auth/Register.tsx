@@ -1,172 +1,144 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { AuthContext } from '@/context';
-import { BackButton, Button, Input } from '@/components/ui';
+import { Button, Enter, IconButton, Input } from '@/components/ui';
+import { DEMO_OTP } from '@/constants/ciudadano';
+import { DUR, EASE } from '@/constants/motion';
+import { useCiudadano } from '@/hooks';
+import { trackEvent } from '@/utils/analytics';
 
-interface RegisterProps {
-    onClose: () => void;
-    onLogin: () => void;
-}
+type Errors = Partial<Record<'name' | 'phone' | 'code', boolean>>;
 
-export const Register: React.FC<RegisterProps> = ({ onClose, onLogin }) => {
-    const auth = useContext(AuthContext);
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-    });
-    const [errors, setErrors] = useState({
-        email: false,
-        passwordMismatch: false
-    });
+const muted: React.CSSProperties = { fontSize: 14, lineHeight: 1.5, color: 'var(--text-muted)', margin: 0 };
 
-    const validateEmail = (email: string) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
+/**
+ * Sign-up (name + phone) or log-in (phone only), then a 4-digit SMS code.
+ * No passwords. A wrong field shakes and turns red.
+ */
+export const Register: React.FC = () => {
+    const app = useCiudadano();
+    const login = app.register === 'login';
+    const [step, setStep] = useState<0 | 1>(0);
+    const [name, setName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [code, setCode] = useState('');
+    const [err, setErr] = useState<Errors>({});
+    const [shake, setShake] = useState(0);
+
+    const fail = (e: Errors) => {
+        setErr(e);
+        setShake((n) => n + 1);
     };
 
-    const handleEmailBlur = () => {
-        if (formData.email && !validateEmail(formData.email)) {
-            setErrors(prev => ({ ...prev, email: true }));
-        } else {
-            setErrors(prev => ({ ...prev, email: false }));
-        }
-    };
-
-    const handlePasswordBlur = () => {
-        if (formData.confirmPassword && formData.password !== formData.confirmPassword) {
-            setErrors(prev => ({ ...prev, passwordMismatch: true }));
-        } else {
-            setErrors(prev => ({ ...prev, passwordMismatch: false }));
-        }
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
+    const send = (e: React.FormEvent) => {
         e.preventDefault();
-
-        // Validate before submit
-        const emailValid = validateEmail(formData.email);
-        const passwordsMatch = formData.password === formData.confirmPassword;
-
-        setErrors({
-            email: !emailValid,
-            passwordMismatch: !passwordsMatch
-        });
-
-        if (!emailValid || !passwordsMatch) {
-            return;
-        }
-
-        // Register the user
-        if (auth?.register) {
-            auth.register(formData.name, formData.email);
-        }
-        onClose();
+        const x = { name: !login && !name.trim(), phone: phone.replace(/\D/g, '').length < 8 };
+        if (x.name || x.phone) return fail(x);
+        setErr({});
+        setStep(1);
     };
+
+    const verify = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (code !== DEMO_OTP) return fail({ code: true });
+        trackEvent(login ? 'login_completed' : 'signup_completed');
+        app.signIn(login ? null : name, phone.trim());
+    };
+
+    const shakeIf = (on?: boolean) => (on ? 'ec-shake' : undefined);
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <motion.div
-                initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className="w-full max-w-md bg-white dark:bg-[#1E1E1E] rounded-3xl shadow-2xl overflow-hidden flex flex-col relative max-h-[90vh] overflow-y-auto"
+        <motion.div
+            initial={{ y: '100%' }}
+            animate={{ y: 0, transition: { duration: DUR.slow, ease: EASE.enter } }}
+            exit={{ y: '100%', transition: { duration: DUR.slow * 0.7, ease: EASE.exit } }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="register-title"
+            style={{ position: 'absolute', inset: 0, zIndex: 80, background: 'var(--surface-page)', display: 'flex', flexDirection: 'column' }}
+        >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '16px 12px 0' }}>
+                <IconButton
+                    icon={step ? 'arrow_back' : 'close'}
+                    variant="ghost"
+                    ariaLabel={step ? 'Volver' : 'Cerrar'}
+                    onClick={() => (step ? setStep(0) : app.closeRegister())}
+                />
+            </div>
+            <Enter
+                key={step}
+                className="no-scrollbar"
+                style={{ flex: 1, overflowY: 'auto', padding: '12px 24px 32px', display: 'flex', flexDirection: 'column', gap: 24 }}
             >
-                {/* Header Image */}
-                <div className="h-40 relative bg-primary/10 overflow-hidden shrink-0">
-                    {/* Ambient Background Glow */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-primary/20 dark:bg-accent/20 blur-[60px] rounded-full pointer-events-none" />
-
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-primary/30 dark:bg-accent/30 blur-xl rounded-full scale-150 animate-pulse" />
-                            <span className="relative material-symbols-rounded text-6xl text-primary dark:text-accent drop-shadow-lg">person_add</span>
-                        </div>
-                    </div>
-
-                    <BackButton
-                        onClick={onClose}
-                        variant="overlay"
-                        className="absolute top-4 left-4"
-                    />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <h1 id="register-title" style={{ fontSize: 26, fontWeight: 700, margin: 0 }}>
+                        {step ? 'Revisa tus mensajes' : login ? 'Ingresa a tu cuenta' : 'Crea tu cuenta'}
+                    </h1>
+                    <p style={muted}>
+                        {step
+                            ? `Te enviamos un código de 4 dígitos al ${phone}.`
+                            : login
+                              ? 'Escribe el teléfono con que creaste tu cuenta. Sin contraseñas.'
+                              : 'Solo te pedimos tu nombre y tu teléfono. Sin contraseñas.'}
+                    </p>
                 </div>
-
-                {/* Form Content */}
-                <div className="p-8 flex flex-col gap-6">
-                    <div className="text-center">
-                        <h2 className="text-2xl font-bold text-text dark:text-white mb-2">Crea tu cuenta</h2>
-                        <p className="text-gray-500 dark:text-gray-400 text-sm">
-                            Únete a la comunidad de Mineros Urbanos y empieza a reciclar hoy.
-                        </p>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                        <Input
-                            label="Nombre Completo"
-                            type="text"
-                            placeholder="Juan Pérez"
-                            icon="person"
-                            value={formData.name}
-                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        />
-
-                        <Input
-                            label="Correo Electrónico"
-                            type="email"
-                            placeholder="juan@ejemplo.com"
-                            icon="mail"
-                            error={errors.email ? "Inválido" : false}
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            onBlur={handleEmailBlur}
-                        />
-
-                        <Input
-                            label="Contraseña"
-                            type="password"
-                            placeholder="••••••••"
-                            icon="lock"
-                            value={formData.password}
-                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        />
-
-                        <Input
-                            label="Confirmar Contraseña"
-                            type="password"
-                            placeholder="••••••••"
-                            icon="lock_reset"
-                            error={errors.passwordMismatch ? "No coinciden" : false}
-                            value={formData.confirmPassword}
-                            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                            onBlur={handlePasswordBlur}
-                        />
-
-                        <Button
-                            type="submit"
-                            variant="primary"
-                            size="lg"
-                            fullWidth
-                            className="mt-4"
-                            icon={<span className="material-symbols-rounded">arrow_forward</span>}
-                        >
-                            Registrarme
+                {step === 0 ? (
+                    <form onSubmit={send} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                        {!login && (
+                            <div key={`n${shake}`} className={shakeIf(err.name)}>
+                                <Input
+                                    label="Nombre"
+                                    icon="person"
+                                    placeholder="Trinidad Rojas"
+                                    autoComplete="name"
+                                    value={name}
+                                    error={err.name ? 'Falta tu nombre' : false}
+                                    onChange={(e) => setName(e.target.value)}
+                                />
+                            </div>
+                        )}
+                        <div key={`p${shake}`} className={shakeIf(err.phone)}>
+                            <Input
+                                label="Teléfono"
+                                type="tel"
+                                icon="smartphone"
+                                placeholder="+56 9 1234 5678"
+                                autoComplete="tel"
+                                value={phone}
+                                error={err.phone ? 'Revisa el número' : false}
+                                onChange={(e) => setPhone(e.target.value)}
+                            />
+                        </div>
+                        <div style={{ marginTop: 8 }}>
+                            <Button type="submit" size="lg" fullWidth icon="arrow_forward">
+                                Enviar código
+                            </Button>
+                        </div>
+                    </form>
+                ) : (
+                    <form onSubmit={verify} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                        <div key={`c${shake}`} className={shakeIf(err.code)}>
+                            <Input
+                                label="Código"
+                                inputMode="numeric"
+                                autoComplete="one-time-code"
+                                maxLength={4}
+                                icon="pin"
+                                placeholder="1234"
+                                value={code}
+                                error={err.code ? 'Código incorrecto' : false}
+                                helperText="En esta maqueta el código es 1234."
+                                onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                            />
+                        </div>
+                        <Button type="submit" size="lg" fullWidth>
+                            {login ? 'Ingresar' : 'Crear cuenta'}
+                        </Button>
+                        <Button variant="ghost" fullWidth onClick={() => app.say('Te enviamos un código nuevo.', 'info')}>
+                            Reenviar código
                         </Button>
                     </form>
-
-                    <div className="flex items-center justify-center gap-1 mt-6">
-                        <span className="text-sm text-gray-500 dark:text-gray-400">¿Ya tienes cuenta?</span>
-                        <Button
-                            onClick={onLogin}
-                            variant="ghost"
-                            size="sm"
-                            className="!px-2 h-auto hover:underline"
-                        >
-                            Iniciar Sesión
-                        </Button>
-                    </div>
-                </div>
-            </motion.div>
-        </div>
+                )}
+            </Enter>
+        </motion.div>
     );
 };

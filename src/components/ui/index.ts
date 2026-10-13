@@ -9,6 +9,7 @@ export * from './SplashScreen';
 export * from './Icon';
 export * from './Enter';
 export * from './Counter';
+export * from './AccountNudge';
 export * from './Button';
 export * from './Input';
 export * from './Card';

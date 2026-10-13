@@ -188,6 +188,11 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
             onPointerCancel={onPointerUp}
+            // Focusing an off-screen pin would scroll this overflow:hidden box and shift the whole map.
+            onScroll={(e) => {
+                e.currentTarget.scrollLeft = 0;
+                e.currentTarget.scrollTop = 0;
+            }}
             style={{
                 position: 'absolute',
                 inset: 0,
