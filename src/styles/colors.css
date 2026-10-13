@@ -1,0 +1,147 @@
+/* E-Cycle color tokens · v2 (12 oct 2026)
+   Base values come from the app's tailwind.config (index.html). v2 adds contrast variants
+   derived in OKLCH (only L changes, chroma and hue kept) and resolves the gaps documented in
+   "E-Cycle Design System v2.dc.html". Each hex carries its OKLCH equivalent in a comment:
+   in code, OKLCH is the source of truth; in Figma, use the hex. */
+:root{
+  /* Brand */
+  --ec-primary:#004D40; /* oklch(37.6% 0.070 176.4) · claro: color de marca y botón primario */
+  --ec-primary-dark:#00382E; /* oklch(30.4% 0.057 176.4) · hover/presionado en claro */
+  --ec-primary-light:#00695C; /* oklch(46.7% 0.084 180.4) · icono activo en claro */
+  --ec-accent:#1DE9B6; /* oklch(83.2% 0.162 169.2) · en oscuro el primario ES el accent */
+  --ec-accent-pressed:#17C99C; /* oklch(74.4% 0.146 168.9) · v2 · hover/presionado del primario en oscuro */
+  --ec-secondary:#A6F8F2; /* oklch(92.5% 0.080 190.0) */
+  /* Teal tints */
+  --ec-teal-100:#D0EBE8; /* oklch(92.0% 0.029 188.6) · v2 · surface-teal-soft, absorbe a teal-050 */
+  --ec-teal-050:var(--ec-teal-100); /* v2 · fusionado con teal-100 */
+  --ec-teal-200:#B2DFDB; /* oklch(87.1% 0.047 189.6) */
+  --ec-teal-400:#4DB6AC; /* oklch(71.2% 0.098 186.7) */
+  --ec-teal-600:#00796B; /* oklch(51.7% 0.093 181.1) */
+  --ec-theme-color:#121212; /* v2 · antes #047A6C (no era token). Claro: #F5F8F8 vía media */
+  --ec-theme-color-light:#F5F8F8;
+
+  /* Surfaces — light */
+  --ec-background:#F5F8F8; /* oklch(97.7% 0.003 197.1) */
+  --ec-surface:#FFFFFF; /* oklch(100.0% 0.000 0) */
+  --ec-map-canvas:#F2F1ED; /* oklch(95.8% 0.005 95.1) */
+  --ec-search-shell:#F7F7F7; /* oklch(97.6% 0.000 0) */
+  --ec-inset:#F8F9FA; /* oklch(98.2% 0.002 0) */
+
+  /* Text — light */
+  --ec-text:#151515; /* oklch(19.6% 0.000 0) */
+  --ec-text-secondary:#6B6B6B; /* oklch(52.8% 0.000 0) · v2 · antes #808080 (3,95:1), ahora 5,33:1 sobre surface */
+  --ec-icon-inactive-light:#8B929E; /* oklch(65.8% 0.020 261.3) · v2 · iconos en reposo en claro, 3,1:1 */
+
+  /* Borders — light */
+  --ec-border:#F3F4F6; /* oklch(96.7% 0.003 264.5) */
+  --ec-border-strong:#E5E7EB; /* oklch(92.8% 0.006 264.5) · tablas y campos de Gestión */
+
+  /* Neutrals (Tailwind gray, kept for back-compat) */
+  --ec-gray-50:#F9FAFB;
+  --ec-gray-100:#F3F4F6;
+  --ec-gray-200:#E5E7EB;
+  --ec-gray-300:#D1D5DB;
+  --ec-gray-400:#9CA3AF;
+  --ec-gray-500:#6B7280;
+  --ec-gray-700:#374151;
+  --ec-gray-800:#1F2937;
+
+  /* Feedback — v2: components use THESE, never Tailwind red/green/amber */
+  --ec-success:#4CAF50; /* oklch(67.3% 0.162 144.2) */
+  --ec-success-bg:#E8F5E9; /* oklch(95.7% 0.021 147.6) */
+  --ec-success-text:#2E7D32; /* oklch(52.3% 0.135 144.2) · 4,56:1 sobre success-bg */
+  --ec-error:#F44336; /* oklch(64.3% 0.215 28.8) */
+  --ec-error-bg:#FFEBEE; /* oklch(95.7% 0.022 7.2) · v2 */
+  --ec-error-text:#C62828; /* oklch(53.9% 0.194 26.7) · v2 · texto de error en claro y botón destructivo con blanco */
+  --ec-warning:#FF9800; /* oklch(77.0% 0.174 64.1) */
+  --ec-warning-bg:#FFF3E0; /* oklch(96.9% 0.028 79.5) · v2 */
+  --ec-warning-text:#8A4B00; /* oklch(47.9% 0.112 59.9) · v2 · 6,2:1 sobre warning-bg */
+  --ec-points:#FFC107; /* oklch(84.4% 0.172 84.9) */
+  --ec-points-bg:#FFF8E1; /* oklch(97.9% 0.031 92.9) */
+  --ec-points-text:#9E6400; /* oklch(55.3% 0.120 70.3) · v2 · único texto permitido sobre points-bg */
+
+  /* Perk / special-mission accents */
+  --ec-perk-purple:#7C4DFF; /* oklch(57.9% 0.247 288.2) · mission-special */
+  --ec-perk-purple-on-dark:#8A5FFF; /* oklch(61.6% 0.226 290.6) · v2 · texto/icono de misión especial en oscuro */
+  --ec-perk-purple-dark:#651FFF; /* oklch(51.4% 0.285 284.3) */
+  --ec-perk-violet:#A855F7; /* oklch(62.7% 0.233 303.9) · mission-perk */
+  --ec-perk-violet-on-light:#9C47E9; /* oklch(58.7% 0.233 304.0) · v2 · texto de beneficio en claro */
+  --ec-perk-green:#10B981; /* oklch(69.6% 0.149 162.5) */
+  --ec-perk-orange:#FB923C; /* oklch(75.8% 0.159 55.9) */
+
+  /* Dark mode base values */
+  --ec-dark-bg:#121212; /* oklch(18.2% 0.000 0) */
+  --ec-dark-surface:#1E1E1E; /* oklch(23.5% 0.000 0) */
+  --ec-dark-surface-elevated:#2A2A2A; /* oklch(28.5% 0.000 0) · v2 · toast, hover de filas, shimmer */
+  --ec-dark-border:#333333; /* oklch(32.1% 0.000 0) */
+  --ec-dark-text:#E2E2E2; /* oklch(91.3% 0.000 0) */
+  --ec-dark-text-secondary:#A0A0A0; /* oklch(70.6% 0.000 0) */
+  --ec-dark-text-tertiary:#8A8A8A; /* oklch(63.3% 0.000 0) · v2 · reemplaza gray-500 en oscuro, 4,8:1 */
+  --ec-icon-inactive-dark:#9CA3AF; /* oklch(71.4% 0.019 261.3) */
+
+  /* ── Semantic aliases (use these in components) ── */
+  --surface-page:var(--ec-background);
+  --surface-card:var(--ec-surface);
+  --surface-elevated:var(--ec-surface);
+  --surface-inset:var(--ec-gray-50);
+  --text-body:var(--ec-text);
+  --text-muted:var(--ec-text-secondary);
+  --text-tertiary:var(--ec-text-secondary);
+  --icon-inactive:var(--ec-icon-inactive-light);
+  --text-on-brand:#FFFFFF;
+  --brand-solid:var(--ec-primary);
+  --brand-solid-hover:var(--ec-primary-dark);
+  --brand-on-solid:#FFFFFF;
+  --brand-fg:var(--ec-primary);
+  --brand-tint:var(--ec-teal-100);
+  --brand-glow:var(--ec-accent);
+  --border-hairline:var(--ec-border);
+  --border-card:var(--ec-gray-100);
+  --border-strong:var(--ec-border-strong);
+  --focus-ring:rgba(0,77,64,.5);
+  --link:var(--ec-primary);
+  --link-hover:var(--ec-primary-dark);
+  --success-fg:var(--ec-success-text);
+  --success-soft:var(--ec-success-bg);
+  --error-fg:var(--ec-error-text);
+  --error-soft:var(--ec-error-bg);
+  --error-solid:var(--ec-error-text);
+  --on-error-solid:#FFFFFF;
+  --warning-fg:var(--ec-warning-text);
+  --warning-soft:var(--ec-warning-bg);
+  --points-fg:var(--ec-points-text);
+  --mission-fg:var(--ec-perk-purple);
+  --perk-fg:var(--ec-perk-violet-on-light);
+}
+html.dark,.ec-dark{
+  --surface-page:var(--ec-dark-bg);
+  --surface-card:var(--ec-dark-surface);
+  --surface-elevated:var(--ec-dark-surface-elevated);
+  --surface-inset:rgba(255,255,255,.05);
+  --text-body:var(--ec-dark-text);
+  --text-muted:var(--ec-dark-text-secondary);
+  --text-tertiary:var(--ec-dark-text-tertiary);
+  --icon-inactive:var(--ec-icon-inactive-dark);
+  --brand-solid:var(--ec-accent);
+  --brand-solid-hover:var(--ec-accent-pressed);
+  --brand-on-solid:var(--ec-dark-bg);
+  --brand-fg:var(--ec-accent);
+  --brand-tint:rgba(29,233,182,.12);
+  --border-hairline:var(--ec-dark-border);
+  --border-card:var(--ec-dark-border);
+  --border-strong:var(--ec-dark-border);
+  --focus-ring:rgba(29,233,182,.5);
+  --link:var(--ec-accent);
+  --link-hover:var(--ec-secondary);
+  --success-fg:var(--ec-success);
+  --success-soft:rgba(76,175,80,.15);
+  --error-fg:var(--ec-error);
+  --error-soft:rgba(244,67,54,.15);
+  --error-solid:var(--ec-error);
+  --on-error-solid:var(--ec-dark-bg);
+  --warning-fg:var(--ec-warning);
+  --warning-soft:rgba(255,152,0,.15);
+  --points-fg:var(--ec-points);
+  --mission-fg:var(--ec-perk-purple-on-dark);
+  --perk-fg:var(--ec-perk-violet);
+}

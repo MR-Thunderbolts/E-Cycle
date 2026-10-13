@@ -1,0 +1,45 @@
+/* Global base — mirrors the app's index.html <style> block. */
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;font-family:var(--font-sans);background:var(--surface-page);color:var(--text-body);-webkit-font-smoothing:antialiased;text-wrap:pretty}
+/* v2 · sin pulgas: títulos y texto centrado balancean; párrafos usan pretty */
+h1,h2,h3,h4,.ec-balance,[style*="text-align:center"]{text-wrap:balance}
+.ec-nowrap{white-space:nowrap}
+:focus-visible{outline:2px solid var(--brand-glow);outline-offset:2px}
+button,input,select,textarea{font-family:inherit;color:inherit}
+html.dark body,.ec-dark,.ec-hc{color:var(--text-body)}
+
+a{color:var(--link);text-decoration:none;font-weight:var(--fw-bold)}
+a:hover{color:var(--link-hover);text-decoration:underline;text-underline-offset:3px}
+
+/* Icon font. Default is outline; .filled-icon fills. */
+.material-symbols-rounded{font-family:"Material Symbols Rounded";font-weight:normal;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+.filled-icon{font-variation-settings:'FILL' 1}
+
+/* Mobile shell helpers */
+.no-scrollbar::-webkit-scrollbar{display:none}
+.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+.safe-bottom{padding-bottom:env(safe-area-inset-bottom)}
+
+/* Animations used by components */
+@keyframes ec-scan{0%{top:0;opacity:0}10%{opacity:1}90%{opacity:1}100%{top:100%;opacity:0}}
+@keyframes ec-bounce-short{0%,100%{transform:translateY(0)}50%{transform:translateY(-15%)}}
+@keyframes ec-bounce-gentle{0%,100%{transform:translateY(-5%)}50%{transform:translateY(0)}}
+@keyframes ec-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes ec-spin{to{transform:rotate(360deg)}}
+@keyframes ec-ping{75%,100%{transform:scale(2);opacity:0}}
+@keyframes ec-pulse{50%{opacity:.5}}
+.animate-bounce-short{animation:ec-bounce-short 1s infinite}
+.animate-bounce-gentle{animation:ec-bounce-gentle 2s infinite}
+.skeleton-shimmer{background:linear-gradient(90deg,#e8e8e8 25%,#f0f0f0 50%,#e8e8e8 75%);background-size:200% 100%;animation:ec-shimmer 1.5s infinite}
+html.dark .skeleton-shimmer,.ec-dark .skeleton-shimmer{background:linear-gradient(90deg,#2a2a2a 25%,#333 50%,#2a2a2a 75%);background-size:200% 100%;animation:ec-shimmer 1.5s infinite}
+@keyframes ec-loc-pulse{0%{transform:scale(.5);opacity:.6}100%{transform:scale(1.6);opacity:0}}
+@keyframes ec-fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes ec-shake{0%,100%{transform:translateX(0)}15%,55%{transform:translateX(-8px)}35%,75%{transform:translateX(8px)}90%{transform:translateX(-3px)}}
+@keyframes ec-scale-in{from{opacity:0;transform:scale(.94) translateY(8px)}to{opacity:1;transform:none}}
+@keyframes ec-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes ec-pop{0%{opacity:0;transform:scale(.6)}60%{opacity:1;transform:scale(1.06)}100%{transform:scale(1)}}
+.ec-shake{animation:ec-shake 420ms var(--ease-standard)}
+.ec-enter{animation:ec-scale-in var(--dur-slow) var(--ease-enter) backwards}
+@keyframes ec-sheet-up{from{transform:translateY(100%)}to{transform:none}}
+/* v2 · movimiento reducido: regla global */
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}

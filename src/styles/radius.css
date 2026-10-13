@@ -1,0 +1,11 @@
+/* E-Cycle is a very round interface. Pills for anything tappable, 24–40px for containers. */
+:root{
+  --radius-sm:8px;
+  --radius-md:12px;    /* badges, small tiles */
+  --radius-lg:16px;    /* rounded-2xl — default card */
+  --radius-xl:24px;    /* nested cards, active nav button */
+  --radius-2xl:28px;   /* deposit rows */
+  --radius-3xl:32px;   /* hero cards, bottom-sheet top, reward tiles */
+  --radius-4xl:40px;   /* profile overlay, modal-like panels */
+  --radius-full:9999px;
+}

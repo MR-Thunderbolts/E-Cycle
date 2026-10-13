@@ -1,0 +1,28 @@
+/* Motion · v2. Values map 1:1 to framer-motion (^11 in the repo).
+   Principles: explains, doesn't decorate · fast and continuous (max 350 ms) · all or nothing
+   (if it animates in, it animates out and through every state). */
+:root{
+  --dur-instant:100ms; /* @kind other */ /* press */
+  --dur-fast:150ms; /* @kind other */ /* hover, color, focus */
+  --dur-base:250ms; /* @kind other */ /* v2 · antes 300ms. tabs, chips, toggle, pins, search */
+  --dur-slow:350ms; /* @kind other */ /* v2 · antes 500ms. sheets, drawers, modals, screens */
+  --dur-bar:1000ms; /* @kind other */ /* progress-bar fills */
+  --dur-pulse:2000ms; /* @kind other */ /* current-location pulse */
+  --exit-factor:.7; /* @kind other */ /* exit = 70% of enter */
+  --ease-standard:cubic-bezier(.2,0,0,1); /* @kind other */
+  --ease-enter:cubic-bezier(0,0,0,1); /* @kind other */
+  --ease-exit:cubic-bezier(.3,0,1,1); /* @kind other */
+  --ease-out:var(--ease-enter); /* @kind other */ /* back-compat */
+  --ease-in-out:var(--ease-standard); /* @kind other */ /* back-compat */
+  --spring-sheet-stiffness:400; /* @kind other */
+  --spring-sheet-damping:40; /* @kind other */
+  --spring-snappy-stiffness:500; /* @kind other */ /* tabs/nav indicator (layoutId) */
+  --spring-snappy-damping:32; /* @kind other */
+  --spring-sheet:25; /* @kind other */ /* legacy damping, kept */
+  --sheet-dismiss-distance:120px; /* @kind other */
+  --sheet-dismiss-velocity:500; /* @kind other */ /* px/s */
+  --press-scale:.98; /* @kind other */
+  --dialog-enter-scale:.96; /* @kind other */
+  --lift-nav:-8px; /* @kind other */
+  --stagger:30ms; /* @kind other */ /* lists, max 6 items */
+}
