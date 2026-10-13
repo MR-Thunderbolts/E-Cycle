@@ -1,36 +1,22 @@
 import React from 'react';
-import { BottomNavBar } from '../BottomNavBar';
 import { TabType } from '@/types';
+import { BottomNavBar, NavTab } from '../BottomNavBar';
 
 export interface MobileLayoutProps {
     children: React.ReactNode;
     currentTab: TabType;
     onTabChange: (tab: TabType) => void;
     showNav?: boolean;
+    tabs?: NavTab[];
 }
 
-export const MobileLayout: React.FC<MobileLayoutProps> = ({
-    children,
-    currentTab,
-    onTabChange,
-    showNav = true
-}) => {
-    return (
-        <div className="fixed inset-0 flex flex-col w-full overflow-hidden font-sans">
-
-            {/* Scrollable Content Area */}
-            <main className="flex-1 overflow-hidden relative">
-                {children}
-            </main>
-
-            {/* Fixed Bottom Navigation - Absolute to overlay content */}
-            {showNav && (
-                <div className="absolute bottom-0 w-full z-40 pointer-events-none">
-                    <div className="pointer-events-auto">
-                        <BottomNavBar currentTab={currentTab} onTabChange={onTabChange} />
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
+export const MobileLayout: React.FC<MobileLayoutProps> = ({ children, currentTab, onTabChange, showNav = true, tabs }) => (
+    <div className="ec-shell">
+        <main className="ec-shell__main">{children}</main>
+        {showNav && (
+            <div className="ec-shell__nav">
+                <BottomNavBar currentTab={currentTab} onTabChange={onTabChange} tabs={tabs} />
+            </div>
+        )}
+    </div>
+);
