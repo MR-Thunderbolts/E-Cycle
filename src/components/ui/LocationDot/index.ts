@@ -1,0 +1,1 @@
+export { LocationDot } from './LocationDot';

@@ -17,6 +17,11 @@ export * from './LoadingSpinner';
 export * from './ProgressBar';
 export * from './EmptyState';
 export * from './Skeleton';
+export * from './BottomSheet';
+export * from './ConfirmDialog';
+export * from './Toast';
+export * from './MapPin';
+export * from './LocationDot';
 
 // Additional components (Option B)
 export * from './Chip';
