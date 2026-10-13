@@ -1,228 +1,281 @@
-import React, { useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { RecyclePoint } from '@/types';
-import { useAuth } from '@/hooks';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { animate, motion, useMotionValue, useTransform } from 'framer-motion';
+import type { CleanPoint, MapPosition } from '@/types';
+import { IconButton, LocationDot, MapPin, Skeleton } from '@/components/ui';
+import { DUR, EASE } from '@/constants/motion';
 import mapBg from '@/assets/map-bg.jpg';
 import mapBgLight from '@/assets/map-bg-light.jpg';
 
 interface InteractiveMapProps {
-    points: RecyclePoint[];
-    selectedPointId: string | null;
-    onPointSelect: (point: RecyclePoint) => void;
-    zoom: number;
-    onZoomChange: (zoom: number) => void;
-    centerOnUser: boolean;
-    onCenterComplete: () => void;
+    points: CleanPoint[];
+    userPos: MapPosition;
+    selected: CleanPoint | null;
+    onSelect: (point: CleanPoint) => void;
+    dark: boolean;
+    loading?: boolean;
+    /** Re-centres on this position when it changes (e.g. the centroid of a search). */
+    focus?: MapPosition | null;
+    /** Distance of the zoom controls from the bottom edge. */
+    controlsBottom?: number;
+    hideControls?: boolean;
+    children?: React.ReactNode;
 }
 
-const MAP_SIZE = 2000;
-const USER_POS = { x: 1000, y: 1000 };
-const MIN_ZOOM = 0.5;
-const MAX_ZOOM = 4;
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 3.2;
+const START_ZOOM = 1.6;
+const STEP = 1.35;
 const clampZoom = (z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));
+const glide = { duration: DUR.slow, ease: EASE.standard };
 
+const panelStyle: React.CSSProperties = {
+    background: 'var(--surface-card)',
+    border: '1px solid var(--border-card)',
+    borderRadius: 9999,
+};
+
+/**
+ * Drag to pan, + / − (or pinch / wheel) to zoom between 1 and 3.2, «mi ubicación» to re-centre.
+ * Pins and the «Tú» dot keep their size at any zoom; choosing a point centres on it and draws
+ * a dashed line from the user.
+ */
 const InteractiveMap: React.FC<InteractiveMapProps> = ({
     points,
-    selectedPointId,
-    onPointSelect,
-    zoom,
-    onZoomChange,
-    centerOnUser,
-    onCenterComplete
+    userPos,
+    selected,
+    onSelect,
+    dark,
+    loading,
+    focus,
+    controlsBottom = 40,
+    hideControls,
+    children,
 }) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const { isDarkMode } = useAuth();
+    const box = useRef<HTMLDivElement>(null);
+    const x = useMotionValue(0);
+    const y = useMotionValue(0);
+    const z = useMotionValue(START_ZOOM);
+    const inverse = useTransform(z, (v) => 1 / v);
 
-    // Mirror zoom into a ref so event handler closures never go stale
-    const zoomRef = useRef(zoom);
-    useEffect(() => { zoomRef.current = zoom; }, [zoom]);
+    const pointers = useRef(new Map<number, { x: number; y: number }>());
+    const gesture = useRef<{ x: number; y: number; px: number; py: number; dist: number; z: number } | null>(null);
 
-    // Stores initial pinch state: distance between fingers + zoom at gesture start
-    const pinchRef = useRef<{ dist: number; startZoom: number } | null>(null);
+    const stop = () => [x, y, z].forEach((v) => v.stop());
 
-    // Attach touch and wheel event listeners for pinch-to-zoom / scroll-to-zoom
-    useEffect(() => {
-        const container = containerRef.current;
-        if (!container) return;
-
-        const getDistance = (touches: TouchList) => {
-            const dx = touches[0].clientX - touches[1].clientX;
-            const dy = touches[0].clientY - touches[1].clientY;
-            return Math.hypot(dx, dy);
-        };
-
-        const onTouchStart = (e: TouchEvent) => {
-            if (e.touches.length === 2) {
-                pinchRef.current = {
-                    dist: getDistance(e.touches),
-                    startZoom: zoomRef.current,
-                };
+    /** Places a map position (in %) at the horizontal centre, 42% from the top. */
+    const center = useCallback(
+        (pos: MapPosition, instant = false) => {
+            const el = box.current;
+            if (!el) return;
+            const w = el.clientWidth;
+            const h = el.clientHeight;
+            const zz = z.get();
+            const tx = w / 2 - (pos.x / 100) * w * zz;
+            const ty = h * 0.42 - (pos.y / 100) * h * zz;
+            if (instant) {
+                x.set(tx);
+                y.set(ty);
+            } else {
+                animate(x, tx, glide);
+                animate(y, ty, glide);
             }
-        };
+        },
+        [x, y, z],
+    );
 
-        const onTouchMove = (e: TouchEvent) => {
-            if (e.touches.length === 2 && pinchRef.current) {
-                // Prevent the browser from scrolling the page during a pinch
-                e.preventDefault();
-                const newDist = getDistance(e.touches);
-                const scale = newDist / pinchRef.current.dist;
-                onZoomChange(clampZoom(pinchRef.current.startZoom * scale));
+    /** Zooms by `factor` keeping the screen point (cx, cy) fixed. */
+    const zoomAt = useCallback(
+        (factor: number, cx: number, cy: number, animated: boolean, from = { x: x.get(), y: y.get(), z: z.get() }) => {
+            const nz = clampZoom(from.z * factor);
+            const k = nz / from.z;
+            const nx = cx - (cx - from.x) * k;
+            const ny = cy - (cy - from.y) * k;
+            if (animated) {
+                animate(z, nz, glide);
+                animate(x, nx, glide);
+                animate(y, ny, glide);
+            } else {
+                z.set(nz);
+                x.set(nx);
+                y.set(ny);
             }
-        };
+        },
+        [x, y, z],
+    );
 
-        const onTouchEnd = (e: TouchEvent) => {
-            // Reset when any finger lifts (pinch ended)
-            if (e.touches.length < 2) {
-                pinchRef.current = null;
-            }
-        };
-
-        // Scroll wheel zoom for desktop / emulators
-        const onWheel = (e: WheelEvent) => {
-            e.preventDefault();
-            const delta = e.deltaY > 0 ? -0.15 : 0.15;
-            onZoomChange(clampZoom(zoomRef.current + delta));
-        };
-
-        container.addEventListener('touchstart', onTouchStart, { passive: true });
-        container.addEventListener('touchmove', onTouchMove, { passive: false });
-        container.addEventListener('touchend', onTouchEnd, { passive: true });
-        container.addEventListener('wheel', onWheel, { passive: false });
-
-        return () => {
-            container.removeEventListener('touchstart', onTouchStart);
-            container.removeEventListener('touchmove', onTouchMove);
-            container.removeEventListener('touchend', onTouchEnd);
-            container.removeEventListener('wheel', onWheel);
-        };
-    }, [onZoomChange]);
-
-    // Calculate initial position to center user
-    const getInitialPosition = () => {
-        if (containerRef.current) {
-            const { offsetWidth, offsetHeight } = containerRef.current;
-            return {
-                x: (offsetWidth / 2) - USER_POS.x,
-                y: (offsetHeight / 2) - USER_POS.y
-            };
-        }
-        return { x: 0, y: 0 };
+    const zoomButton = (factor: number) => {
+        const el = box.current;
+        if (el) zoomAt(factor, el.clientWidth / 2, el.clientHeight / 2, true);
     };
 
-    const [position, setPosition] = React.useState(getInitialPosition);
-
-    // Initialize on mount
     useEffect(() => {
-        setPosition(getInitialPosition());
+        center(userPos, true);
     }, []);
 
-    // Handle center on user
     useEffect(() => {
-        if (centerOnUser && containerRef.current) {
-            const { offsetWidth, offsetHeight } = containerRef.current;
-            setPosition({
-                x: (offsetWidth / 2) - USER_POS.x,
-                y: (offsetHeight / 2) - USER_POS.y
-            });
-            setTimeout(onCenterComplete, 100);
+        if (selected) center(selected);
+    }, [selected, center]);
+
+    useEffect(() => {
+        if (focus) center(focus);
+    }, [focus, center]);
+
+    // Wheel zoom (desktop). Non-passive so the page itself does not scroll.
+    useEffect(() => {
+        const el = box.current;
+        if (!el) return;
+        const onWheel = (e: WheelEvent) => {
+            e.preventDefault();
+            stop();
+            const r = el.getBoundingClientRect();
+            zoomAt(e.deltaY > 0 ? 1 / 1.1 : 1.1, e.clientX - r.left, e.clientY - r.top, false);
+        };
+        el.addEventListener('wheel', onWheel, { passive: false });
+        return () => el.removeEventListener('wheel', onWheel);
+    }, [zoomAt]);
+
+    const startGesture = () => {
+        const list = [...pointers.current.values()];
+        const r = box.current!.getBoundingClientRect();
+        const mid = list.length === 2
+            ? { x: (list[0].x + list[1].x) / 2, y: (list[0].y + list[1].y) / 2 }
+            : list[0];
+        gesture.current = {
+            x: x.get(),
+            y: y.get(),
+            z: z.get(),
+            px: mid.x - r.left,
+            py: mid.y - r.top,
+            dist: list.length === 2 ? Math.hypot(list[0].x - list[1].x, list[0].y - list[1].y) : 0,
+        };
+    };
+
+    const onPointerDown = (e: React.PointerEvent) => {
+        if ((e.target as HTMLElement).closest('button')) return;
+        stop();
+        pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        e.currentTarget.setPointerCapture(e.pointerId);
+        startGesture();
+    };
+
+    const onPointerMove = (e: React.PointerEvent) => {
+        const g = gesture.current;
+        if (!g || !pointers.current.has(e.pointerId)) return;
+        pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        const list = [...pointers.current.values()];
+        const r = box.current!.getBoundingClientRect();
+        if (list.length === 2) {
+            const dist = Math.hypot(list[0].x - list[1].x, list[0].y - list[1].y);
+            const mx = (list[0].x + list[1].x) / 2 - r.left;
+            const my = (list[0].y + list[1].y) / 2 - r.top;
+            zoomAt(dist / g.dist, g.px, g.py, false, { x: g.x + (mx - g.px), y: g.y + (my - g.py), z: g.z });
+        } else {
+            x.set(g.x + (e.clientX - r.left - g.px));
+            y.set(g.y + (e.clientY - r.top - g.py));
         }
-    }, [centerOnUser, onCenterComplete]);
+    };
+
+    const onPointerUp = (e: React.PointerEvent) => {
+        pointers.current.delete(e.pointerId);
+        if (pointers.current.size) startGesture();
+        else gesture.current = null;
+    };
 
     return (
-        <div ref={containerRef} className="w-full h-full overflow-hidden bg-[#1a1d21] relative touch-none">
+        <div
+            ref={box}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
+            style={{
+                position: 'absolute',
+                inset: 0,
+                overflow: 'hidden',
+                touchAction: 'none',
+                cursor: 'grab',
+                background: dark ? 'var(--ec-dark-bg)' : 'var(--ec-map-canvas)',
+            }}
+        >
             <motion.div
-                drag
-                dragElastic={0.05}
-                dragMomentum={false}
-                animate={{
-                    x: position.x,
-                    y: position.y,
-                    scale: zoom
-                }}
-                onDragEnd={(_, info) => {
-                    setPosition(prev => ({
-                        x: prev.x + info.offset.x,
-                        y: prev.y + info.offset.y
-                    }));
-                }}
-                transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                style={{
-                    width: MAP_SIZE,
-                    height: MAP_SIZE,
-                    transformOrigin: `${USER_POS.x}px ${USER_POS.y}px`
-                }}
-                className="absolute cursor-grab active:cursor-grabbing"
+                style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', x, y, scale: z, originX: 0, originY: 0 }}
             >
-                {/* Map Background Image - Dynamic based on theme */}
                 <img
-                    src={isDarkMode ? mapBg : mapBgLight}
-                    alt="Map Background"
-                    className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-90"
+                    src={dark ? mapBg : mapBgLight}
+                    alt=""
+                    aria-hidden="true"
+                    draggable={false}
+                    style={{ position: 'absolute', left: '-50%', top: '-50%', width: '200%', height: '200%', maxWidth: 'none', objectFit: 'cover', pointerEvents: 'none', opacity: 0.9 }}
                 />
-
-                {/* User Location Indicator */}
-                <div
-                    className="absolute z-20 flex items-center justify-center w-12 h-12 pointer-events-none"
-                    style={{
-                        left: USER_POS.x - 24,
-                        top: USER_POS.y - 24
-                    }}
+                {selected && (
+                    <svg
+                        viewBox="0 0 100 100"
+                        preserveAspectRatio="none"
+                        aria-hidden="true"
+                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible' }}
+                    >
+                        <line
+                            x1={userPos.x}
+                            y1={userPos.y}
+                            x2={selected.x}
+                            y2={selected.y}
+                            vectorEffect="non-scaling-stroke"
+                            style={{ stroke: 'var(--brand-fg)', strokeWidth: 2, strokeDasharray: '6 6' }}
+                        />
+                    </svg>
+                )}
+                <motion.div
+                    style={{ position: 'absolute', left: `${userPos.x}%`, top: `${userPos.y}%`, x: '-50%', y: '-50%', scale: inverse }}
                 >
-                    <div className="absolute w-full h-full bg-primary/30 rounded-full animate-ping" />
-                    <div className="relative w-4 h-4 bg-primary border-2 border-white rounded-full shadow-md" />
-                    <div className="absolute w-32 h-32 bg-gradient-to-t from-primary/20 to-transparent rounded-full -z-10 transform -translate-y-1/2 rotate-45 opacity-50"
-                        style={{ clipPath: 'polygon(50% 50%, 0% 0%, 100% 0%)' }}
-                    />
-                </div>
-
-                {/* Recycle Points */}
-                {points.map((point) => {
-                    const px = 1000 + (point.coordinates.lng + 70.6) * 20000;
-                    const py = 1000 - (point.coordinates.lat + 33.51) * 20000;
-                    const isSelected = selectedPointId === point.id;
-
+                    <LocationDot />
+                </motion.div>
+                {points.map((p) => {
+                    const isSel = selected?.id === p.id;
                     return (
-                        <motion.button
-                            key={point.id}
-                            onClick={(e) => { e.stopPropagation(); onPointSelect(point); }}
-                            className="absolute z-30 transform -translate-x-1/2 -translate-y-full"
-                            style={{ left: px, top: py }}
-                            whileHover={{ scale: 1.2 }}
-                            animate={{ scale: isSelected ? 1.2 : 1 }}
+                        <motion.div
+                            key={p.id}
+                            style={{
+                                position: 'absolute',
+                                left: `${p.x}%`,
+                                top: `${p.y}%`,
+                                x: '-50%',
+                                y: '-100%',
+                                scale: inverse,
+                                originX: 0.5,
+                                originY: 1,
+                                zIndex: isSel ? 2 : 1,
+                            }}
                         >
-                            <div className="relative flex flex-col items-center justify-center">
-                                {/* Marker Icon */}
-                                {point.specialMission ? (
-                                    <div className="relative z-10 flex justify-center items-center">
-                                        <div className="absolute inset-0 bg-primary/50 dark:bg-accent/50 rounded-full blur-md animate-pulse"></div>
-                                        <div className="absolute -inset-4 bg-primary/20 dark:bg-accent/20 rounded-full blur-xl animate-pulse delay-75"></div>
-                                        <span className="relative material-symbols-rounded text-7xl drop-shadow-xl filled-icon leading-none text-primary dark:text-accent transition-transform hover:scale-110">
-                                            location_on
-                                        </span>
-                                        <div className="absolute top-[18%] left-1/2 transform -translate-x-1/2 z-20 pointer-events-none w-8 h-8 bg-primary dark:bg-accent rounded-full flex items-center justify-center">
-                                            <span className="material-symbols-rounded text-xl font-bold text-accent dark:text-primary filled-icon">savings</span>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <span className="relative z-10 material-symbols-rounded text-5xl drop-shadow-xl filled-icon leading-none transition-colors text-[#00796B]">
-                                        location_on
-                                    </span>
-                                )}
-
-                                {isSelected && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 5 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className="absolute top-full mt-1 bg-white dark:bg-dark-surface px-3 py-1 rounded-full shadow-md whitespace-nowrap text-xs font-bold text-text dark:text-dark-text z-20"
-                                    >
-                                        {point.name}
-                                    </motion.div>
-                                )}
-                            </div>
-                        </motion.button>
+                            <MapPin label={p.name} selected={isSel} dimmed={!!selected && !isSel} onClick={() => onSelect(p)} />
+                        </motion.div>
                     );
                 })}
             </motion.div>
+            {loading && <Skeleton style={{ position: 'absolute', inset: 0, opacity: 0.5, zIndex: 2, borderRadius: 0 }} />}
+            {children}
+            <div
+                style={{
+                    position: 'absolute',
+                    right: 16,
+                    bottom: controlsBottom,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 8,
+                    zIndex: 3,
+                    opacity: hideControls ? 0 : 1,
+                    pointerEvents: hideControls ? 'none' : 'auto',
+                    transition: 'bottom var(--dur-slow) var(--ease-standard), opacity var(--dur-base)',
+                }}
+                aria-hidden={hideControls}
+            >
+                <div style={{ ...panelStyle, display: 'flex', flexDirection: 'column' }}>
+                    <IconButton icon="add" variant="ghost" ariaLabel="Acercar" onClick={() => zoomButton(STEP)} />
+                    <IconButton icon="remove" variant="ghost" ariaLabel="Alejar" onClick={() => zoomButton(1 / STEP)} />
+                </div>
+                <div style={panelStyle}>
+                    <IconButton icon="my_location" variant="ghost" ariaLabel="Centrar en mi ubicación" onClick={() => center(userPos)} />
+                </div>
+            </div>
         </div>
     );
 };

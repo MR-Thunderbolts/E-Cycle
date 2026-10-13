@@ -29,7 +29,7 @@ const today = () => 'Hoy';
 
 export const CiudadanoProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [tab, setTab] = useState<TabType>('explorar');
-    const [dark, setDarkState] = useState(() => storage.get<string>(KEY_THEME, 'dark') !== 'light');
+    const [dark, setDarkState] = useState(() => storage.getRaw(KEY_THEME) !== 'light');
 
     const [loading, setLoading] = useState(true);
     const [showWelcome, setShowWelcome] = useState(false);
@@ -55,7 +55,7 @@ export const CiudadanoProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // Theme: dark by default, persisted.
     useEffect(() => {
         document.documentElement.classList.toggle('dark', dark);
-        storage.set(KEY_THEME, dark ? 'dark' : 'light');
+        storage.setRaw(KEY_THEME, dark ? 'dark' : 'light');
     }, [dark]);
 
     // Skeleton until 3.2 s; welcome card at 3.6 s, only on the first visit.

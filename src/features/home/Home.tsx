@@ -1,397 +1,295 @@
-import React, { useState } from 'react';
-import { RECYCLE_POINTS, RECYCLE_CATEGORIES, COUPONS } from '@/constants';
-import { RecyclePoint } from '@/types';
-import { Avatar, SpecialMissionCard, Button, IconButton, ImageWithSkeleton } from '@/components';
-import { useAuth } from '@/hooks';
-import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import InteractiveMap from './components/InteractiveMap';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { animate, motion, useMotionValue } from 'framer-motion';
+import type { CleanPoint } from '@/types';
+import { BottomSheet, Chip, Icon, IconButton, Skeleton } from '@/components/ui';
+import { CAMPAIGN, MATERIAL_CATEGORIES, USER_POSITION } from '@/constants/ciudadano';
+import { SPRING_SHEET } from '@/constants/motion';
+import { useCiudadano } from '@/hooks';
 import { analytics } from '@/utils';
+import { initials } from '@/utils/format';
+import InteractiveMap from './components/InteractiveMap';
+import { SearchOverlay } from './components/SearchOverlay';
+import { PointRow } from './components/PointRow';
+import { PointDetail } from './components/PointDetail';
+import { CampaignNotice } from './components/CampaignNotice';
+import { ChipId, centroid, usePointFilter } from './usePointFilter';
 
-interface HomeProps {
-    onOpenProfile: () => void;
-    onNavigateToHub: (tab: 'beneficios' | 'usar' | 'progreso') => void;
-}
+/** Collapsed list: its top edge sits 240 px above the bottom of the screen. */
+const PEEK = 240;
+/** Drag further than this to snap open or closed. */
+const SNAP = 60;
 
-const Home: React.FC<HomeProps> = ({ onOpenProfile, onNavigateToHub }) => {
-    const { isDarkMode } = useAuth();
-    const [selectedPoint, setSelectedPoint] = useState<RecyclePoint | null>(null);
-    const [mapZoom, setMapZoom] = useState(1.5);
-    const [centerMapOnUser, setCenterMapOnUser] = useState(true);
+export const MATERIAL_CHIPS: { id: ChipId; label: string }[] = [
+    { id: 'todos', label: 'Todos' },
+    ...MATERIAL_CATEGORIES.map((c) => ({ id: c.id, label: c.label })),
+];
 
-    // Search Overlay State
-    const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [activeSearchTab, setActiveSearchTab] = useState<'donde' | 'materiales'>('donde');
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
+export const listTitle = (count: number, query: string) =>
+    query
+        ? `${count === 1 ? '1 punto' : `${count} puntos`} para «${query}»`
+        : count === 1
+          ? '1 punto cerca de ti'
+          : `${count} puntos cerca de ti`;
 
-    const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-        // Close sheet if dragged down
-        if (info.offset.y > 150 || info.velocity.y > 200) {
-            setSelectedPoint(null);
-        }
+/** Explorar (mobile): full-screen map, Google Maps-style search, draggable list. */
+const Home: React.FC = () => {
+    const app = useCiudadano();
+    const [chip, setChip] = useState<ChipId>('todos');
+    const [query, setQuery] = useState('');
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [selected, setSelected] = useState<CleanPoint | null>(null);
+    const [open, setOpen] = useState(false);
+    const list = usePointFilter(chip, query);
+    // Re-centre only when the search changes, not when a chip filters the list.
+    const focus = useMemo(() => (query ? centroid(list) : null), [query]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Sheet geometry: collapsed at h − 240, expanded at max(96, 14% of the height).
+    const root = useRef<HTMLDivElement>(null);
+    const [h, setH] = useState(800);
+    useLayoutEffect(() => {
+        const el = root.current;
+        if (!el) return;
+        const ro = new ResizeObserver(() => setH(el.clientHeight));
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, []);
+    const minTop = Math.max(96, h * 0.14);
+    const maxTop = h - PEEK;
+    const top = useMotionValue(maxTop);
+    useEffect(() => {
+        animate(top, open ? minTop : maxTop, SPRING_SHEET);
+    }, [open, minTop, maxTop, top]);
+
+    const drag = useRef<{ y: number; start: number; moved: boolean } | null>(null);
+    const onDown = (e: React.PointerEvent) => {
+        top.stop();
+        drag.current = { y: e.clientY, start: top.get(), moved: false };
+        e.currentTarget.setPointerCapture(e.pointerId);
+    };
+    const onMove = (e: React.PointerEvent) => {
+        const d = drag.current;
+        if (!d) return;
+        const dy = e.clientY - d.y;
+        if (Math.abs(dy) > 4) d.moved = true;
+        top.set(Math.min(maxTop, Math.max(minTop, d.start + dy)));
+    };
+    const onUp = (e: React.PointerEvent) => {
+        const d = drag.current;
+        drag.current = null;
+        if (!d) return;
+        const dy = e.clientY - d.y;
+        const next = !d.moved ? !open : dy < -SNAP ? true : dy > SNAP ? false : open;
+        if (next === open) animate(top, open ? minTop : maxTop, SPRING_SHEET);
+        else setOpen(next);
     };
 
-
-    const toggleMaterial = (id: string) => {
-        const newMaterials = selectedMaterials.includes(id) ? selectedMaterials.filter(m => m !== id) : [...selectedMaterials, id];
-        setSelectedMaterials(newMaterials);
-        analytics.materialFilterApplied(newMaterials, RECYCLE_POINTS.filter(p => p.materials?.some(m => newMaterials.includes(m))).length);
+    const pickChip = (id: ChipId) => {
+        setChip(id);
+        analytics.materialFilterApplied([id], list.length);
     };
-
-    // Filter Points Logic
-    const filteredPoints = RECYCLE_POINTS.filter(point => {
-        const matchesSearch = searchQuery === '' ||
-            point.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            point.address.toLowerCase().includes(searchQuery.toLowerCase());
-
-        const matchesMaterials = selectedMaterials.length === 0 ||
-            (point.materials && point.materials.some(m => selectedMaterials.includes(m)));
-
-        return matchesSearch && matchesMaterials;
-    });
-
-    // Special Missions Logic (Home focus: Partner and Perk of Month)
-    const specialPartnerPoint = filteredPoints.find(p => p.specialMission);
-    const currentPerk = COUPONS.find(c => c.isCurrentMonthPerk);
-
-    // Create mission objects for the carousel
-    const priorityMissions = [
-        ...(specialPartnerPoint ? [{
-            id: 'partner_mission',
-            type: 'partner',
-            data: specialPartnerPoint
-        }] : []),
-        ...(currentPerk ? [{
-            id: 'perk_of_month',
-            type: 'perk',
-            data: currentPerk
-        }] : [])
-    ];
+    const select = (p: CleanPoint) => {
+        setSelected(p);
+        analytics.recyclingPointClicked(p.id, p.name);
+    };
 
     return (
-        <div className="relative w-full h-full bg-[#F2F1ED] dark:bg-dark-bg overflow-hidden font-sans">
-
-            {/* Search Overlay Implementation */}
-            <AnimatePresence>
-                {isSearchOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 20 }}
-                        transition={{ duration: 0.2 }}
-                        className="fixed inset-0 z-50 flex flex-col bg-[#F7F7F7] dark:bg-dark-bg"
-                    >
-                        <div className="px-6 pt-6 pb-2 flex justify-between items-center bg-transparent shrink-0">
-                            <IconButton
-                                icon="close"
-                                onClick={() => setIsSearchOpen(false)}
-                                variant="default"
-                                className="bg-white dark:bg-dark-surface shadow-sm"
-                                ariaLabel="Cerrar búsqueda"
-                            />
-                            <div className="text-sm font-bold underline decoration-text dark:decoration-dark-text underline-offset-4 text-text dark:text-dark-text">Búsqueda</div>
-                            <div className="w-10"></div>
-                        </div>
-                        {/* Content */}
-                        <div className="flex-1 overflow-y-auto px-4 py-6">
-                            {/* Where Section */}
-                            <motion.div
-                                layout
-                                onClick={() => setActiveSearchTab('donde')}
-                                className={`bg-white dark:bg-dark-surface rounded-[32px] p-6 mb-4 overflow-hidden ${activeSearchTab === 'donde' ? 'shadow-lg z-10' : 'opacity-70'}`}
-                                animate={{ scale: activeSearchTab === 'donde' ? 1.01 : 0.95 }}
-                            >
-                                {activeSearchTab === 'donde' ? (
-                                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                        <h2 className="text-2xl font-extrabold text-text dark:text-dark-text mb-6">¿Dónde?</h2>
-                                        <div className="bg-gray-50 dark:bg-black/20 rounded-full flex items-center px-4 py-4 mb-6 shadow-inner border border-transparent focus-within:border-primary">
-                                            <span className="material-symbols-rounded text-text dark:text-dark-text mr-3">search</span>
-                                            <input type="text" placeholder="Explorar destinos" className="flex-1 outline-none text-sm font-bold bg-transparent text-text dark:text-dark-text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} autoFocus />
-                                        </div>
-                                    </motion.div>
-                                ) : (
-                                    <motion.div className="text-sm font-bold text-gray-400">¿Dónde?</motion.div>
-                                )}
-                            </motion.div>
-
-                            {/* Materials Section */}
-                            <motion.div
-                                layout
-                                onClick={() => setActiveSearchTab('materiales')}
-                                className={`bg-white dark:bg-dark-surface rounded-[32px] p-6 overflow-hidden ${activeSearchTab === 'materiales' ? 'shadow-lg z-10' : 'opacity-70'}`}
-                                animate={{ scale: activeSearchTab === 'materiales' ? 1.01 : 0.95 }}
-                            >
-                                {activeSearchTab === 'materiales' ? (
-                                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                        <h2 className="text-2xl font-extrabold text-text dark:text-dark-text mb-6">Materiales</h2>
-                                        <div className="grid grid-cols-4 gap-3">
-                                            {RECYCLE_CATEGORIES.map(cat => (
-                                                <button key={cat.id} onClick={(e) => { e.stopPropagation(); toggleMaterial(cat.id); }} className={`flex flex-col items-center gap-3 p-3 rounded-3xl transition-all ${selectedMaterials.includes(cat.id) ? 'bg-[#E0F2F1] dark:bg-primary/20 ring-1 ring-primary' : 'bg-white dark:bg-dark-surface shadow-sm'}`}>
-                                                    <span className={`material-symbols-rounded text-2xl ${selectedMaterials.includes(cat.id) ? 'filled-icon text-primary dark:text-accent' : 'text-gray-400'}`}>{cat.iconName}</span>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </motion.div>
-                                ) : (
-                                    <motion.div className="flex justify-between items-center">
-                                        <span className="text-sm font-bold text-gray-400">Materiales</span>
-                                        {selectedMaterials.length > 0 && <span className="text-xs font-bold text-primary">{selectedMaterials.length} seleccionados</span>}
-                                    </motion.div>
-                                )}
-                            </motion.div>
-                        </div>
-
-                        {/* Footer Search Button */}
-                        <div className="p-4 bg-white dark:bg-dark-surface border-t border-gray-100 dark:border-dark-border flex justify-between items-center shrink-0 pb-safe-bottom">
-                            <Button
-                                onClick={() => { setSearchQuery(''); setSelectedMaterials([]); setActiveSearchTab('donde'); }}
-                                variant="ghost"
-                                className="underline"
-                            >
-                                Limpiar todo
-                            </Button>
-                            <Button
-                                onClick={() => setIsSearchOpen(false)}
-                                icon="search"
-                                className="shadow-lg px-8 py-4 h-auto"
-                            >
-                                Buscar
-                            </Button>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* Floating Header */}
-            <motion.div
-                animate={{ opacity: selectedPoint ? 0 : 1, y: selectedPoint ? -100 : 0 }}
-                className="absolute top-6 left-4 right-4 z-20"
-            >
-                <div className="bg-white dark:bg-dark-surface rounded-[32px] shadow-lg p-2 flex items-center gap-3 border border-transparent dark:border-dark-border">
-                    <button onClick={() => setIsSearchOpen(true)} className="flex-1 flex items-center h-12 pl-4 text-left">
-                        <span className="material-symbols-rounded text-primary dark:text-accent text-3xl mr-3 font-bold">search</span>
-                        <div className="flex flex-col justify-center">
-                            <span className="text-sm font-bold text-text dark:text-dark-text leading-tight">¿A dónde vamos?</span>
-                            {(searchQuery || selectedMaterials.length > 0) && (
-                                <span className="text-[10px] text-gray-400 truncate max-w-[200px]">
-                                    {searchQuery && `"${searchQuery}"`}
-                                    {searchQuery && selectedMaterials.length > 0 && ' • '}
-                                    {selectedMaterials.length > 0 && `${selectedMaterials.length} materiales`}
-                                </span>
-                            )}
-                        </div>
-                    </button>
-                    <button onClick={onOpenProfile} className="mr-1"><Avatar size="md" /></button>
-                </div>
-            </motion.div>
-
-            {/* Interactive Map */}
+        <div ref={root} style={{ position: 'absolute', inset: 0 }}>
             <InteractiveMap
-                points={filteredPoints}
-                selectedPointId={selectedPoint?.id || null}
-                onPointSelect={(point) => {
-                    if (point) {
-                        analytics.recyclingPointClicked(point.id, point.name);
-                    }
-                    setSelectedPoint(point);
-                }}
-                zoom={mapZoom}
-                onZoomChange={setMapZoom}
-                centerOnUser={centerMapOnUser}
-                onCenterComplete={() => setCenterMapOnUser(false)}
-            />
-
-            {/* Priority Mission Carousel - Special Partner + Monthly Perk */}
-            <AnimatePresence>
-                {!selectedPoint && !isSearchOpen && priorityMissions.length > 0 && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 50 }}
-                        className="absolute bottom-[80px] left-0 right-0 z-50 overflow-x-auto no-scrollbar px-4 pb-8 pt-8"
-                    >
-                        <div className="flex gap-4 w-max">
-                            <AnimatePresence mode="popLayout">
-                                {priorityMissions.map((mission) => (
-                                    <motion.div
-                                        key={mission.id}
-                                        layout
-                                        initial={{ opacity: 1, scale: 1 }}
-                                        className="relative"
-                                    >
-                                        {mission.type === 'partner' ? (
-                                            <SpecialMissionCard
-                                                title={(mission.data as RecyclePoint).specialMission!.title}
-                                                subtitle={(mission.data as RecyclePoint).specialMission!.subtitle}
-                                                logo={(mission.data as RecyclePoint).specialMission!.logo}
-                                                bonusPoints={(mission.data as RecyclePoint).specialMission!.bonusPoints}
-                                                onClick={() => {
-                                                    setSelectedPoint(mission.data as RecyclePoint);
-                                                    analytics.recyclingPointClicked((mission.data as RecyclePoint).id, (mission.data as RecyclePoint).name);
-                                                }}
-                                                compact
-                                            />
-                                        ) : (
-                                            <SpecialMissionCard
-                                                title={(mission.data as any).title}
-                                                subtitle={(mission.data as any).unlockMission}
-                                                logo={(mission.data as any).image}
-                                                bonusPoints={0}
-                                                variant="perk"
-                                                onClick={() => onNavigateToHub('beneficios')}
-                                                compact
-                                            />
-                                        )}
-                                    </motion.div>
-                                ))}
-                            </AnimatePresence>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* Controls */}
-            <motion.div
-                animate={{ opacity: selectedPoint ? 0 : 1, x: selectedPoint ? 100 : 0 }}
-                className="absolute bottom-72 right-4 flex flex-col gap-3 z-10"
+                points={list}
+                userPos={USER_POSITION}
+                selected={selected}
+                onSelect={select}
+                dark={app.dark}
+                loading={app.loading}
+                focus={focus}
+                controlsBottom={PEEK + 16}
+                hideControls={open}
             >
-                <div className="bg-white dark:bg-dark-surface rounded-[32px] shadow-lg flex flex-col">
-                    <button onClick={() => setMapZoom(z => Math.min(z + 0.5, 4))} className="w-12 h-12 flex items-center justify-center text-primary dark:text-accent border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-white/5 rounded-t-[32px] transition-colors"><span className="material-symbols-rounded text-2xl">add</span></button>
-                    <button onClick={() => setMapZoom(z => Math.max(z - 0.5, 0.5))} className="w-12 h-12 flex items-center justify-center text-primary dark:text-accent border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"><span className="material-symbols-rounded text-2xl">remove</span></button>
-                    <button onClick={() => { setCenterMapOnUser(true); setMapZoom(1.5); }} className="w-12 h-12 flex items-center justify-center text-primary dark:text-accent hover:bg-gray-50 dark:hover:bg-white/5 rounded-b-[32px] transition-colors" aria-label="Centrar mapa"><span className="material-symbols-rounded text-2xl">my_location</span></button>
-                </div>
-            </motion.div>
-
-            {/* Point Details Bottom Sheet */}
-            <AnimatePresence>
-                {selectedPoint && (
-                    <>
-                        {/* Backdrop */}
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-50 bg-black/10 dark:bg-black/40 backdrop-blur-[1px]"
-                            onClick={() => setSelectedPoint(null)}
-                        />
-
-                        {/* Draggable Sheet */}
-                        <motion.div
-                            layout
-                            initial={{ y: '100%' }}
-                            animate={{ y: 0 }}
-                            exit={{ y: '100%' }}
-                            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                            drag="y"
-                            dragConstraints={{ top: 0 }}
-                            dragElastic={0.2}
-                            onDragEnd={handleDragEnd}
-                            className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-dark-surface w-full rounded-t-[32px] shadow-2xl flex flex-col max-h-[85vh]"
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: 16,
+                        left: 16,
+                        right: 16,
+                        zIndex: 4,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        height: 56,
+                        padding: '0 6px 0 18px',
+                        borderRadius: 9999,
+                        background: 'var(--surface-card)',
+                        border: '1px solid var(--border-card)',
+                    }}
+                >
+                    <button
+                        type="button"
+                        onClick={() => setSearchOpen(true)}
+                        style={{
+                            flex: 1,
+                            minWidth: 0,
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10,
+                            border: 0,
+                            background: 'transparent',
+                            cursor: 'text',
+                            font: 'inherit',
+                            color: 'inherit',
+                            textAlign: 'left',
+                            padding: 0,
+                        }}
+                    >
+                        <Icon name="search" style={{ color: 'var(--text-muted)' }} />
+                        <span
+                            style={{
+                                flex: 1,
+                                minWidth: 0,
+                                fontSize: 14,
+                                color: query ? 'var(--text-body)' : 'var(--text-muted)',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                            }}
                         >
-                            <div className="w-full flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing shrink-0 touch-none">
-                                <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                            {query || 'Buscar comuna o dirección'}
+                        </span>
+                    </button>
+                    {query && <IconButton icon="close" variant="ghost" ariaLabel="Borrar búsqueda" onClick={() => setQuery('')} />}
+                    <button
+                        type="button"
+                        onClick={app.openAccount}
+                        aria-label="Tu cuenta"
+                        style={{
+                            width: 44,
+                            height: 44,
+                            flexShrink: 0,
+                            borderRadius: 9999,
+                            border: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            padding: 0,
+                            background: app.signedIn ? 'color-mix(in oklch, var(--brand-fg) 16%, transparent)' : 'var(--surface-inset)',
+                            color: app.signedIn ? 'var(--brand-fg)' : 'var(--text-body)',
+                        }}
+                    >
+                        {app.signedIn ? <span style={{ fontSize: 14, fontWeight: 800 }}>{initials(app.profile.name)}</span> : <Icon name="person" />}
+                    </button>
+                </div>
+            </InteractiveMap>
+
+            <motion.section
+                aria-label="Puntos limpios"
+                style={{
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    top,
+                    background: 'var(--surface-page)',
+                    borderTop: '1px solid var(--border-card)',
+                    borderRadius: '32px 32px 0 0',
+                    boxShadow: '0 -10px 30px rgba(0,0,0,.25)',
+                    zIndex: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                }}
+            >
+                <div
+                    onPointerDown={onDown}
+                    onPointerMove={onMove}
+                    onPointerUp={onUp}
+                    onPointerCancel={onUp}
+                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setOpen(!open))}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={open ? 'Bajar lista' : 'Ver lista completa'}
+                    aria-expanded={open}
+                    style={{
+                        flexShrink: 0,
+                        padding: '12px 20px 4px',
+                        cursor: 'grab',
+                        touchAction: 'none',
+                        userSelect: 'none',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 12,
+                    }}
+                >
+                    <div style={{ width: 40, height: 4, borderRadius: 9999, background: 'var(--border-strong)', alignSelf: 'center' }} />
+                    {app.loading ? (
+                        <Skeleton style={{ height: 22, width: 180, borderRadius: 8 }} />
+                    ) : (
+                        <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>{listTitle(list.length, query)}</h1>
+                    )}
+                </div>
+                <div
+                    className="no-scrollbar"
+                    style={{
+                        flex: 1,
+                        minHeight: 0,
+                        overflowY: open ? 'auto' : 'hidden',
+                        overflowX: 'hidden',
+                        padding: '8px 20px 132px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 12,
+                    }}
+                >
+                    {app.loading ? (
+                        [0, 1, 2].map((i) => <Skeleton key={i} style={{ height: 70, borderRadius: 16, flexShrink: 0 }} />)
+                    ) : (
+                        <>
+                            <div
+                                className="no-scrollbar"
+                                style={{
+                                    display: 'flex',
+                                    gap: 8,
+                                    overflowX: 'auto',
+                                    overflowY: 'hidden',
+                                    touchAction: 'pan-x',
+                                    overscrollBehavior: 'contain',
+                                    flexShrink: 0,
+                                    margin: '0 -20px',
+                                    padding: '2px 20px',
+                                }}
+                            >
+                                {MATERIAL_CHIPS.map((c) => (
+                                    <Chip key={c.id} active={chip === c.id} onClick={() => pickChip(c.id)}>
+                                        {c.label}
+                                    </Chip>
+                                ))}
                             </div>
-                            <button onClick={() => setSelectedPoint(null)} className="absolute top-4 right-4 w-8 h-8 bg-gray-50 dark:bg-white/5 text-gray-400 rounded-full flex items-center justify-center"><span className="material-symbols-rounded text-xl">close</span></button>
-
-                            <div className="px-6 pb-2 shrink-0">
-                                <h2 className="text-2xl font-bold text-[#151515] dark:text-dark-text mb-1 pr-8">{selectedPoint.name}</h2>
-                                <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-3">{selectedPoint.address}</p>
-                                <div className="flex items-center gap-2 text-xs font-medium text-gray-500 mb-4">
-                                    <div className="bg-[#E8F5E9] text-[#2E7D32] px-3 py-1.5 rounded-full font-bold flex items-center gap-1">
-                                        <span className="material-symbols-rounded filled-icon text-sm">schedule</span> Abierto ahora
-                                    </div>
-                                    <span>● {selectedPoint.hours}</span>
+                            {list.map((p) => (
+                                <PointRow key={p.id} point={p} onClick={() => select(p)} />
+                            ))}
+                            {!list.length && (
+                                <div style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                                    No hay puntos con ese filtro. Prueba con «Todos» o pide un retiro a domicilio.
                                 </div>
-                            </div>
+                            )}
+                            <CampaignNotice campaign={CAMPAIGN} onClick={() => pickChip(CAMPAIGN.chip)} />
+                        </>
+                    )}
+                </div>
+            </motion.section>
 
-                            <div className="overflow-y-auto px-6 pb-32">
-                                {selectedPoint.specialMission ? (
-                                    <div className="mb-6 pt-8 pr-6">
-                                        <SpecialMissionCard
-                                            title={selectedPoint.specialMission.title}
-                                            subtitle={selectedPoint.specialMission.subtitle}
-                                            logo={selectedPoint.specialMission.logo}
-                                            bonusPoints={selectedPoint.specialMission.bonusPoints}
-                                        />
-                                    </div>
-                                ) : (
-                                    <div className="bg-[#F8F9FA] dark:bg-white/5 p-4 rounded-[24px] flex items-center gap-4 mb-6 shadow-sm">
-                                        <div className="w-14 h-14 bg-white dark:bg-dark-surface rounded-2xl flex items-center justify-center p-2 shadow-sm shrink-0">
-                                            {selectedPoint.logo ? <ImageWithSkeleton src={selectedPoint.logo} alt="brand" className="w-full h-full" skeletonClassName="rounded-xl" /> : <span className="material-symbols-rounded text-gray-400">storefront</span>}
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="font-bold text-[#00695C] dark:text-[#4DB6AC] text-sm mb-0.5">{selectedPoint.promoText}</div>
-                                            <div className="text-xs text-gray-400">Acumula puntos extra reciclando aquí</div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Materials - Centered & Styled like Distances */}
-                                <div className="mb-6">
-                                    <h3 className="font-bold text-[#151515] dark:text-dark-text text-sm mb-3">Materiales Aceptados</h3>
-                                    <div className="flex items-center justify-between px-2 w-full">
-                                        {(selectedPoint.materials || []).map((matId, index) => {
-                                            const category = RECYCLE_CATEGORIES.find(c => c.id === matId);
-                                            return category ? (
-                                                <React.Fragment key={matId}>
-                                                    <div className="flex-1 flex flex-col items-center gap-1">
-                                                        <span className="material-symbols-rounded text-[#00695C] text-3xl">{category.iconName}</span>
-                                                        <span className="text-xs font-bold text-text dark:text-dark-text capitalize">{category.label}</span>
-                                                    </div>
-                                                    {index < (selectedPoint.materials?.length || 0) - 1 && (
-                                                        <div className="h-8 w-[1px] bg-gray-200 dark:bg-gray-700 shrink-0"></div>
-                                                    )}
-                                                </React.Fragment>
-                                            ) : null;
-                                        })}
-                                    </div>
-                                </div>
-
-                                {/* Estimated Distances */}
-                                <div className="mb-6">
-                                    <h3 className="font-bold text-[#151515] dark:text-dark-text text-sm mb-3">Distancias estimadas</h3>
-                                    <div className="flex justify-between items-center px-2">
-                                        <div className="flex flex-col items-center gap-1">
-                                            <span className="material-symbols-rounded text-[#00695C] text-2xl">directions_walk</span>
-                                            <span className="font-bold text-sm text-text dark:text-dark-text">35 min</span>
-                                            <span className="text-xs text-gray-400">Caminando</span>
-                                        </div>
-                                        <div className="h-8 w-[1px] bg-gray-200 dark:bg-gray-700"></div>
-                                        <div className="flex flex-col items-center gap-1">
-                                            <span className="material-symbols-rounded text-[#00695C] text-2xl">directions_bike</span>
-                                            <span className="font-bold text-sm text-text dark:text-dark-text">15 min</span>
-                                            <span className="text-xs text-gray-400">Bicicleta</span>
-                                        </div>
-                                        <div className="h-8 w-[1px] bg-gray-200 dark:bg-gray-700"></div>
-                                        <div className="flex flex-col items-center gap-1">
-                                            <span className="material-symbols-rounded text-[#00695C] text-2xl">directions_car</span>
-                                            <span className="font-bold text-sm text-text dark:text-dark-text">10 min</span>
-                                            <span className="text-xs text-gray-400">Auto</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Mock Map Preview */}
-                                <div className="mb-6 rounded-[24px] overflow-hidden h-32 relative bg-[#E0F2F1] dark:bg-primary/10 border border-gray-100 dark:border-white/5">
-                                    <div className="absolute top-0 bottom-0 left-1/3 w-4 bg-white/50 transform -skew-x-12"></div>
-                                    <div className="absolute top-1/2 left-0 right-0 h-3 bg-white/50 transform -translate-y-1/2 rotate-3"></div>
-                                    <div className="absolute top-1/4 right-1/4 w-8 h-8 bg-[#B2DFDB] rounded-md"></div>
-                                    <div className="absolute bottom-1/4 left-1/4 w-12 h-12 bg-[#B2DFDB] rounded-full opacity-50"></div>
-                                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-                                        <span className="material-symbols-rounded filled-icon text-red-500 text-3xl drop-shadow-md">location_on</span>
-                                        <div className="w-2 h-1 bg-black/20 rounded-full blur-[1px]"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="absolute bottom-0 left-0 right-0 p-4 bg-white dark:bg-dark-surface border-t border-gray-50 dark:border-dark-border flex gap-3 z-30 pb-8 rounded-t-[20px]">
-                                <Button disabled variant="secondary" icon="qr_code_scanner" fullWidth>Escanear QR</Button>
-                                <Button disabled variant="secondary" icon="near_me" fullWidth>Indicaciones</Button>
-                            </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
+            <SearchOverlay
+                open={searchOpen}
+                query={query}
+                setQuery={setQuery}
+                onClose={() => setSearchOpen(false)}
+                onPick={(p) => {
+                    setSearchOpen(false);
+                    if (p) select(p);
+                }}
+            />
+            <BottomSheet contained open={!!selected} onClose={() => setSelected(null)}>
+                {selected && <PointDetail point={selected} onClose={() => setSelected(null)} />}
+            </BottomSheet>
         </div>
     );
 };
