@@ -57,7 +57,7 @@ export const AppRouter: React.FC = () => {
         switch (currentTab) {
             case 'explorar': return <Home />;
             case 'escaner': return <Scan />;
-            case 'ehub': return <Hub initialTab={hubInitialTab} />;
+            case 'ehub': return <Hub />;
             case 'retiro': return <Pickup />;
             default: return <Home />;
         }
