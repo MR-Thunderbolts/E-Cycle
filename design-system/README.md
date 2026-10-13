@@ -1,5 +1,7 @@
 # 🎨 E-Cycle Design System
 
+> **v1.** La capa Ciudadano ya usa el Design System v2: tokens y clases `ec-*` en `src/styles/`, componentes en `src/components/`. Los niveles y las misiones especiales se eliminaron en v2.
+
 Este paquete/directorio contiene una **copia completa, desacoplada y documentada** del Design System de **E-Cycle**, listo para ser utilizado, exportado a otros proyectos o sincronizado con Figma.
 
 ---
@@ -25,14 +27,12 @@ design-system/
 │   │   ├── IconBox/           # Cajas de íconos con fondos tonales
 │   │   ├── IconButton/        # Botones circulares de acción rápida
 │   │   ├── Input/             # Campos de texto con validación y estados focus
-│   │   ├── LevelIndicator/    # Indicador dinámico de Rango E-Cycler (Badge + Pill)
 │   │   ├── LoadingSpinner/    # Indicadores circulares de carga
 │   │   ├── MenuItem/          # Filas de configuración y menú con soporte Dark Mode
 │   │   ├── Modal/             # Diálogos modales accesibles con backdrop blur
 │   │   ├── ProgressBar/       # Barras de progreso lineal con acento dinámico
 │   │   ├── SearchBar/         # Barra de búsqueda integrada con icono y clear
 │   │   ├── Skeleton/          # Placeholders animados para estado de carga
-│   │   ├── SpecialMissionCard # Tarjeta destacada de misión partner del mes
 │   │   ├── SplashScreen/      # Pantalla de carga con logo SVG inmediato
 │   │   ├── Tabs/              # Pestañas horizontales segmentadas
 │   │   └── Toggle/            # Interruptores tipo switch para opciones booleanas
@@ -55,19 +55,11 @@ design-system/
 - **Secondary**: `#A6F8F2` (Cian Suave)
 - **Surface Tint**: `#D0EBE8` / `#E0F2F1` (Fondos de tarjetas y badges activos)
 
-### 2. Identidad de Rangos de Gamificación
-| Rango | Color Principal | Color Tinte / Fondo | Multiplicador |
-| :--- | :--- | :--- | :--- |
-| **Descubridor** | Slate `#64748B` | `#F1F5F9` | `1.0x` |
-| **Ensamblador** | Teal `#004D40` | `#D0EBE8` / `#1DE9B6` | `1.2x` |
-| **Recolector** | Ámbar `#D97706` | `#FEF3C7` / `#F59E0B` | `1.5x` |
-| **Reactivador** | Índigo `#4F46E5` | `#EEF2FF` / `#6366F1` | `2.0x` |
-
-### 3. Tipografía
+### 2. Tipografía
 - **Fuente Principal**: `Plus Jakarta Sans`, sans-serif (pesos: 400, 500, 600, 700, 800)
 - **Iconografía**: `Material Symbols Rounded` con renderizado optimizado (`font-feature-settings: 'liga'`).
 
-### 4. Radios de Borde (Border Radius)
+### 3. Radios de Borde (Border Radius)
 - **Tarjetas Principales**: `32px` (`rounded-[32px]`)
 - **Contenedores y Modales**: `24px` (`rounded-[24px]`)
 - **Botones y Pills**: `9999px` (`rounded-full`)
@@ -91,7 +83,6 @@ const badgeStyle = {
 ```tsx
 import { 
   Button, 
-  LevelIndicator, 
   Card, 
   Avatar 
 } from './design-system';
@@ -102,7 +93,6 @@ export const UserCard = () => (
       <Avatar name="Alexandra" src="/avatar.jpg" size="lg" />
       <div>
         <h3 className="font-bold text-lg">Alexandra</h3>
-        <LevelIndicator level="Recolector" variant="pill" />
       </div>
     </div>
     <Button variant="primary" className="mt-4 w-full">

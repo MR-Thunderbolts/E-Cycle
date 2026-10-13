@@ -57,7 +57,7 @@ const Scan: React.FC = () => {
             .map((c) => `${qty[c.id]} ${c.label.toLowerCase()}`)
             .join(', ');
         analytics.scanItemsEntered(qty, count, total);
-        analytics.dropoffCompleted(total, count, 1);
+        analytics.dropoffCompleted(total, count);
         app.addPoints(total, point.name, detail);
         setEarned(total);
         setStage('done');

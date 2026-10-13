@@ -1,13 +1,5 @@
-// User types
-export type { Transaction, Achievement, User, UserLevel } from './user.types';
+export type { TabType } from './common.types';
 
-// Recycle types
-export type { RecyclePoint, ItemCategory, Coupon } from './recycle.types';
-
-// Common types
-export type { TabType, HubTab, ScanStep } from './common.types';
-
-// Ciudadano (v2)
 export type {
     MaterialId,
     MaterialCategory,
