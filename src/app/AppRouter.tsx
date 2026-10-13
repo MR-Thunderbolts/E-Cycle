@@ -11,15 +11,16 @@ import { TabType, HubTab } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import { analytics } from '@/utils';
 import { AuthContext } from '@/context';
+import { useCiudadano } from '@/hooks';
 
 export const AppRouter: React.FC = () => {
     const [showSplash, setShowSplash] = useState(true);
-    const [currentTab, setCurrentTab] = useState<TabType>('explorar');
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isRegisterOpen, setIsRegisterOpen] = useState(false);
     const [hubInitialTab, setHubInitialTab] = useState<HubTab>('beneficios');
 
     const auth = useContext(AuthContext);
+    const { tab: currentTab, go } = useCiudadano();
 
     useEffect(() => {
         let isMounted = true;
@@ -45,19 +46,17 @@ export const AppRouter: React.FC = () => {
 
     const handleGoToRedeem = () => {
         setHubInitialTab('usar');
-        analytics.tabChanged(currentTab, 'ehub');
-        setCurrentTab('ehub');
+        go('ehub');
     };
 
     const handleTabChange = (newTab: TabType) => {
-        analytics.tabChanged(currentTab, newTab);
-        setCurrentTab(newTab);
+        go(newTab);
     };
 
     const renderContent = () => {
         switch (currentTab) {
             case 'explorar': return <Home />;
-            case 'escaner': return <Scan onGoToRedeem={handleGoToRedeem} onBack={() => handleTabChange('explorar')} />;
+            case 'escaner': return <Scan />;
             case 'ehub': return <Hub initialTab={hubInitialTab} />;
             case 'retiro': return <Pickup />;
             default: return <Home />;
