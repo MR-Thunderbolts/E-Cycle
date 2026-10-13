@@ -3,18 +3,14 @@ import React from 'react';
 interface SkeletonProps {
     className?: string;
     circle?: boolean;
+    style?: React.CSSProperties;
 }
 
-/**
- * Skeleton placeholder with shimmer animation.
- * Use `className` to control size/shape (e.g., `w-32 h-32 rounded-2xl`).
- * Use `circle` for circular avatars/icons.
- */
-export const Skeleton: React.FC<SkeletonProps> = ({ className = '', circle = false }) => {
-    return (
-        <div
-            className={`skeleton-shimmer ${circle ? 'rounded-full' : 'rounded-2xl'} ${className}`}
-            aria-hidden="true"
-        />
-    );
-};
+/** Shimmer placeholder. Size it with `style` or `className`. */
+export const Skeleton: React.FC<SkeletonProps> = ({ className = '', circle = false, style }) => (
+    <div
+        aria-hidden="true"
+        style={style}
+        className={['skeleton-shimmer', 'ec-skeleton', circle ? 'ec-skeleton--circle' : '', className].filter(Boolean).join(' ')}
+    />
+);

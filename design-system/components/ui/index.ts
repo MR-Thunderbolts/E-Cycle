@@ -1,8 +1,6 @@
 // Existing components
 export * from './Avatar';
 export * from './BackButton';
-export * from './LevelIndicator';
-export * from './SpecialMissionCard';
 export * from './SplashScreen';
 
 // New UI primitives

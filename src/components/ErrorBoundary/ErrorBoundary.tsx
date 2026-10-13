@@ -1,4 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { Button } from '../ui/Button';
+import { Icon } from '../ui/Icon';
 
 interface Props {
     children: ReactNode;
@@ -41,36 +43,45 @@ export class ErrorBoundary extends Component<Props, State> {
     render() {
         if (this.state.hasError) {
             return (
-                <div className="flex flex-col items-center justify-center min-h-screen bg-background dark:bg-dark-bg p-8 text-center">
-                    <div className="bg-white dark:bg-dark-surface rounded-[40px] p-12 max-w-md shadow-xl">
-                        <div className="w-24 h-24 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <span className="material-symbols-rounded text-red-500 dark:text-red-400 text-5xl">
-                                error
-                            </span>
+                <div
+                    role="alert"
+                    style={{
+                        minHeight: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: 24,
+                        background: 'var(--surface-page)',
+                        fontFamily: 'var(--font-sans)',
+                    }}
+                >
+                    <div className="ec-prompt" style={{ width: '100%', maxWidth: 400 }}>
+                        <div className="ec-iconbox ec-iconbox--xl ec-iconbox--danger">
+                            <Icon name="error" filled />
                         </div>
-
-                        <h1 className="text-3xl font-bold text-text dark:text-dark-text mb-4">
-                            Algo salió mal
-                        </h1>
-
-                        <p className="text-gray-600 dark:text-gray-400 mb-8">
-                            Lo sentimos, ocurrió un error inesperado. Por favor, intenta nuevamente.
-                        </p>
-
-                        {process.env.NODE_ENV === 'development' && this.state.error && (
-                            <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl p-4 mb-6 text-left">
-                                <p className="text-xs font-mono text-gray-700 dark:text-gray-300 break-all">
-                                    {this.state.error.toString()}
-                                </p>
-                            </div>
+                        <h1 className="ec-prompt__title">Algo salió mal</h1>
+                        <p className="ec-prompt__desc">Lo sentimos, ocurrió un error inesperado. Por favor, intenta nuevamente.</p>
+                        {import.meta.env.DEV && this.state.error && (
+                            <pre
+                                style={{
+                                    margin: 0,
+                                    width: '100%',
+                                    padding: 12,
+                                    borderRadius: 12,
+                                    background: 'var(--surface-inset)',
+                                    fontFamily: 'var(--font-mono)',
+                                    fontSize: 12,
+                                    whiteSpace: 'pre-wrap',
+                                    wordBreak: 'break-all',
+                                    textAlign: 'left',
+                                }}
+                            >
+                                {this.state.error.toString()}
+                            </pre>
                         )}
-
-                        <button
-                            onClick={this.handleReset}
-                            className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-4 px-8 rounded-full transition-colors"
-                        >
+                        <Button size="lg" fullWidth onClick={this.handleReset}>
                             Volver al inicio
-                        </button>
+                        </Button>
                     </div>
                 </div>
             );

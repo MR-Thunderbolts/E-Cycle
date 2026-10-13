@@ -1,4 +1,5 @@
-import React, { InputHTMLAttributes } from 'react';
+import React, { InputHTMLAttributes, useId } from 'react';
+import { Icon } from '../Icon';
 
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
     label?: string;
@@ -19,70 +20,35 @@ export const Input: React.FC<InputProps> = ({
     variant = 'default',
     fullWidth = true,
     className = '',
+    id,
     ...props
 }) => {
-    // Determine variant based on error prop
-    const effectiveVariant = error ? 'error' : variant;
-
-    // Variant styles for input
-    const variantStyles = {
-        default: 'border-gray-200 dark:border-white/10 focus:ring-primary/50',
-        error: 'border-red-500 focus:ring-red-500/50',
-        success: 'border-green-500 focus:ring-green-500/50',
-    };
-
-    // Icon color based on variant
-    const iconColorStyles = {
-        default: 'text-gray-400',
-        error: 'text-red-500',
-        success: 'text-green-500',
-    };
-
-    // Label color based on variant
-    const labelColorStyles = {
-        default: 'text-gray-500 dark:text-gray-400',
-        error: 'text-red-500',
-        success: 'text-green-500',
-    };
-
-    const inputPaddingLeft = icon && iconPosition === 'left' ? 'pl-12' : 'pl-4';
-    const inputPaddingRight = icon && iconPosition === 'right' ? 'pr-12' : 'pr-4';
+    const autoId = useId();
+    const inputId = id ?? autoId;
+    const v = error ? 'error' : variant;
+    const inputCls = [
+        'ec-input',
+        `ec-input--${v}`,
+        icon && iconPosition === 'left' ? 'ec-input--pad-left' : '',
+        icon && iconPosition === 'right' ? 'ec-input--pad-right' : '',
+        className,
+    ].filter(Boolean).join(' ');
 
     return (
-        <div className={`space-y-1 ${fullWidth ? 'w-full' : ''}`}>
+        <div className={['ec-field', fullWidth ? 'ec-field--full' : ''].filter(Boolean).join(' ')}>
             {label && (
-                <label className={`text-xs font-bold uppercase tracking-wider ml-1 ${labelColorStyles[effectiveVariant]}`}>
+                <label htmlFor={inputId} className={'ec-field__label' + (v !== 'default' ? ` ec-field__label--${v}` : '')}>
                     {label}
-                    {error && typeof error === 'string' && ` - ${error}`}
+                    {error && typeof error === 'string' ? ` - ${error}` : ''}
                 </label>
             )}
-
-            <div className="relative">
-                {icon && iconPosition === 'left' && (
-                    <span className={`absolute left-4 top-1/2 -translate-y-1/2 material-symbols-rounded ${iconColorStyles[effectiveVariant]}`}>
-                        {icon}
-                    </span>
-                )}
-
-                <input
-                    className={`w-full bg-gray-50 dark:bg-white/5 border rounded-xl py-3 ${inputPaddingLeft} ${inputPaddingRight} text-text dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${variantStyles[effectiveVariant]} ${className}`}
-                    {...props}
-                />
-
-                {icon && iconPosition === 'right' && (
-                    <span className={`absolute right-4 top-1/2 -translate-y-1/2 material-symbols-rounded ${iconColorStyles[effectiveVariant]}`}>
-                        {icon}
-                    </span>
-                )}
+            <div className="ec-field__wrap">
+                {icon && iconPosition === 'left' && <Icon name={icon} className="ec-field__icon ec-field__icon--left" />}
+                <input id={inputId} className={inputCls} aria-invalid={!!error || undefined} {...props} />
+                {icon && iconPosition === 'right' && <Icon name={icon} className="ec-field__icon ec-field__icon--right" />}
             </div>
-
-            {helperText && !error && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 ml-1">{helperText}</p>
-            )}
-
-            {error && typeof error === 'string' && !label && (
-                <p className="text-xs text-red-500 ml-1">{error}</p>
-            )}
+            {helperText && !error && <p className="ec-field__help">{helperText}</p>}
+            {error && typeof error === 'string' && !label && <p className="ec-field__err">{error}</p>}
         </div>
     );
 };

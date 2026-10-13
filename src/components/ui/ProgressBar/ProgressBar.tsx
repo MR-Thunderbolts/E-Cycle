@@ -1,7 +1,7 @@
 import React from 'react';
 
 export interface ProgressBarProps {
-    value: number; // 0-100
+    value: number;
     max?: number;
     variant?: 'primary' | 'secondary' | 'success' | 'warning';
     size?: 'sm' | 'md' | 'lg';
@@ -19,44 +19,24 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
     label,
     className = '',
 }) => {
-    const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
-
-    // Variant colors
-    const variantStyles = {
-        primary: 'bg-primary dark:bg-accent',
-        secondary: 'bg-secondary dark:bg-secondary',
-        success: 'bg-green-500',
-        warning: 'bg-amber-500',
-    };
-
-    // Size styles
-    const sizeStyles = {
-        sm: 'h-1.5',
-        md: 'h-2.5',
-        lg: 'h-4',
-    };
-
+    const pct = Math.min(Math.max((value / max) * 100, 0), 100);
     return (
-        <div className={`w-full ${className}`}>
+        <div className={['ec-progress', className].filter(Boolean).join(' ')}>
             {(showLabel || label) && (
-                <div className="flex justify-between items-center mb-2">
-                    {label && (
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                            {label}
-                        </span>
-                    )}
-                    {showLabel && (
-                        <span className="text-sm font-bold text-gray-600 dark:text-gray-400">
-                            {Math.round(percentage)}%
-                        </span>
-                    )}
+                <div className="ec-progress__head">
+                    {label && <span className="ec-progress__label">{label}</span>}
+                    {showLabel && <span className="ec-progress__pct">{Math.round(pct)}%</span>}
                 </div>
             )}
-            <div className={`w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden ${sizeStyles[size]}`}>
-                <div
-                    className={`${variantStyles[variant]} ${sizeStyles[size]} rounded-full transition-all duration-300 ease-out`}
-                    style={{ width: `${percentage}%` }}
-                />
+            <div
+                className={`ec-progress__track ec-progress--${size}`}
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={max}
+                aria-valuenow={Math.min(value, max)}
+                aria-label={label}
+            >
+                <div className={`ec-progress__fill ec-progress__fill--${variant}`} style={{ width: `${pct}%` }} />
             </div>
         </div>
     );

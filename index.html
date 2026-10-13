@@ -44,7 +44,7 @@
     content="reciclaje electrónico, e-waste, reciclaje, puntos de reciclaje, recompensas ecológicas, medio ambiente, sustentabilidad" />
 
   <!-- PWA Theme Colors -->
-  <meta name="theme-color" content="#047A6C" />
+  <meta name="theme-color" content="#F5F8F8" />
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121212" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -78,58 +78,8 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block"
     rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-          },
-          colors: {
-            // Brand Colors
-            primary: '#004D40',
-            'primary-dark': '#00382E',
-            'primary-light': '#00695C',
-            accent: '#1DE9B6',
-            secondary: '#A6F8F2',
-
-            // Semantic Colors
-            background: '#F5F8F8',
-            surface: '#FFFFFF',
-            text: '#151515',
-            'text-secondary': '#808080',
-            border: '#F3F4F6',
-
-            // Feedback
-            points: '#FFC107',
-            'points-bg': '#FFF8E1',
-            success: '#4CAF50',
-            error: '#F44336',
-            warning: '#FF9800',
-
-            // Dark Mode
-            'dark-bg': '#121212',
-            'dark-surface': '#1E1E1E',
-            'dark-border': '#333333',
-            'dark-text': '#E2E2E2',
-            'dark-text-secondary': '#A0A0A0',
-          },
-          animation: {
-            'bounce-gentle': 'bounce-gentle 2s infinite',
-          },
-          keyframes: {
-            'bounce-gentle': {
-              '0%, 100%': { transform: 'translateY(-5%)' },
-              '50%': { transform: 'translateY(0)' },
-            }
-          }
-        }
-      }
-    }
-  </script>
   <style>
+    /* Critical styles before the bundle loads. Everything else lives in src/styles. */
     html,
     body,
     #root {
@@ -138,157 +88,35 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
-      /* App handles scrolling internally */
+      /* The app handles scrolling internally */
       background-color: #121212;
       overscroll-behavior: none;
-      transition: background-color 0.3s ease;
     }
 
-    html.light body,
-    html.light #root {
+    html:not(.dark) body,
+    html:not(.dark) #root {
       background-color: #F5F8F8;
     }
 
-    html.dark body,
-    html.dark #root {
-      background-color: #121212;
-    }
-
-    @keyframes shimmer {
-      0% {
-        background-position: -200% 0;
-      }
-
-      100% {
-        background-position: 200% 0;
-      }
-    }
-
-    .skeleton-shimmer {
-      background: linear-gradient(90deg, #2a2a2a 25%, #333333 50%, #2a2a2a 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-    }
-
-    html.light .skeleton-shimmer {
-      background: linear-gradient(90deg, #e8e8e8 25%, #f0f0f0 50%, #e8e8e8 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-    }
-
-    /* ─── Material Symbols FOUT Fix ─────────────────────────────────────────
-       Icons start invisible; fade in once the icon font has loaded.
-       This prevents showing raw text (e.g. 'recycling', 'location_on').
-    ────────────────────────────────────────────────────────────────────────── */
+    /* Material Symbols FOUT fix: icons stay invisible until the icon font has loaded,
+       so raw ligature names (e.g. 'recycling') never flash on screen. */
     .material-symbols-rounded {
-      font-family: 'Material Symbols Rounded';
-      font-variation-settings:
-        'FILL' 0,
-        'wght' 400,
-        'GRAD' 0,
-        'opsz' 24;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      vertical-align: middle;
-      line-height: 1;
-      width: 1em;
-      height: 1em;
-      min-width: 1em;
-      min-height: 1em;
-      text-transform: none;
-      letter-spacing: normal;
-      word-wrap: normal;
-      white-space: nowrap;
-      direction: ltr;
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-      font-feature-settings: 'liga';
       opacity: 0;
       transition: opacity 0.2s ease;
     }
 
-    /* Once document.fonts.ready resolves, this class is added to <html> */
     html.fonts-loaded .material-symbols-rounded {
       opacity: 1;
     }
-
-    .filled-icon {
-      font-variation-settings: 'FILL' 1;
-    }
-
-    /* Hide scrollbar for Chrome, Safari and Opera */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-
-    /* Hide scrollbar for IE, Edge and Firefox */
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      /* IE and Edge */
-      scrollbar-width: none;
-      /* Firefox */
-    }
-
-    .safe-bottom {
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-
-    @keyframes scan {
-
-      0%,
-      100% {
-        top: 0%;
-        opacity: 0;
-      }
-
-      10% {
-        opacity: 1;
-      }
-
-      90% {
-        opacity: 1;
-      }
-
-      100% {
-        top: 100%;
-        opacity: 0;
-      }
-    }
-
-    @keyframes bounce-short {
-
-      0%,
-      100% {
-        transform: translateY(0);
-      }
-
-      50% {
-        transform: translateY(-15%);
-      }
-    }
-
-    .animate-bounce-short {
-      animation: bounce-short 1s infinite;
-    }
-
-    /* 3D Flip Card Utilities */
-    .perspective-1000 {
-      perspective: 1000px;
-    }
-
-    .preserve-3d {
-      transform-style: preserve-3d;
-    }
-
-    .backface-hidden {
-      backface-visibility: hidden;
-    }
-
-    .rotate-y-180 {
-      transform: rotateY(180deg);
-    }
   </style>
+  <script>
+    // Apply the saved theme before first paint (dark by default).
+    try {
+      if (localStorage.getItem('theme') !== 'light') document.documentElement.classList.add('dark');
+    } catch (e) {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
 
 </head>
 

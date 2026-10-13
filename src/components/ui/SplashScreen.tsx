@@ -1,59 +1,44 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { DUR, EASE } from '@/constants/motion';
 
-export const SplashScreen: React.FC = () => {
-    return (
-        <motion.div
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-white dark:bg-[#121212]"
-        >
-            {/* Large Ambient Background Glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/20 blur-[100px] rounded-full pointer-events-none animate-pulse" />
+// Material Symbols `recycling` (filled), split into its 6 sub-paths in absolute coordinates.
+// Each piece draws its outline in turn while the mark rotates, then fills (see .ec-splash__mark in components.css).
+const MARK = [
+    'M389 -626l68-113-59-98q-12-20-34.5-20T329-837l-77 129q-8 14-4.5 30.5T265-653l69 41q14 8 30.5 4t24.5-18Z',
+    'M755 -320l-68-113q-9-14-4.5-30.5T701-488l70-40q14-8 30-4t24 18l44 73q11 17 12 38t-9 39q-10 20-29.5 32T800-320h-45Z',
+    'M606 -74l-98-98q-12-12-12-28t12-28l98-98q10-10 22-5t12 19v32h190l-58 116q-11 20-30 32t-42 12h-60v32q0 14-12 19t-22-5Z',
+    'M253 -120q-20 0-36.5-10.5T192-158q-8-16-7.5-33.5T194-224l34-56h132q17 0 28.5 11.5T400-240v80q0 17-11.5 28.5T360-120H253Z',
+    'M154 -234L89-364q-9-18-8.5-38.5T92-441l16-27-27-16q-11-7-9-20.5T87-521l133-33q16-4 30.5 4.5T269-525l33 134q3 13-8 21t-22 1l-27-17-91 152Z',
+    'M655 -586l-133-33q-13-3-14.5-16.5T517-656l27-16-125-208h141q21 0 39.5 10.5T629-841l52 87 26-16q11-7 22 1t8 21l-33 133q-4 16-18.5 24.5T655-586Z',
+];
 
-            <div className="relative flex flex-col items-center z-10">
-                {/* Logo Container */}
-                <div className="relative w-32 h-32 mb-6">
-                    {/* Ambient Glow */}
-                    <div className="absolute inset-0 bg-primary/30 blur-[40px] rounded-full animate-pulse" />
+export interface SplashScreenProps {
+    wordmark?: string;
+    tagline?: string;
+}
 
-                    {/* Icon */}
-                    <motion.div
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{
-                            duration: 0.8,
-                            ease: "easeOut"
-                        }}
-                        className="relative z-10 w-full h-full bg-white dark:bg-[#1E1E1E] rounded-3xl shadow-2xl flex items-center justify-center border border-gray-100 dark:border-white/5"
-                    >
-                        <svg
-                            className="w-16 h-16 text-primary dark:text-accent"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            aria-hidden="true"
-                        >
-                            <path d="M4.02 9.54l1.63-2.83C6.39 5.3 7.82 4.3 9.5 4.08V2.17c0-.45.54-.67.85-.35l3.25 3.25c.2.2.2.51 0 .71L10.35 9.03c-.31.31-.85.09-.85-.35V6.75c-1.36.19-2.48.96-3.08 2.01L5.3 10.7c-.2.35-.65.47-1 .27l-.01-.01c-.35-.2-.47-.65-.27-1.02zM21.72 13.97l-1.63 2.83c-.74 1.41-2.17 2.41-3.85 2.63v1.91c0 .45-.54.67-.85.35l-3.25-3.25c-.2-.2-.2-.51 0-.71l3.25-3.25c.31-.31.85-.09.85.35v1.93c1.36-.19 2.48-.96 3.08-2.01l1.12-1.94c.2-.35.65-.47 1-.27l.01.01c.35.2.47.65.27 1.01zM11.66 19.34l-1.12 1.94c-.2.35-.65.47-1 .27l-.01-.01c-.35-.2-.47-.65-.27-1.02l1.63-2.83c.74-1.41 2.17-2.41 3.85-2.63v-1.91c0-.45.54-.67.85-.35l3.25 3.25c.2.2.2.51 0 .71l-3.25 3.25c-.31.31-.85.09-.85-.35v-1.93c-1.36.19-2.48.96-3.08 2.01z" />
-                        </svg>
-                    </motion.div>
-                </div>
-
-                {/* Text */}
-                <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.3, duration: 0.5 }}
-                    className="text-center"
-                >
-                    <h1 className="text-3xl font-bold text-text dark:text-white mb-2 tracking-tight">
-                        e-cycle
-                    </h1>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm font-medium tracking-wide uppercase">
-                        Recicla. Gana. Repite.
-                    </p>
-                </motion.div>
+export const SplashScreen: React.FC<SplashScreenProps> = ({ wordmark = 'e-cycle', tagline = 'Recicla. Gana. Repite.' }) => (
+    <motion.div
+        className="ec-splash"
+        role="status"
+        aria-label="Cargando E-Cycle"
+        exit={{ opacity: 0 }}
+        transition={{ duration: DUR.slow, ease: EASE.exit }}
+    >
+        <div className="ec-splash__glow" />
+        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10 }}>
+            <div className="ec-splash__tile">
+                <svg className="ec-splash__mark" viewBox="0 -960 960 960" aria-hidden="true">
+                    {MARK.map((d, i) => (
+                        <path key={i} pathLength={1} d={d} style={{ animationDelay: `${i * 140}ms, ${900 + i * 90}ms` }} />
+                    ))}
+                </svg>
             </div>
-        </motion.div>
-    );
-};
+            <div style={{ textAlign: 'center' }}>
+                <h1 className="ec-splash__word">{wordmark}</h1>
+                <p className="ec-splash__tag">{tagline}</p>
+            </div>
+        </div>
+    </motion.div>
+);

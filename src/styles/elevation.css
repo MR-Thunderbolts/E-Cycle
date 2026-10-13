@@ -1,0 +1,21 @@
+/* Two elevation families: soft neutral drops for cards, and colored glows for anything
+   "charged" (active multipliers, mission badges, active nav icon). */
+:root{
+  --shadow-sm:0 1px 2px 0 rgba(0,0,0,.05);
+  --shadow-card:0 4px 16px rgba(0,0,0,.04);
+  --shadow-lg:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);
+  --shadow-sheet:0 -10px 40px rgba(0,0,0,.08);
+  --shadow-nav:0 -5px 20px rgba(0,0,0,.03);
+
+  --glow-teal:0 0 10px rgba(4,122,108,.5);
+  --glow-teal-dark:0 0 10px rgba(29,233,182,.5);
+  --glow-teal-strong:0 0 15px rgba(4,122,108,.5);
+  --glow-accent-strong:0 0 15px rgba(29,233,182,.6);
+  --glow-purple:0 0 15px rgba(124,77,255,.6);
+  --glow-icon-active:0 0 8px rgba(0,121,107,.5);
+
+  --blur-glass:blur(12px); /* @kind other */
+  --blur-backdrop:blur(4px); /* @kind other */
+  --scrim:rgba(0,0,0,.6);
+  --scrim-soft:rgba(0,0,0,.2);
+}

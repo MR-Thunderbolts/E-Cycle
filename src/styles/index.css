@@ -1,0 +1,10 @@
+/* Design System v2 · capa Ciudadano. Orden: tokens → base → componentes. */
+@import './colors.css';
+@import './typography.css';
+@import './spacing.css';
+@import './radius.css';
+@import './elevation.css';
+@import './motion.css';
+@import './base.css';
+@import './components.css';
+@import './v2.css';

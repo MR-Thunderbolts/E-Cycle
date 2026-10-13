@@ -1,5 +1,7 @@
 import React, { ReactNode, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { IconButton } from '../IconButton';
+import { DUR, EASE } from '@/constants/motion';
 
 export interface ModalProps {
     open: boolean;
@@ -22,97 +24,46 @@ export const Modal: React.FC<ModalProps> = ({
     showCloseButton = true,
     className = '',
 }) => {
-    // Close on Escape key
     useEffect(() => {
-        const handleEscape = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && open) {
-                onClose();
-            }
-        };
-
-        document.addEventListener('keydown', handleEscape);
-        return () => document.removeEventListener('keydown', handleEscape);
+        if (!open) return;
+        const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+        document.addEventListener('keydown', onKey);
+        return () => document.removeEventListener('keydown', onKey);
     }, [open, onClose]);
 
-    // Prevent body scroll when modal is open
-    useEffect(() => {
-        if (open) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = '';
-        }
-        return () => {
-            document.body.style.overflow = '';
-        };
-    }, [open]);
-
-    // Size styles
-    const sizeStyles = {
-        sm: 'max-w-sm',
-        md: 'max-w-md',
-        lg: 'max-w-2xl',
-        fullscreen: 'max-w-full w-full h-full rounded-none',
-    };
+    const close = <IconButton icon="close" variant="ghost" ariaLabel="Cerrar" onClick={onClose} />;
 
     return (
         <AnimatePresence>
             {open && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    {/* Backdrop */}
+                <div className="ec-modal">
                     <motion.div
+                        className="ec-modal__scrim"
+                        onClick={onClose}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={onClose}
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        transition={{ duration: DUR.base, ease: EASE.standard }}
                     />
-
-                    {/* Modal Content */}
                     <motion.div
-                        initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                        animate={{ scale: 1, opacity: 1, y: 0 }}
-                        exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                        className={`relative w-full ${sizeStyles[size]} bg-white dark:bg-dark-surface rounded-3xl shadow-2xl overflow-hidden flex flex-col ${size === 'fullscreen' ? '' : 'max-h-[90vh]'} ${className}`}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label={title}
+                        className={['ec-modal__panel', `ec-modal__panel--${size}`, className].filter(Boolean).join(' ')}
+                        initial={{ opacity: 0, scale: 0.96 }}
+                        animate={{ opacity: 1, scale: 1, transition: { duration: DUR.base, ease: EASE.enter } }}
+                        exit={{ opacity: 0, scale: 0.96, transition: { duration: DUR.base * 0.7, ease: EASE.exit } }}
                     >
-                        {/* Header */}
                         {title ? (
-                            <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-dark-border shrink-0">
-                                <h2 className="text-xl font-bold text-text dark:text-dark-text">
-                                    {title}
-                                </h2>
-                                {showCloseButton && (
-                                    <button
-                                        onClick={onClose}
-                                        className="p-2 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
-                                        aria-label="Close"
-                                    >
-                                        <span className="material-symbols-rounded">close</span>
-                                    </button>
-                                )}
+                            <div className="ec-modal__head">
+                                <h2 className="ec-modal__title">{title}</h2>
+                                {showCloseButton && close}
                             </div>
                         ) : (
-                            showCloseButton && (
-                                <button
-                                    onClick={onClose}
-                                    className="absolute top-4 right-4 p-2 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors z-10"
-                                    aria-label="Close"
-                                >
-                                    <span className="material-symbols-rounded">close</span>
-                                </button>
-                            )
+                            showCloseButton && <div className="ec-modal__x">{close}</div>
                         )}
-
-                        {/* Body */}
-                        <div className="flex-1 overflow-y-auto p-6">
-                            {children}
-                        </div>
-
-                        {/* Footer */}
-                        {footer && (
-                            <div className="p-6 border-t border-gray-100 dark:border-dark-border shrink-0">
-                                {footer}
-                            </div>
-                        )}
+                        <div className="ec-modal__body">{children}</div>
+                        {footer && <div className="ec-modal__foot">{footer}</div>}
                     </motion.div>
                 </div>
             )}

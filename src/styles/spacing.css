@@ -1,0 +1,49 @@
+/* 4px base scale (Tailwind default — the app never leaves it). */
+:root{
+  --space-0-5:2px;
+  --space-1:4px;
+  --space-2:8px;
+  --space-3:12px;
+  --space-4:16px;
+  --space-5:20px;
+  --space-6:24px;   /* standard screen gutter */
+  --space-8:32px;
+  --space-10:40px;
+  --space-12:48px;
+
+  --gutter-screen:var(--space-6);
+  --gutter-card:var(--space-4);
+  --stack-section:var(--space-8);
+
+  /* Component sizing lifted from the source */
+  --size-avatar-sm:32px;
+  --size-avatar-md:44px;
+  --size-avatar-lg:64px;
+  --size-iconbox-sm:32px;
+  --size-iconbox-md:40px;
+  --size-iconbox-lg:48px;
+  --size-iconbox-xl:56px;
+  --size-logo-tile:80px;
+  --size-nav-bar:100px;
+  --size-nav-tab:64px;
+  --size-nav-tab-active:72px;
+  --size-hit-min:44px;
+  --size-hit-citizen:48px;  /* v2 · Ciudadano */
+  --size-hit-driver:64px;   /* v2 · Conductor */
+  --size-hit-pointer:40px;  /* v2 · Gestión con puntero */
+  --size-topbar:72px;       /* v2 · TopBar escritorio */
+  --size-navrail:88px;      /* v2 · NavRail tablet */
+  --size-sidebar:248px;     /* v2 · Sidebar Gestión */
+  --size-drawer:440px;      /* v2 · Drawer Gestión */
+
+  /* v2 · breakpoints (reference values for media queries) */
+  --bp-medium:600px;
+  --bp-expanded:1024px;
+  --bp-gestion:1280px;
+  --content-max:1200px;
+
+  --border-hair:1px;
+  --border-avatar-sm:2px;
+  --border-avatar-md:3px;
+  --border-avatar-lg:4px;
+}

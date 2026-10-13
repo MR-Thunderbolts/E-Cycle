@@ -1,2 +1,2 @@
-export { BottomNavBar } from './BottomNavBar';
-export type { BottomNavBarProps } from './BottomNavBar';
+export { BottomNavBar, NAV_TABS } from './BottomNavBar';
+export type { BottomNavBarProps, NavTab } from './BottomNavBar';

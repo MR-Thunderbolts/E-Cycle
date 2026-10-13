@@ -143,15 +143,10 @@ export const analytics = {
         });
     },
 
-    dropoffCompleted: (
-        pointsEarned: number,
-        itemsCount: number,
-        multiplier: number
-    ) => {
+    dropoffCompleted: (pointsEarned: number, itemsCount: number) => {
         trackEvent('dropoff_completed', {
             points_earned: pointsEarned,
             items_count: itemsCount,
-            multiplier_active: multiplier,
         });
     },
 
@@ -173,21 +168,6 @@ export const analytics = {
             coupon_id: couponId,
             points_spent: pointsSpent,
             remaining_points: remainingPoints,
-        });
-    },
-
-    // Achievements
-    achievementsViewed: (completedCount: number, totalCount: number) => {
-        trackEvent('achievements_viewed', {
-            completed_count: completedCount,
-            total_count: totalCount,
-        });
-    },
-
-    achievementUnlocked: (achievementId: string, rewardPoints: number) => {
-        trackEvent('achievement_unlocked', {
-            achievement_id: achievementId,
-            reward_points: rewardPoints,
         });
     },
 
