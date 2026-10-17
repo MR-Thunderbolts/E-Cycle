@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Button, Chip, Counter, Enter, Icon, IconButton, Input, ProgressBar, screen } from '@/components/ui';
 import { COMUNAS, FREE_PICKUP_KG, PICKUP_ITEMS, PICKUP_POINTS_PER_KG, SECTOR } from '@/constants/ciudadano';
 import { useCiudadano } from '@/hooks';
-import { trackEvent } from '@/utils/analytics';
 import { fmtKg } from '@/utils/format';
 
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -47,7 +46,6 @@ const Pickup: React.FC = () => {
         setErr({});
         setStep(step + 1);
         if (step === 3) {
-            trackEvent('pickup_requested', { kg: +kg.toFixed(1), units, comuna: addr.comuna });
             if (!app.signedIn) setTimeout(() => app.openNudge(Math.round(kg * PICKUP_POINTS_PER_KG)), NUDGE_DELAY_MS);
         }
     };
