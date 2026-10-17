@@ -8,7 +8,7 @@ App web progresiva (PWA) para que cualquier persona de la casa recicle sus apara
 | --- | --- |
 | **Explorar** | Mapa a pantalla completa con los puntos limpios, buscador por comuna o dirección, lista arrastrable y aviso de campaña. |
 | **Retiro** | Retiro a domicilio en 4 pasos (qué, dónde, cuándo, revisión) y seguimiento. Gratis desde 5 kg. |
-| **Escanear** | Solo en celular: lee el QR del punto, se declara lo que se entrega y se suman puntos. |
+| **Escanear** | Solo en celular: simula la lectura del QR del punto (el QR es simulado, no se lee con la cámara), se declara lo que se entrega y se suman puntos. |
 | **Beneficios** | Saldo de puntos, premios para canjear e historial. |
 
 La cuenta es opcional y se crea con teléfono y código SMS. Sin cuenta, los puntos quedan guardados 30 días en el navegador y pasan a la cuenta al crearla.
@@ -27,6 +27,8 @@ npm run build      # build de producción en dist/
 Variables de entorno opcionales (copiar `.env.example` a `.env.local`):
 
 - `VITE_GA_MEASUREMENT_ID`: Google Analytics 4. Sin ella, los eventos solo se registran en la consola en desarrollo.
+
+La medición del prototipo es el snippet de Maze de `index.html`. GA4 está inactivo porque falta `VITE_GA_MEASUREMENT_ID`.
 
 ## Stack
 
@@ -55,8 +57,6 @@ src/
 - Tema oscuro por defecto; se cambia desde la cuenta y se guarda en el navegador.
 - Transiciones con Framer Motion usando los tokens de `src/constants/motion.ts`. Con `prefers-reduced-motion` no hay animaciones.
 - Áreas táctiles de 44 × 44 como mínimo. Textos en español de Chile.
-
-La carpeta `design-system/` en la raíz es la copia v1, previa a este rediseño.
 
 ## Datos de ejemplo
 
