@@ -4,7 +4,6 @@ import { Button, Enter, IconButton, Input } from '@/components/ui';
 import { DEMO_OTP } from '@/constants/ciudadano';
 import { DUR, EASE } from '@/constants/motion';
 import { useCiudadano } from '@/hooks';
-import { trackEvent } from '@/utils/analytics';
 
 type Errors = Partial<Record<'name' | 'phone' | 'code', boolean>>;
 
@@ -40,7 +39,6 @@ export const Register: React.FC = () => {
     const verify = (e: React.FormEvent) => {
         e.preventDefault();
         if (code !== DEMO_OTP) return fail({ code: true });
-        trackEvent(login ? 'login_completed' : 'signup_completed');
         app.signIn(login ? null : name, phone.trim());
     };
 

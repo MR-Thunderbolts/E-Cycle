@@ -3,7 +3,6 @@ import type { Reward } from '@/types';
 import { BottomSheet, Button, Enter, Icon, ProgressBar, Tabs, screen } from '@/components/ui';
 import { REWARDS } from '@/constants/ciudadano';
 import { useCiudadano } from '@/hooks';
-import { analytics } from '@/utils';
 import { fmtNumber } from '@/utils/format';
 
 type HubTab = 'canjear' | 'historial';
@@ -33,14 +32,10 @@ const Hub: React.FC = () => {
     const [pick, setPick] = useState<Reward | null>(null);
     const [code, setCode] = useState<string | null>(null);
 
-    const open = (r: Reward) => {
-        setPick(r);
-        analytics.couponViewed(r.id, r.partner, r.cost);
-    };
+    const open = (r: Reward) => setPick(r);
     const redeem = () => {
         if (!pick) return;
         app.spend(pick.cost, pick.title);
-        analytics.couponRedeemed(pick.id, pick.cost, pts - pick.cost);
         setCode(voucherCode());
     };
     const close = () => {

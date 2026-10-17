@@ -3,7 +3,6 @@ import type { MaterialCategory } from '@/types';
 import { Badge, Button, Counter, Enter, Icon, IconButton, screen } from '@/components/ui';
 import { CLEAN_POINTS, MATERIAL_CATEGORIES } from '@/constants/ciudadano';
 import { useCiudadano } from '@/hooks';
-import { analytics } from '@/utils';
 import { fmtNumber } from '@/utils/format';
 
 type Stage = 'camera' | 'scanning' | 'declare' | 'done';
@@ -46,18 +45,13 @@ const Scan: React.FC = () => {
         .filter((c) => qty[c.id])
         .sort((a, b) => qty[b.id] * b.pointsPerUnit - qty[a.id] * a.pointsPerUnit) as (MaterialCategory | undefined)[];
 
-    const scan = () => {
-        analytics.scanStarted();
-        setStage('scanning');
-    };
+    const scan = () => setStage('scanning');
 
     const confirm = () => {
         const detail = accepted
             .filter((c) => qty[c.id])
             .map((c) => `${qty[c.id]} ${c.label.toLowerCase()}`)
             .join(', ');
-        analytics.scanItemsEntered(qty, count, total);
-        analytics.dropoffCompleted(total, count);
         app.addPoints(total, point.name, detail);
         setEarned(total);
         setStage('done');
