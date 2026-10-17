@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { Address, HistoryEntry, Profile, TabType } from '@/types';
 import type { ToastVariant } from '@/components/ui/Toast';
 import { DEMO_ACCOUNT, GUEST_POINTS_TTL_MS } from '@/constants/ciudadano';
-import { analytics } from '@/utils';
 import { storage } from '@/utils/storage';
 import { CiudadanoContext, ConfirmRequest, RegisterMode, ToastState } from './CiudadanoContext';
 
@@ -83,15 +82,11 @@ export const CiudadanoProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }, []);
 
     const go = useCallback((next: TabType) => {
-        setTab((prev) => {
-            if (prev !== next) analytics.tabChanged(prev, next);
-            return next;
-        });
+        setTab(next);
     }, []);
 
     const setDark = (value: boolean) => {
         setDarkState(value);
-        analytics.themeToggled(value);
     };
 
     const closeWelcome = () => setShowWelcome(false);
@@ -195,10 +190,7 @@ export const CiudadanoProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 sms,
                 setSms,
                 account,
-                openAccount: () => {
-                    setAccount(true);
-                    analytics.profileOpened();
-                },
+                openAccount: () => setAccount(true),
                 closeAccount: () => setAccount(false),
                 register,
                 openRegister,

@@ -5,7 +5,6 @@ import { BottomSheet, Chip, Icon, IconButton, Skeleton } from '@/components/ui';
 import { CAMPAIGN, MATERIAL_CATEGORIES, USER_POSITION } from '@/constants/ciudadano';
 import { SPRING_SHEET } from '@/constants/motion';
 import { useCiudadano } from '@/hooks';
-import { analytics } from '@/utils';
 import { initials } from '@/utils/format';
 import InteractiveMap from './components/InteractiveMap';
 import { SearchOverlay } from './components/SearchOverlay';
@@ -83,14 +82,8 @@ const Home: React.FC = () => {
         else setOpen(next);
     };
 
-    const pickChip = (id: ChipId) => {
-        setChip(id);
-        analytics.materialFilterApplied([id], list.length);
-    };
-    const select = (p: CleanPoint) => {
-        setSelected(p);
-        analytics.recyclingPointClicked(p.id, p.name);
-    };
+    const pickChip = (id: ChipId) => setChip(id);
+    const select = (p: CleanPoint) => setSelected(p);
 
     return (
         <div ref={root} style={{ position: 'absolute', inset: 0 }}>

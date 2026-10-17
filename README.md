@@ -24,11 +24,7 @@ npm run typecheck  # tsc --noEmit
 npm run build      # build de producción en dist/
 ```
 
-Variables de entorno opcionales (copiar `.env.example` a `.env.local`):
-
-- `VITE_GA_MEASUREMENT_ID`: Google Analytics 4. Sin ella, los eventos solo se registran en la consola en desarrollo.
-
-La medición del prototipo es el snippet de Maze de `index.html`. GA4 está inactivo porque falta `VITE_GA_MEASUREMENT_ID`.
+El prototipo no usa variables de entorno ni medición: todo corre en el navegador con datos de ejemplo.
 
 ## Stack
 
@@ -48,7 +44,7 @@ src/
 ├── hooks/          # useCiudadano, useIsDesktop, useCanScan
 ├── constants/      # Datos de ejemplo (ciudadano.ts) y tokens de movimiento
 ├── styles/         # Tokens y clases ec-* del Design System v2
-└── utils/          # Analytics, formato es-CL, localStorage seguro
+└── utils/          # Formato es-CL, localStorage seguro
 ```
 
 ## Design System v2

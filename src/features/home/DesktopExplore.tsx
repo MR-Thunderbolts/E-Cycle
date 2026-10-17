@@ -3,7 +3,6 @@ import type { CleanPoint } from '@/types';
 import { Chip, Enter, SearchBar } from '@/components/ui';
 import { CAMPAIGN, COMUNAS, USER_POSITION } from '@/constants/ciudadano';
 import { useCiudadano } from '@/hooks';
-import { analytics } from '@/utils';
 import InteractiveMap from './components/InteractiveMap';
 import { PointRow } from './components/PointRow';
 import { PointDetail } from './components/PointDetail';
@@ -20,14 +19,8 @@ const DesktopExplore: React.FC = () => {
     const list = usePointFilter(chip, query);
     const focus = useMemo(() => (query ? centroid(list) : null), [query]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const select = (p: CleanPoint) => {
-        setSelected(p);
-        analytics.recyclingPointClicked(p.id, p.name);
-    };
-    const pickChip = (id: ChipId) => {
-        setChip(id);
-        analytics.materialFilterApplied([id], list.length);
-    };
+    const select = (p: CleanPoint) => setSelected(p);
+    const pickChip = (id: ChipId) => setChip(id);
 
     return (
         <div style={{ position: 'absolute', inset: 0, display: 'grid', gridTemplateColumns: 'minmax(340px,420px) minmax(0,1fr)' }}>
