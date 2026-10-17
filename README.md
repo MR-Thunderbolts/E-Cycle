@@ -28,7 +28,7 @@ Variables de entorno opcionales (copiar `.env.example` a `.env.local`):
 
 - `VITE_GA_MEASUREMENT_ID`: Google Analytics 4. Sin ella, los eventos solo se registran en la consola en desarrollo.
 
-La medición del prototipo es el snippet de Maze de `index.html`. GA4 está inactivo porque falta `VITE_GA_MEASUREMENT_ID`.
+El prototipo no tiene medición activa: GA4 está inactivo porque falta `VITE_GA_MEASUREMENT_ID`.
 
 ## Stack
 
