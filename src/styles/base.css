@@ -32,7 +32,7 @@ a:hover{color:var(--link-hover);text-decoration:underline;text-underline-offset:
 .animate-bounce-gentle{animation:ec-bounce-gentle 2s infinite}
 .skeleton-shimmer{background:linear-gradient(90deg,#e8e8e8 25%,#f0f0f0 50%,#e8e8e8 75%);background-size:200% 100%;animation:ec-shimmer 1.5s infinite}
 html.dark .skeleton-shimmer,.ec-dark .skeleton-shimmer{background:linear-gradient(90deg,#2a2a2a 25%,#333 50%,#2a2a2a 75%);background-size:200% 100%;animation:ec-shimmer 1.5s infinite}
-@keyframes ec-loc-pulse{0%{transform:scale(.5);opacity:.6}100%{transform:scale(1.6);opacity:0}}
+@keyframes ec-loc-pulse{0%{transform:scale(.45);opacity:.7}100%{transform:scale(2);opacity:0}}
 @keyframes ec-fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes ec-shake{0%,100%{transform:translateX(0)}15%,55%{transform:translateX(-8px)}35%,75%{transform:translateX(8px)}90%{transform:translateX(-3px)}}
 @keyframes ec-scale-in{from{opacity:0;transform:scale(.94) translateY(8px)}to{opacity:1;transform:none}}
@@ -42,4 +42,11 @@ html.dark .skeleton-shimmer,.ec-dark .skeleton-shimmer{background:linear-gradien
 .ec-enter{animation:ec-scale-in var(--dur-slow) var(--ease-enter) backwards}
 @keyframes ec-sheet-up{from{transform:translateY(100%)}to{transform:none}}
 /* v2 · movimiento reducido: regla global */
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media (prefers-reduced-motion:reduce){*:not(.ec-keep-motion),*:not(.ec-keep-motion)::before,*:not(.ec-keep-motion)::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+/* Theme switch: colours cross-fade instead of snapping (class is set for ~0.6 s by the provider). */
+@media (prefers-reduced-motion:no-preference){
+  html.ec-theme-fade,html.ec-theme-fade *,html.ec-theme-fade *::before,html.ec-theme-fade *::after{transition:background-color .55s ease,color .55s ease,border-color .55s ease,fill .55s ease,stroke .55s ease,box-shadow .55s ease,opacity .55s ease!important}
+}
+/* Map skeleton: soft placeholder blocks that breathe while the map «loads». */
+@keyframes ec-map-sk{0%,100%{opacity:.55}50%{opacity:1}}
+@keyframes ec-scan-v{0%{top:0;opacity:0}10%{opacity:1}90%{opacity:1}100%{top:calc(100% - 2px);opacity:0}}

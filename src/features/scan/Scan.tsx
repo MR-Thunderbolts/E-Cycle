@@ -5,10 +5,15 @@ import { CLEAN_POINTS, MATERIAL_CATEGORIES } from '@/constants/ciudadano';
 import { useCiudadano } from '@/hooks';
 import { fmtNumber } from '@/utils/format';
 
-type Stage = 'camera' | 'scanning' | 'declare' | 'done';
+type Stage = 'camera' | 'scanning' | 'declare' | 'validating' | 'done';
+type Cam = 'idle' | 'on' | 'denied' | 'unsupported';
 
 /** «Leyendo código…» stays for 1.4 s. */
 const READ_MS = 1400;
+
+/** The container «checks» the delivery in these steps, one every STEP_MS. */
+const VALIDATION_STEPS = ['Conectando con el contenedor', 'Pesando lo que depositaste', 'Validando tu entrega'];
+const STEP_MS = 1100;
 
 const corner = (pos: React.CSSProperties): React.CSSProperties => ({
     position: 'absolute',
@@ -27,7 +32,12 @@ const Scan: React.FC = () => {
     const [torch, setTorch] = useState(false);
     const [qty, setQty] = useState<Record<string, number>>({});
     const [earned, setEarned] = useState(0);
-    const photo = useRef<HTMLInputElement>(null);
+    const [vstep, setVstep] = useState(0);
+
+    const video = useRef<HTMLVideoElement>(null);
+    const stream = useRef<MediaStream | null>(null);
+    const [cam, setCam] = useState<Cam>('idle');
+    const [torchOk, setTorchOk] = useState(false);
 
     // The QR identifies the clean point; the demo uses the first one.
     const point = CLEAN_POINTS[0];
@@ -39,6 +49,73 @@ const Scan: React.FC = () => {
         return () => clearTimeout(t);
     }, [stage]);
 
+    // Rear camera while the viewfinder is on screen; released as soon as it is not.
+    const viewing = stage === 'camera' || stage === 'scanning';
+    useEffect(() => {
+        if (!viewing) return;
+        if (!navigator.mediaDevices?.getUserMedia) {
+            setCam('unsupported');
+            return;
+        }
+        let cancelled = false;
+        navigator.mediaDevices
+            .getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false })
+            .then((s) => {
+                if (cancelled) return s.getTracks().forEach((t) => t.stop());
+                stream.current = s;
+                const caps = s.getVideoTracks()[0]?.getCapabilities?.() as { torch?: boolean } | undefined;
+                setTorchOk(!!caps?.torch);
+                setCam('on');
+            })
+            .catch(() => !cancelled && setCam('denied'));
+        return () => {
+            cancelled = true;
+            stream.current?.getTracks().forEach((t) => t.stop());
+            stream.current = null;
+            setCam('idle');
+            setTorch(false);
+            setTorchOk(false);
+        };
+    }, [viewing]);
+
+    // Attach the stream once the <video> exists.
+    useEffect(() => {
+        if (cam === 'on' && video.current && stream.current) {
+            video.current.srcObject = stream.current;
+            video.current.play().catch(() => {});
+        }
+    }, [cam, stage]);
+
+    // A real QR in front of the camera counts as a scan (where the browser can detect barcodes).
+    useEffect(() => {
+        const Detector = (window as unknown as { BarcodeDetector?: new (o: { formats: string[] }) => { detect: (v: HTMLVideoElement) => Promise<unknown[]> } }).BarcodeDetector;
+        if (cam !== 'on' || stage !== 'camera' || !Detector) return;
+        const det = new Detector({ formats: ['qr_code'] });
+        const t = setInterval(() => {
+            const v = video.current;
+            if (v && v.readyState >= 2) det.detect(v).then((r) => r.length && setStage('scanning')).catch(() => {});
+        }, 500);
+        return () => clearInterval(t);
+    }, [cam, stage]);
+
+    const toggleTorch = () => {
+        const next = !torch;
+        stream.current
+            ?.getVideoTracks()[0]
+            ?.applyConstraints({ advanced: [{ torch: next } as MediaTrackConstraintSet] })
+            .then(() => setTorch(next))
+            .catch(() => {});
+    };
+
+    // Validation screen: the container «checks» the delivery, then the points land.
+    useEffect(() => {
+        if (stage !== 'validating') return;
+        setVstep(0);
+        const timers = VALIDATION_STEPS.map((_, i) => setTimeout(() => setVstep(i + 1), (i + 1) * STEP_MS));
+        const end = setTimeout(finish, VALIDATION_STEPS.length * STEP_MS + 500);
+        return () => [...timers, end].forEach(clearTimeout);
+    }, [stage]); // eslint-disable-line react-hooks/exhaustive-deps
+
     const total = accepted.reduce((s, c) => s + (qty[c.id] || 0) * c.pointsPerUnit, 0);
     const count = Object.values(qty).reduce((a, b) => a + b, 0);
     const [top] = accepted
@@ -47,7 +124,9 @@ const Scan: React.FC = () => {
 
     const scan = () => setStage('scanning');
 
-    const confirm = () => {
+    const confirm = () => setStage('validating');
+
+    const finish = () => {
         const detail = accepted
             .filter((c) => qty[c.id])
             .map((c) => `${qty[c.id]} ${c.label.toLowerCase()}`)
@@ -74,18 +153,26 @@ const Scan: React.FC = () => {
                         maxWidth: 360,
                         aspectRatio: '1',
                         borderRadius: 24,
-                        background: torch ? '#2A2A2A' : '#000',
+                        background: '#000',
                         position: 'relative',
                         overflow: 'hidden',
-                        transition: 'background var(--dur-base)',
                     }}
                 >
+                    <video
+                        ref={video}
+                        muted
+                        playsInline
+                        autoPlay
+                        aria-hidden="true"
+                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: cam === 'on' ? 1 : 0, transition: 'opacity var(--dur-base)' }}
+                    />
                     <div style={corner({ top: '18%', left: '18%', borderTopWidth: 4, borderLeftWidth: 4, borderTopLeftRadius: 12 })} />
                     <div style={corner({ top: '18%', right: '18%', borderTopWidth: 4, borderRightWidth: 4, borderTopRightRadius: 12 })} />
                     <div style={corner({ bottom: '18%', left: '18%', borderBottomWidth: 4, borderLeftWidth: 4, borderBottomLeftRadius: 12 })} />
                     <div style={corner({ bottom: '18%', right: '18%', borderBottomWidth: 4, borderRightWidth: 4, borderBottomRightRadius: 12 })} />
                     <div style={{ position: 'absolute', left: '18%', right: '18%', top: '18%', bottom: '18%' }}>
                         <div
+                            className="ec-keep-motion"
                             style={{
                                 position: 'absolute',
                                 left: 0,
@@ -116,33 +203,28 @@ const Scan: React.FC = () => {
                             <span style={{ fontSize: 14, fontWeight: 700 }}>Leyendo código…</span>
                         </Enter>
                     )}
-                    <div style={{ position: 'absolute', top: 12, right: 12 }}>
-                        <IconButton
-                            icon={torch ? 'flashlight_off' : 'flashlight_on'}
-                            ariaLabel={torch ? 'Apagar linterna' : 'Prender linterna'}
-                            aria-pressed={torch}
-                            onClick={() => setTorch(!torch)}
-                            style={{ background: 'rgba(255,255,255,.12)', color: '#fff' }}
-                        />
-                    </div>
+                    {torchOk && (
+                        <div style={{ position: 'absolute', top: 12, right: 12 }}>
+                            <IconButton
+                                icon={torch ? 'flashlight_off' : 'flashlight_on'}
+                                ariaLabel={torch ? 'Apagar linterna' : 'Prender linterna'}
+                                aria-pressed={torch}
+                                onClick={toggleTorch}
+                                style={{ background: 'rgba(255,255,255,.12)', color: '#fff' }}
+                            />
+                        </div>
+                    )}
                 </div>
-                <p style={{ ...screen.p, maxWidth: 300 }}>Apunta al código QR del punto limpio para declarar lo que entregas.</p>
+                <p style={{ ...screen.p, maxWidth: 300 }}>
+                    {cam === 'denied'
+                        ? 'No pudimos usar la cámara. Permite el acceso en tu navegador o simula el escaneo.'
+                        : cam === 'unsupported'
+                          ? 'Este navegador no permite usar la cámara. Puedes simular el escaneo.'
+                          : 'Apunta al código QR del punto limpio para declarar lo que entregas.'}
+                </p>
                 <Button size="lg" fullWidth icon="qr_code_scanner" iconPosition="left" disabled={stage === 'scanning'} onClick={scan}>
                     Simular escaneo
                 </Button>
-                <Button variant="neutral" size="lg" fullWidth icon="upload" iconPosition="left" onClick={() => photo.current?.click()}>
-                    Subir una foto
-                </Button>
-                <input
-                    ref={photo}
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    onChange={(e) => {
-                        if (e.target.files?.length) scan();
-                        e.target.value = '';
-                    }}
-                />
             </div>
         );
     }
@@ -194,6 +276,50 @@ const Scan: React.FC = () => {
                 <Button size="lg" fullWidth disabled={!count} onClick={confirm}>
                     Confirmar entrega
                 </Button>
+            </div>
+        );
+    }
+
+    if (stage === 'validating') {
+        body = (
+            <div role="status" aria-live="polite" style={{ display: 'flex', flexDirection: 'column', gap: 24, alignItems: 'center', textAlign: 'center', paddingTop: 48 }}>
+                <div style={{ position: 'relative', width: 112, height: 112, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div
+                        className="ec-keep-motion"
+                        style={{
+                            position: 'absolute',
+                            inset: 0,
+                            borderRadius: 9999,
+                            border: '4px solid color-mix(in oklch, var(--brand-fg) 18%, transparent)',
+                            borderTopColor: 'var(--brand-fg)',
+                            animation: 'ec-spin 1.1s linear infinite',
+                        }}
+                    />
+                    <div style={screen.ico('var(--brand-fg)', 72)}>
+                        <Icon name="recycling" size={36} />
+                    </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <h1 style={screen.h1}>Validando tu entrega</h1>
+                    <p style={{ ...screen.p, maxWidth: 300 }}>El contenedor está verificando que dejaste lo que declaraste. Solo toma unos segundos.</p>
+                </div>
+                <div style={{ ...screen.card, width: '100%', textAlign: 'left', gap: 14 }}>
+                    {VALIDATION_STEPS.map((label, i) => {
+                        const state = i < vstep ? 'done' : i === vstep ? 'active' : 'todo';
+                        return (
+                            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 12, opacity: state === 'todo' ? 0.45 : 1, transition: 'opacity var(--dur-base)' }}>
+                                {state === 'done' ? (
+                                    <Icon name="check_circle" filled style={{ color: 'var(--brand-fg)' }} />
+                                ) : state === 'active' ? (
+                                    <Icon name="progress_activity" className="ec-keep-motion" style={{ color: 'var(--brand-fg)', animation: 'ec-spin 1s linear infinite' }} />
+                                ) : (
+                                    <Icon name="radio_button_unchecked" style={{ color: 'var(--text-muted)' }} />
+                                )}
+                                <span style={{ fontSize: 14, fontWeight: state === 'active' ? 700 : 500 }}>{label}</span>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
         );
     }

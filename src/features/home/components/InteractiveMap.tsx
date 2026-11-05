@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { animate, motion, useMotionValue, useTransform } from 'framer-motion';
+import { AnimatePresence, animate, motion, useMotionValue, useTransform } from 'framer-motion';
 import type { CleanPoint, MapPosition } from '@/types';
-import { IconButton, LocationDot, MapPin, Skeleton } from '@/components/ui';
+import { IconButton, LocationDot, MapPin } from '@/components/ui';
+import { MapSkeleton } from './MapSkeleton';
 import { DUR, EASE } from '@/constants/motion';
 import mapBg from '@/assets/map-bg.jpg';
 import mapBgLight from '@/assets/map-bg-light.jpg';
@@ -200,18 +201,37 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
                 touchAction: 'none',
                 cursor: 'grab',
                 background: dark ? 'var(--ec-dark-bg)' : 'var(--ec-map-canvas)',
+                transition: 'background-color .55s ease',
             }}
         >
             <motion.div
                 style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', x, y, scale: z, originX: 0, originY: 0 }}
             >
-                <img
-                    src={dark ? mapBg : mapBgLight}
-                    alt=""
-                    aria-hidden="true"
-                    draggable={false}
-                    style={{ position: 'absolute', left: '-50%', top: '-50%', width: '200%', height: '200%', maxWidth: 'none', objectFit: 'cover', pointerEvents: 'none', opacity: 0.9 }}
-                />
+                {/* Both tiles stay mounted so a theme change cross-fades instead of swapping. */}
+                {[
+                    { src: mapBg, on: dark },
+                    { src: mapBgLight, on: !dark },
+                ].map((t) => (
+                    <img
+                        key={t.src}
+                        src={t.src}
+                        alt=""
+                        aria-hidden="true"
+                        draggable={false}
+                        style={{
+                            position: 'absolute',
+                            left: '-50%',
+                            top: '-50%',
+                            width: '200%',
+                            height: '200%',
+                            maxWidth: 'none',
+                            objectFit: 'cover',
+                            pointerEvents: 'none',
+                            opacity: t.on ? 0.9 : 0,
+                            transition: 'opacity .55s ease',
+                        }}
+                    />
+                ))}
                 {selected && (
                     <svg
                         viewBox="0 0 100 100"
@@ -256,7 +276,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
                     );
                 })}
             </motion.div>
-            {loading && <Skeleton style={{ position: 'absolute', inset: 0, opacity: 0.5, zIndex: 2, borderRadius: 0 }} />}
+            <AnimatePresence>{loading && <MapSkeleton key="map-skeleton" controlsBottom={controlsBottom} />}</AnimatePresence>
             {children}
             <div
                 style={{
