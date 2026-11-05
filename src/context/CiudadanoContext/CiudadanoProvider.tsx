@@ -8,8 +8,8 @@ import { CiudadanoContext, ConfirmRequest, RegisterMode, ToastState } from './Ci
 const KEY_THEME = 'theme';
 const KEY_GUEST = 'ec-guest-points';
 
-const LOADING_MS = 3200;
-const WELCOME_MS = 3600;
+const LOADING_MS = 4200;
+const WELCOME_MS = 4600;
 const TOAST_MS = 3200;
 
 interface GuestPoints {
@@ -51,12 +51,22 @@ export const CiudadanoProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
     // Theme: dark by default, persisted.
+    // After the first paint, a switch cross-fades colours (.ec-theme-fade) instead of snapping.
+    const themeReady = useRef(false);
     useEffect(() => {
-        document.documentElement.classList.toggle('dark', dark);
+        const root = document.documentElement;
+        let t: ReturnType<typeof setTimeout> | undefined;
+        if (themeReady.current) {
+            root.classList.add('ec-theme-fade');
+            t = setTimeout(() => root.classList.remove('ec-theme-fade'), 650);
+        }
+        themeReady.current = true;
+        root.classList.toggle('dark', dark);
         storage.setRaw(KEY_THEME, dark ? 'dark' : 'light');
+        return () => clearTimeout(t);
     }, [dark]);
 
-    // Skeleton until 3.2 s; welcome card at 3.6 s on every load. The handoff shows it only on
+    // Skeleton until 4.2 s (the splash covers the first 2.3 s); welcome card at 4.6 s on every load. The handoff shows it only on
     // the first visit; this high-fidelity prototype shows it always so demos and tests see it.
     useEffect(() => {
         const a = setTimeout(() => setLoading(false), LOADING_MS);

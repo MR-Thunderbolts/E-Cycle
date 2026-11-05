@@ -52,7 +52,8 @@
 .ec-prompt__num{width:28px;height:28px;border-radius:var(--radius-full);background:var(--surface-page);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:var(--fw-extrabold);color:var(--brand-fg);flex-shrink:0}
 /* Map */
 .ec-locdot{position:relative;width:44px;height:44px;display:flex;align-items:center;justify-content:center;pointer-events:none}
-.ec-locdot__pulse{position:absolute;inset:0;border-radius:var(--radius-full);background:rgba(29,233,182,.35);animation:ec-loc-pulse var(--dur-pulse) var(--ease-enter) infinite}
+.ec-locdot__pulse{position:absolute;inset:-6px;border-radius:var(--radius-full);background:rgba(29,233,182,.45);animation:ec-loc-pulse var(--dur-pulse) var(--ease-enter) infinite}
+.ec-locdot__pulse--b{animation-delay:calc(var(--dur-pulse) / 2)}
 .ec-locdot__halo{position:absolute;inset:8px;border-radius:var(--radius-full);background:rgba(29,233,182,.15)}
 .ec-locdot__core{position:relative;width:14px;height:14px;border-radius:var(--radius-full);background:var(--ec-accent);border:3px solid var(--ec-dark-bg);box-shadow:var(--glow-teal-dark)}
 .ec-locdot__label{position:absolute;top:calc(100% - 2px);left:50%;transform:translateX(-50%);font-size:11px;font-weight:var(--fw-bold);color:var(--ec-dark-text);background:var(--ec-dark-bg);padding:2px 8px;border-radius:var(--radius-full);white-space:nowrap}

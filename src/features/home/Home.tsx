@@ -13,8 +13,12 @@ import { PointDetail } from './components/PointDetail';
 import { CampaignNotice } from './components/CampaignNotice';
 import { ChipId, centroid, usePointFilter } from './usePointFilter';
 
-/** Collapsed list: its top edge sits 240 px above the bottom of the screen. */
-const PEEK = 240;
+/** Bottom nav bar height; the collapsed list shows only its handle, title and chips above it. */
+const NAV = 100;
+/** Collapsed list: its top edge sits this far above the bottom of the screen (handle + title + chips). */
+const PEEK = NAV + 108;
+/** Expanded list stops just under the search bar. */
+const FULL_TOP = 88;
 /** Drag further than this to snap open or closed. */
 const SNAP = 60;
 
@@ -42,7 +46,7 @@ const Home: React.FC = () => {
     // Re-centre only when the search changes, not when a chip filters the list.
     const focus = useMemo(() => (query ? centroid(list) : null), [query]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Sheet geometry: collapsed at h − 240, expanded at max(96, 14% of the height).
+    // Sheet geometry: collapsed at h − PEEK, expanded at FULL_TOP (just under the search bar).
     const root = useRef<HTMLDivElement>(null);
     const [h, setH] = useState(800);
     useLayoutEffect(() => {
@@ -52,7 +56,7 @@ const Home: React.FC = () => {
         ro.observe(el);
         return () => ro.disconnect();
     }, []);
-    const minTop = Math.max(96, h * 0.14);
+    const minTop = FULL_TOP;
     const maxTop = h - PEEK;
     const top = useMotionValue(maxTop);
     useEffect(() => {
@@ -80,6 +84,35 @@ const Home: React.FC = () => {
         const next = !d.moved ? !open : dy < -SNAP ? true : dy > SNAP ? false : open;
         if (next === open) animate(top, open ? minTop : maxTop, SPRING_SHEET);
         else setOpen(next);
+    };
+
+    // Swiping or scrolling up on the list opens the sheet; pulling down at the top closes it.
+    const scroller = useRef<HTMLDivElement>(null);
+    const swipe = useRef<{ x: number; y: number; done: boolean } | null>(null);
+    const swipeStart = (x: number, y: number) => {
+        swipe.current = { x, y, done: false };
+    };
+    const swipeMove = (x: number, y: number) => {
+        const g = swipe.current;
+        if (!g || g.done) return;
+        const dy = g.y - y;
+        if (Math.abs(dy) < 24 || Math.abs(dy) < Math.abs(g.x - x)) return;
+        const atTop = (scroller.current?.scrollTop ?? 0) <= 0;
+        if (!open && dy > 0) {
+            g.done = true;
+            setOpen(true);
+        } else if (open && dy < 0 && atTop) {
+            g.done = true;
+            setOpen(false);
+        }
+    };
+    const swipeEnd = () => {
+        swipe.current = null;
+    };
+    const onWheel = (e: React.WheelEvent) => {
+        const atTop = (scroller.current?.scrollTop ?? 0) <= 0;
+        if (!open && e.deltaY > 8) setOpen(true);
+        else if (open && e.deltaY < -8 && atTop) setOpen(false);
     };
 
     const pickChip = (id: ChipId) => setChip(id);
@@ -220,13 +253,23 @@ const Home: React.FC = () => {
                     )}
                 </div>
                 <div
+                    ref={scroller}
                     className="no-scrollbar"
+                    onWheel={onWheel}
+                    onTouchStart={(e) => swipeStart(e.touches[0].clientX, e.touches[0].clientY)}
+                    onTouchMove={(e) => swipeMove(e.touches[0].clientX, e.touches[0].clientY)}
+                    onTouchEnd={swipeEnd}
+                    onTouchCancel={swipeEnd}
+                    onPointerDown={(e) => e.pointerType === 'mouse' && swipeStart(e.clientX, e.clientY)}
+                    onPointerMove={(e) => e.pointerType === 'mouse' && e.buttons === 1 && swipeMove(e.clientX, e.clientY)}
+                    onPointerUp={swipeEnd}
                     style={{
                         flex: 1,
                         minHeight: 0,
                         overflowY: open ? 'auto' : 'hidden',
                         overflowX: 'hidden',
-                        padding: '8px 20px 132px',
+                        overscrollBehavior: 'contain',
+                        padding: `8px 20px ${NAV + 28}px`,
                         display: 'flex',
                         flexDirection: 'column',
                         gap: 12,
