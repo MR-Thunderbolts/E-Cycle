@@ -29,8 +29,16 @@ export const PointDetail: React.FC<{ point: CleanPoint; onClose: () => void }> =
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {line('directions_walk', point.dist)}
-                {line('schedule', point.hours)}
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14 }}>
+                    <Icon name="schedule" size={20} style={{ color: 'var(--brand-fg)' }} />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {(point.schedule ?? [point.hours]).map((l) => (
+                            <span key={l}>{l}</span>
+                        ))}
+                    </div>
+                </div>
                 {line('location_on', point.address)}
+                {point.community === false && line('lock', 'Solo para la comunidad de la sede')}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div style={sectionLabel}>Recibe</div>

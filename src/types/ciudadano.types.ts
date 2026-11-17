@@ -16,7 +16,12 @@ export interface CleanPoint {
     id: string;
     name: string;
     address: string;
+    /** One-line summary for lists. */
     hours: string;
+    /** Full schedule, one line per group of days; shown in the point detail. */
+    schedule?: string[];
+    /** False when the point only serves its own community (e.g. a campus). Defaults to open. */
+    community?: boolean;
     type: 'Punto limpio' | 'Tienda asociada';
     dist: string;
     materials: MaterialId[];
