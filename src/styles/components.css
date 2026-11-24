@@ -27,6 +27,7 @@
 .ec-btn--danger:hover:not(:disabled){filter:brightness(.92)}
 .ec-btn--danger-ghost{background:transparent;color:var(--error-fg,var(--ec-error))}
 .ec-btn--danger-ghost:hover:not(:disabled){background:color-mix(in oklch,var(--ec-error) 14%,transparent);color:var(--error-fg,var(--ec-error))}
+.ec-btn--danger-ghost .material-symbols-rounded{color:var(--error-fg,var(--ec-error))} /* v2.1 · ícono en error en todos los estados */
 .ec-btn *{pointer-events:none}
 .ec-btn--xl{min-height:64px;padding:0 24px;font-size:18px;font-weight:var(--fw-extrabold)}
 .ec-btn .material-symbols-rounded{font-size:20px}
@@ -229,8 +230,16 @@
 .ec-dark .ec-spinner--primary,html.dark .ec-spinner--primary{color:var(--ec-accent)}
 .ec-spinner__text{font-size:var(--fs-sm);font-weight:var(--fw-medium);margin:0;text-align:center;text-wrap:balance}
 
+/* ── LoadingRing (Anillo de carga) ────────────────────── */
+.ec-ring{display:inline-block;flex-shrink:0;color:var(--brand-fg)}
+.ec-ring__track{opacity:.18}
+.ec-ring__arc{transform-origin:50% 50%;animation:ec-spin .8s linear infinite}
+
+/* ── SuccessIcon (Éxito / Ícono) ──────────────────────── */
+.ec-success{display:flex;align-items:center;justify-content:center;border-radius:var(--radius-full);animation:ec-success-in .5s cubic-bezier(.34,1.56,.64,1) .15s both}
+
 /* ── Skeleton ─────────────────────────────────────────── */
-.ec-skeleton{border-radius:var(--radius-lg)}
+.ec-skeleton{border-radius:var(--radius-lg);background:var(--surface-skeleton);animation:ec-skeleton-pulse .8s var(--ease-standard) infinite alternate}
 .ec-skeleton--circle{border-radius:var(--radius-full)}
 
 /* ── BottomNavBar ─────────────────────────────────────── */
@@ -257,16 +266,6 @@
 /* ── SplashScreen ─────────────────────────────────────── */
 .ec-splash{position:absolute;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:var(--surface-card)}
 .ec-splash__glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:384px;height:384px;background:rgba(0,77,64,.2);filter:blur(100px);border-radius:var(--radius-full);animation:ec-pulse 2s var(--ease-in-out) infinite}
-.ec-splash__tile{position:relative;width:128px;height:128px;background:var(--surface-card);border-radius:var(--radius-xl);box-shadow:0 25px 50px -12px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;border:1px solid var(--ec-gray-100);margin-bottom:24px}
-.ec-splash__mark{width:64px;height:64px;color:var(--ec-primary);overflow:visible;transform-origin:50% 50%;animation:ec-splash-turn 1400ms var(--ease-standard) both}
-.ec-dark .ec-splash__mark,html.dark .ec-splash__mark{color:var(--ec-accent)}
-.ec-splash__mark path{fill:currentColor;fill-opacity:0;stroke:currentColor;stroke-width:16;stroke-linejoin:round;stroke-linecap:round;stroke-dasharray:1 1;stroke-dashoffset:1;transform-box:fill-box;transform-origin:center;animation:ec-splash-draw 650ms var(--ease-standard) both,ec-splash-fill 350ms var(--ease-standard) both}
-@keyframes ec-splash-turn{0%{transform:rotate(-90deg)}100%{transform:rotate(0deg)}}
-@keyframes ec-splash-draw{0%{stroke-dashoffset:1;opacity:0}15%{opacity:1}100%{stroke-dashoffset:0;opacity:1}}
-@keyframes ec-splash-fill{0%{fill-opacity:0}100%{fill-opacity:1;stroke-width:0}}
-@media (prefers-reduced-motion:reduce){.ec-splash__mark path{fill-opacity:1;stroke-dashoffset:0;stroke-width:0}}
-.ec-splash__word{font-size:30px;font-weight:var(--fw-bold);color:var(--text-body);letter-spacing:var(--tracking-tight);margin:0 0 8px}
+.ec-splash__brand{display:flex;flex-direction:column;align-items:center;margin-bottom:20px;animation:ec-fade-up .6s var(--ease-enter) both}
 .ec-splash__tag{font-size:var(--fs-sm);font-weight:var(--fw-medium);color:var(--ec-gray-500);text-transform:uppercase;letter-spacing:var(--tracking-wide);margin:0}
 .ec-dark .ec-splash,html.dark .ec-splash{background:var(--ec-dark-bg)}
-.ec-dark .ec-splash__tile,html.dark .ec-splash__tile{background:var(--ec-dark-surface);border-color:rgba(255,255,255,.05)}
-.ec-dark .ec-splash__tile .material-symbols-rounded,html.dark .ec-splash__tile .material-symbols-rounded{color:var(--ec-accent)}

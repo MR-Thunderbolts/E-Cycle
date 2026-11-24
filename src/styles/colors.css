@@ -26,6 +26,10 @@
   --ec-map-canvas:#F2F1ED; /* oklch(95.8% 0.005 95.1) */
   --ec-search-shell:#F7F7F7; /* oklch(97.6% 0.000 0) */
   --ec-inset:#F8F9FA; /* oklch(98.2% 0.002 0) */
+  --logo-symbol:#004D40;   /* v2.1 · marca aprobada «Ciclo fluido», claro */
+  --logo-pixel:#19B99A;
+  --logo-wordmark:#092E28;
+  --map-pin:var(--ec-accent); /* v2.1 · pines de punto y privado; el mapa base es oscuro en todos los modos */
 
   /* Text — light */
   --ec-text:#151515; /* oklch(19.6% 0.000 0) */
@@ -94,7 +98,8 @@
   --brand-on-solid:#FFFFFF;
   --brand-fg:var(--ec-primary);
   --brand-tint:var(--ec-teal-100);
-  --brand-glow:var(--ec-accent);
+  --brand-glow:rgba(0,77,64,.2); /* v2.1 · alpha/primary-20: el menta perdía contraste en claro */
+  --surface-skeleton:var(--ec-gray-300); /* v2.1 · visible en claro */
   --border-hairline:var(--ec-border);
   --border-card:var(--ec-gray-100);
   --border-strong:var(--ec-border-strong);
@@ -110,7 +115,6 @@
   --warning-fg:var(--ec-warning-text);
   --warning-soft:var(--ec-warning-bg);
   --points-fg:var(--ec-points-text);
-  --mission-fg:var(--ec-perk-purple);
   --perk-fg:var(--ec-perk-violet-on-light);
 }
 html.dark,.ec-dark{
@@ -127,6 +131,11 @@ html.dark,.ec-dark{
   --brand-on-solid:var(--ec-dark-bg);
   --brand-fg:var(--ec-accent);
   --brand-tint:rgba(29,233,182,.12);
+  --brand-glow:rgba(29,233,182,.5); /* v2.1 · alpha/accent-50 */
+  --logo-symbol:#19B99A;   /* v2.1 · marca en oscuro */
+  --logo-pixel:#1DE9B6;
+  --logo-wordmark:#F5F4EB;
+  --surface-skeleton:#2A2A2A;
   --border-hairline:var(--ec-dark-border);
   --border-card:var(--ec-dark-border);
   --border-strong:var(--ec-dark-border);
@@ -142,6 +151,5 @@ html.dark,.ec-dark{
   --warning-fg:var(--ec-warning);
   --warning-soft:rgba(255,152,0,.15);
   --points-fg:var(--ec-points);
-  --mission-fg:var(--ec-perk-purple-on-dark);
   --perk-fg:var(--ec-perk-violet);
 }

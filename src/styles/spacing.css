@@ -1,12 +1,18 @@
 /* 4px base scale (Tailwind default — the app never leaves it). */
 :root{
   --space-0-5:2px;
+  --space-0-75:3px;  /* v2.1 */
   --space-1:4px;
+  --space-1-5:6px;   /* v2.1 */
   --space-2:8px;
+  --space-2-5:10px;  /* v2.1 */
   --space-3:12px;
+  --space-3-5:14px;  /* v2.1 */
   --space-4:16px;
+  --space-4-5:18px;  /* v2.1 */
   --space-5:20px;
   --space-6:24px;   /* standard screen gutter */
+  --space-7:28px;    /* v2.1 */
   --space-8:32px;
   --space-10:40px;
   --space-12:48px;

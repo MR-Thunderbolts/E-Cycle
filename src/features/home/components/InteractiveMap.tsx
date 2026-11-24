@@ -5,14 +5,12 @@ import { IconButton, LocationDot, MapPin } from '@/components/ui';
 import { MapSkeleton } from './MapSkeleton';
 import { DUR, EASE } from '@/constants/motion';
 import mapBg from '@/assets/map-bg.jpg';
-import mapBgLight from '@/assets/map-bg-light.jpg';
 
 interface InteractiveMapProps {
     points: CleanPoint[];
     userPos: MapPosition;
     selected: CleanPoint | null;
     onSelect: (point: CleanPoint) => void;
-    dark: boolean;
     loading?: boolean;
     /** Re-centres on this position when it changes (e.g. the centroid of a search). */
     focus?: MapPosition | null;
@@ -45,7 +43,6 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
     userPos,
     selected,
     onSelect,
-    dark,
     loading,
     focus,
     controlsBottom = 40,
@@ -200,38 +197,20 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
                 overflow: 'hidden',
                 touchAction: 'none',
                 cursor: 'grab',
-                background: dark ? 'var(--ec-dark-bg)' : 'var(--ec-map-canvas)',
-                transition: 'background-color .55s ease',
+                background: 'var(--ec-dark-bg)',
             }}
         >
             <motion.div
                 style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', x, y, scale: z, originX: 0, originY: 0 }}
             >
-                {/* Both tiles stay mounted so a theme change cross-fades instead of swapping. */}
-                {[
-                    { src: mapBg, on: dark },
-                    { src: mapBgLight, on: !dark },
-                ].map((t) => (
-                    <img
-                        key={t.src}
-                        src={t.src}
-                        alt=""
-                        aria-hidden="true"
-                        draggable={false}
-                        style={{
-                            position: 'absolute',
-                            left: '-50%',
-                            top: '-50%',
-                            width: '200%',
-                            height: '200%',
-                            maxWidth: 'none',
-                            objectFit: 'cover',
-                            pointerEvents: 'none',
-                            opacity: t.on ? 0.9 : 0,
-                            transition: 'opacity .55s ease',
-                        }}
-                    />
-                ))}
+                {/* The base map is dark in every theme (v2.1): pins and the dashed route keep their contrast. */}
+                <img
+                    src={mapBg}
+                    alt=""
+                    aria-hidden="true"
+                    draggable={false}
+                    style={{ position: 'absolute', left: '-50%', top: '-50%', width: '200%', height: '200%', maxWidth: 'none', objectFit: 'cover', pointerEvents: 'none', opacity: 0.9 }}
+                />
                 {selected && (
                     <svg
                         viewBox="0 0 100 100"
@@ -271,7 +250,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
                                 zIndex: isSel ? 2 : 1,
                             }}
                         >
-                            <MapPin label={p.name} selected={isSel} dimmed={!!selected && !isSel} onClick={() => onSelect(p)} />
+                            <MapPin label={p.name} kind={p.community === false ? 'privado' : 'punto'} selected={isSel} dimmed={!!selected && !isSel} onClick={() => onSelect(p)} />
                         </motion.div>
                     );
                 })}

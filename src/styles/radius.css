@@ -1,5 +1,6 @@
 /* E-Cycle is a very round interface. Pills for anything tappable, 24–40px for containers. */
 :root{
+  --radius-xs:4px;     /* v2.1 · pines, insignias */
   --radius-sm:8px;
   --radius-md:12px;    /* badges, small tiles */
   --radius-lg:16px;    /* rounded-2xl — default card */

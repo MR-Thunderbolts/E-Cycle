@@ -1,6 +1,7 @@
 import React from 'react';
 import { TabType } from '@/types';
 import { Icon } from '@/components/ui/Icon';
+import { LogoHorizontal } from '@/components/ui/Brand';
 import { NavTab } from '../BottomNavBar';
 
 export interface TopBarProps {
@@ -15,8 +16,7 @@ export interface TopBarProps {
 export const TopBar: React.FC<TopBarProps> = ({ items, active, onChange, actions }) => (
     <header className="ec-topbar">
         <div className="ec-topbar__brand">
-            <Icon name="recycling" filled />
-            E-Cycle
+            <LogoHorizontal height={36} />
         </div>
         <nav className="ec-topbar__nav" aria-label="Navegación principal">
             {items.map((it) => {

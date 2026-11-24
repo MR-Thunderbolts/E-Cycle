@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { MaterialCategory } from '@/types';
-import { Badge, Button, Counter, Enter, Icon, IconButton, screen } from '@/components/ui';
+import { Badge, Button, Counter, Enter, Icon, IconButton, LoadingRing, SuccessIcon, screen } from '@/components/ui';
 import { CLEAN_POINTS, MATERIAL_CATEGORIES } from '@/constants/ciudadano';
 import { useCiudadano } from '@/hooks';
 import { fmtNumber } from '@/utils/format';
@@ -13,7 +13,7 @@ const READ_MS = 1400;
 
 /** The container «checks» the delivery in these steps, one every STEP_MS. */
 const VALIDATION_STEPS = ['Conectando con el contenedor', 'Pesando lo que depositaste', 'Validando tu entrega'];
-const STEP_MS = 1100;
+const STEP_MS = 1400;
 
 const corner = (pos: React.CSSProperties): React.CSSProperties => ({
     position: 'absolute',
@@ -193,7 +193,7 @@ const Scan: React.FC = () => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                background: 'rgba(0,0,0,.55)',
+                                background: 'var(--scrim-scanner)',
                                 color: '#E2E2E2',
                                 flexDirection: 'column',
                                 gap: 8,
@@ -284,18 +284,8 @@ const Scan: React.FC = () => {
         body = (
             <div role="status" aria-live="polite" style={{ display: 'flex', flexDirection: 'column', gap: 24, alignItems: 'center', textAlign: 'center', paddingTop: 48 }}>
                 <div style={{ position: 'relative', width: 112, height: 112, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div
-                        className="ec-keep-motion"
-                        style={{
-                            position: 'absolute',
-                            inset: 0,
-                            borderRadius: 9999,
-                            border: '4px solid color-mix(in oklch, var(--brand-fg) 18%, transparent)',
-                            borderTopColor: 'var(--brand-fg)',
-                            animation: 'ec-spin 1.1s linear infinite',
-                        }}
-                    />
-                    <div style={screen.ico('var(--brand-fg)', 72)}>
+                    <LoadingRing size={112} />
+                    <div style={{ ...screen.ico('var(--brand-fg)', 72), position: 'absolute' }}>
                         <Icon name="recycling" size={36} />
                     </div>
                 </div>
@@ -311,7 +301,7 @@ const Scan: React.FC = () => {
                                 {state === 'done' ? (
                                     <Icon name="check_circle" filled style={{ color: 'var(--brand-fg)' }} />
                                 ) : state === 'active' ? (
-                                    <Icon name="progress_activity" className="ec-keep-motion" style={{ color: 'var(--brand-fg)', animation: 'ec-spin 1s linear infinite' }} />
+                                    <LoadingRing size={24} />
                                 ) : (
                                     <Icon name="radio_button_unchecked" style={{ color: 'var(--text-muted)' }} />
                                 )}
@@ -327,15 +317,7 @@ const Scan: React.FC = () => {
     if (stage === 'done') {
         body = (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'center', textAlign: 'center', paddingTop: 12 }}>
-                <div
-                    style={{
-                        ...screen.ico('var(--ec-points)', 72),
-                        background: 'color-mix(in oklch, var(--ec-points) 18%, transparent)',
-                        animation: 'ec-pop 450ms var(--ease-enter) both',
-                    }}
-                >
-                    <Icon name="bolt" filled size={40} />
-                </div>
+                <SuccessIcon icon="bolt" color="var(--ec-points)" />
                 <Enter delay={0.12} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                     <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-muted)' }}>¡Gracias por reciclar!</div>
                     {/* The «+» sits outside the flow so the number stays centred. */}

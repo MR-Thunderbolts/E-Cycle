@@ -19,7 +19,10 @@ export * from './Modal';
 export * from './Toast';
 export * from './ProgressBar';
 export * from './Skeleton';
+export * from './LoadingRing';
+export * from './SuccessIcon';
 export * from './SplashScreen';
+export * from './Brand';
 export * from './AccountNudge';
 
 // Navigation
