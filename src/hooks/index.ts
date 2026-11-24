@@ -1,2 +1,2 @@
 export { useCiudadano } from './useCiudadano';
-export { useMediaQuery, useIsDesktop, useCanScan } from './useMediaQuery';
+export { useMediaQuery, useIsDesktop } from './useMediaQuery';
