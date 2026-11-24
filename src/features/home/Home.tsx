@@ -1,17 +1,21 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { animate, motion, useMotionValue } from 'framer-motion';
-import type { CleanPoint } from '@/types';
-import { BottomSheet, Chip, Icon, IconButton, Skeleton } from '@/components/ui';
-import { CAMPAIGN, MATERIAL_CATEGORIES, USER_POSITION } from '@/constants/ciudadano';
+import type { CleanPoint, Merchant } from '@/types';
+import { BottomSheet, Icon, IconButton, Skeleton } from '@/components/ui';
+import { CAMPAIGN, MERCHANTS, USER_POSITION } from '@/constants/ciudadano';
 import { SPRING_SHEET } from '@/constants/motion';
 import { useCiudadano } from '@/hooks';
 import { initials } from '@/utils/format';
-import InteractiveMap from './components/InteractiveMap';
+import InteractiveMap, { type MapPlace } from './components/InteractiveMap';
 import { SearchOverlay } from './components/SearchOverlay';
 import { PointRow } from './components/PointRow';
 import { PointDetail } from './components/PointDetail';
 import { CampaignNotice } from './components/CampaignNotice';
-import { ChipId, centroid, usePointFilter } from './usePointFilter';
+import { FilterChips } from './components/FilterChips';
+import { MerchantRow } from './components/MerchantRow';
+import { MerchantDetail } from './components/MerchantDetail';
+import { centroid, usePointFilter } from './usePointFilter';
+import { useExploreFilters } from './useExploreFilters';
 
 /** Bottom nav bar height; the collapsed list shows only its handle, title and chips above it. */
 const NAV = 100;
@@ -22,10 +26,10 @@ const FULL_TOP = 88;
 /** Drag further than this to snap open or closed. */
 const SNAP = 60;
 
-export const MATERIAL_CHIPS: { id: ChipId; label: string }[] = [
-    { id: 'todos', label: 'Todos' },
-    ...MATERIAL_CATEGORIES.map((c) => ({ id: c.id, label: c.label })),
-];
+export const placeOf = (p: CleanPoint): MapPlace => ({ id: p.id, name: p.name, x: p.x, y: p.y, kind: p.community === false ? 'privado' : 'punto' });
+export const merchantPlace = (m: Merchant): MapPlace => ({ id: m.id, name: m.name, x: m.x, y: m.y, kind: 'beneficio' });
+
+export const benefitsTitle = (count: number) => (count === 1 ? '1 lugar para canjear cerca' : `${count} lugares para canjear cerca`);
 
 export const listTitle = (count: number, query: string) =>
     query
@@ -37,12 +41,30 @@ export const listTitle = (count: number, query: string) =>
 /** Explorar (mobile): full-screen map, Google Maps-style search, draggable list. */
 const Home: React.FC = () => {
     const app = useCiudadano();
-    const [chip, setChip] = useState<ChipId>('todos');
+    const filters = useExploreFilters();
     const [query, setQuery] = useState('');
     const [searchOpen, setSearchOpen] = useState(false);
     const [selected, setSelected] = useState<CleanPoint | null>(null);
+    const [shop, setShop] = useState<Merchant | null>(null);
     const [open, setOpen] = useState(false);
-    const list = usePointFilter(chip, query);
+    const list = usePointFilter(filters.materials, query);
+    const benefits = filters.benefits;
+    const places = useMemo(() => (benefits ? MERCHANTS.map(merchantPlace) : list.map(placeOf)), [benefits, list]);
+    const selectedPlace = benefits ? (shop ? merchantPlace(shop) : null) : selected ? placeOf(selected) : null;
+
+    // «Ver dónde canjear en el mapa» (Beneficios) lands here with the benefits chip on.
+    const { benefitsMap, clearBenefitsMap } = app;
+    const { withBenefits } = filters;
+    useEffect(() => {
+        if (!benefitsMap) return;
+        withBenefits();
+        clearBenefitsMap();
+    }, [benefitsMap, withBenefits, clearBenefitsMap]);
+
+    // Leaving the benefits view drops the shop that was open.
+    useEffect(() => {
+        if (!benefits) setShop(null);
+    }, [benefits]);
     // Re-centre only when the search changes, not when a chip filters the list.
     const focus = useMemo(() => (query ? centroid(list) : null), [query]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -115,16 +137,22 @@ const Home: React.FC = () => {
         else if (open && e.deltaY < -8 && atTop) setOpen(false);
     };
 
-    const pickChip = (id: ChipId) => setChip(id);
     const select = (p: CleanPoint) => setSelected(p);
+    const selectPlace = (id: string) => {
+        if (benefits) setShop(MERCHANTS.find((m) => m.id === id) ?? null);
+        else {
+            const p = list.find((x) => x.id === id);
+            if (p) setSelected(p);
+        }
+    };
 
     return (
         <div ref={root} style={{ position: 'absolute', inset: 0 }}>
             <InteractiveMap
-                points={list}
+                points={places}
                 userPos={USER_POSITION}
-                selected={selected}
-                onSelect={select}
+                selected={selectedPlace}
+                onSelect={selectPlace}
                 loading={app.loading}
                 focus={focus}
                 controlsBottom={PEEK + 16}
@@ -248,7 +276,7 @@ const Home: React.FC = () => {
                     {app.loading ? (
                         <Skeleton style={{ height: 22, width: 180, borderRadius: 8 }} />
                     ) : (
-                        <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>{listTitle(list.length, query)}</h1>
+                        <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>{benefits ? benefitsTitle(MERCHANTS.length) : listTitle(list.length, query)}</h1>
                     )}
                 </div>
                 <div
@@ -292,21 +320,23 @@ const Home: React.FC = () => {
                                     padding: '2px 20px',
                                 }}
                             >
-                                {MATERIAL_CHIPS.map((c) => (
-                                    <Chip key={c.id} active={chip === c.id} onClick={() => pickChip(c.id)}>
-                                        {c.label}
-                                    </Chip>
-                                ))}
+                                <FilterChips filters={filters} />
                             </div>
-                            {list.map((p) => (
-                                <PointRow key={p.id} point={p} onClick={() => select(p)} />
-                            ))}
-                            {!list.length && (
-                                <div style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                                    No hay puntos con ese filtro. Prueba con «Todos» o pide un retiro a domicilio.
-                                </div>
+                            {benefits ? (
+                                MERCHANTS.map((m) => <MerchantRow key={m.id} merchant={m} onClick={() => setShop(m)} />)
+                            ) : (
+                                <>
+                                    {list.map((p) => (
+                                        <PointRow key={p.id} point={p} onClick={() => select(p)} />
+                                    ))}
+                                    {!list.length && (
+                                        <div style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                                            No hay puntos con ese filtro. Prueba con «Todos» o pide un retiro a domicilio.
+                                        </div>
+                                    )}
+                                    <CampaignNotice campaign={CAMPAIGN} onClick={() => filters.only(CAMPAIGN.chip)} />
+                                </>
                             )}
-                            <CampaignNotice campaign={CAMPAIGN} onClick={() => pickChip(CAMPAIGN.chip)} />
                         </>
                     )}
                 </div>
@@ -324,6 +354,9 @@ const Home: React.FC = () => {
             />
             <BottomSheet contained open={!!selected} onClose={() => setSelected(null)}>
                 {selected && <PointDetail point={selected} onClose={() => setSelected(null)} />}
+            </BottomSheet>
+            <BottomSheet contained open={!!shop} onClose={() => setShop(null)}>
+                {shop && <MerchantDetail merchant={shop} onClose={() => setShop(null)} />}
             </BottomSheet>
         </div>
     );

@@ -30,6 +30,23 @@ export interface CleanPoint {
     y: number;
 }
 
+/** A shop that gives a discount in exchange for points. Example data until partners are signed. */
+export interface Merchant {
+    id: string;
+    name: string;
+    /** What it sells, e.g. «Accesorios para celular». */
+    category: string;
+    /** The reward it honours, e.g. «20% en un cable USB-C». */
+    benefit: string;
+    /** «5 min» in the list, «A 5 min a pie» in the detail. */
+    minutes: number;
+    hours: string;
+    address: string;
+    /** Position on the map canvas, in %. */
+    x: number;
+    y: number;
+}
+
 export interface MapPosition {
     x: number;
     y: number;

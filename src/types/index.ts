@@ -4,6 +4,7 @@ export type {
     MaterialId,
     MaterialCategory,
     CleanPoint,
+    Merchant,
     MapPosition,
     PickupItem,
     Sector,

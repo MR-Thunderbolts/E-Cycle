@@ -42,6 +42,12 @@ const Hub: React.FC = () => {
         setPick(null);
         setCode(null);
     };
+    const copyCode = () => {
+        if (!code) return;
+        // Clipboard needs a secure context and may be refused; the notice is the same either way.
+        navigator.clipboard?.writeText(code).catch(() => {});
+        app.say('Código copiado', 'success', 1600);
+    };
 
     return (
         <div style={{ position: 'absolute', inset: 0 }}>
@@ -74,6 +80,11 @@ const Hub: React.FC = () => {
                         onTabChange={(id) => setTab(id as HubTab)}
                     />
                     <Enter key={tab} role="tabpanel" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        {tab === 'canjear' && (
+                            <Button variant="secondary" size="md" fullWidth icon="map" iconPosition="left" onClick={app.showBenefitsMap}>
+                                Ver dónde canjear en el mapa
+                            </Button>
+                        )}
                         {tab === 'canjear' &&
                             REWARDS.map((r) => {
                                 const ok = pts >= r.cost;
@@ -146,18 +157,25 @@ const Hub: React.FC = () => {
                                 <Icon name="check" size={32} />
                             </div>
                             <div style={{ fontSize: 18, fontWeight: 700 }}>¡Listo! Muestra este código</div>
-                            <div
+                            <button
+                                type="button"
+                                onClick={copyCode}
+                                aria-label={`Copiar código ${code}`}
                                 style={{
+                                    font: 'inherit',
                                     fontSize: 28,
                                     fontWeight: 800,
                                     letterSpacing: '.12em',
                                     padding: '12px 20px',
                                     borderRadius: 16,
                                     border: '1px dashed var(--border-strong)',
+                                    background: 'transparent',
+                                    color: 'inherit',
+                                    cursor: 'pointer',
                                 }}
                             >
                                 {code}
-                            </div>
+                            </button>
                             <p style={screen.p}>
                                 {pick.title} en {pick.partner.toLowerCase()}. Vale por 30 días.
                             </p>
