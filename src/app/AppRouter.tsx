@@ -7,7 +7,7 @@ import { DesktopExplore, Home } from '@/features/home';
 import { Pickup } from '@/features/pickup';
 import { Scan } from '@/features/scan';
 import { Hub } from '@/features/hub';
-import { useCanScan, useCiudadano, useIsDesktop } from '@/hooks';
+import { useCiudadano, useIsDesktop } from '@/hooks';
 import { initials } from '@/utils/format';
 import { CiudadanoOverlays } from './CiudadanoOverlays';
 
@@ -15,10 +15,10 @@ const SPLASH_MS = 2300;
 
 const SCREENS: Record<TabType, React.FC> = { explorar: Home, retiro: Pickup, escaner: Scan, ehub: Hub };
 
-/** Escanear needs a camera: it is only offered on touch devices with media devices, never on desktop. */
+/** The desktop top bar has no Escanear: the camera flow is built for the mobile layout. */
 const DESKTOP_TABS = NAV_TABS.filter((t) => t.id !== 'escaner');
 
-const MobileApp: React.FC<{ canScan: boolean }> = ({ canScan }) => {
+const MobileApp: React.FC = () => {
     const app = useCiudadano();
     const Screen = SCREENS[app.tab];
     return (
@@ -27,7 +27,6 @@ const MobileApp: React.FC<{ canScan: boolean }> = ({ canScan }) => {
                 currentTab={app.tab}
                 onTabChange={app.go}
                 showNav={!app.register}
-                tabs={canScan ? NAV_TABS : DESKTOP_TABS}
             >
                 <Enter key={app.tab} style={{ position: 'absolute', inset: 0 }}>
                     <Screen />
@@ -90,7 +89,6 @@ const DesktopApp: React.FC = () => {
 export const AppRouter: React.FC = () => {
     const app = useCiudadano();
     const desktop = useIsDesktop();
-    const canScan = useCanScan() && !desktop;
     const [splash, setSplash] = useState(true);
 
     useEffect(() => {
@@ -98,14 +96,14 @@ export const AppRouter: React.FC = () => {
         return () => clearTimeout(t);
     }, []);
 
-    // Leaving a layout where Escanear is not offered.
+    // The desktop layout has no Escanear tab.
     useEffect(() => {
-        if (app.tab === 'escaner' && !canScan) app.go('explorar');
-    }, [app.tab, canScan, app]);
+        if (app.tab === 'escaner' && desktop) app.go('explorar');
+    }, [app.tab, desktop, app]);
 
     return (
         <div style={{ height: '100%', width: '100%', position: 'relative', overflow: 'hidden' }}>
-            {desktop ? <DesktopApp /> : <MobileApp canScan={canScan} />}
+            {desktop ? <DesktopApp /> : <MobileApp />}
             <AnimatePresence>{splash && <SplashScreen key="splash" />}</AnimatePresence>
         </div>
     );
