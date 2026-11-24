@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { MaterialCategory } from '@/types';
-import { Badge, Button, Counter, Enter, Icon, IconButton, LoadingRing, SuccessIcon, screen } from '@/components/ui';
+import { Badge, Button, Counter, Enter, Icon, IconButton, LoadingSteps, SuccessIcon, screen } from '@/components/ui';
 import { CLEAN_POINTS, MATERIAL_CATEGORIES } from '@/constants/ciudadano';
 import { useCiudadano } from '@/hooks';
 import { fmtNumber } from '@/utils/format';
@@ -11,9 +11,8 @@ type Cam = 'idle' | 'on' | 'denied' | 'unsupported';
 /** «Leyendo código…» stays for 1.4 s. */
 const READ_MS = 1400;
 
-/** The container «checks» the delivery in these steps, one every STEP_MS. */
+/** The container «checks» the delivery in these steps. */
 const VALIDATION_STEPS = ['Conectando con el contenedor', 'Pesando lo que depositaste', 'Validando tu entrega'];
-const STEP_MS = 1400;
 
 const corner = (pos: React.CSSProperties): React.CSSProperties => ({
     position: 'absolute',
@@ -32,7 +31,6 @@ const Scan: React.FC = () => {
     const [torch, setTorch] = useState(false);
     const [qty, setQty] = useState<Record<string, number>>({});
     const [earned, setEarned] = useState(0);
-    const [vstep, setVstep] = useState(0);
 
     const video = useRef<HTMLVideoElement>(null);
     const stream = useRef<MediaStream | null>(null);
@@ -106,15 +104,6 @@ const Scan: React.FC = () => {
             .then(() => setTorch(next))
             .catch(() => {});
     };
-
-    // Validation screen: the container «checks» the delivery, then the points land.
-    useEffect(() => {
-        if (stage !== 'validating') return;
-        setVstep(0);
-        const timers = VALIDATION_STEPS.map((_, i) => setTimeout(() => setVstep(i + 1), (i + 1) * STEP_MS));
-        const end = setTimeout(finish, VALIDATION_STEPS.length * STEP_MS + 500);
-        return () => [...timers, end].forEach(clearTimeout);
-    }, [stage]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const total = accepted.reduce((s, c) => s + (qty[c.id] || 0) * c.pointsPerUnit, 0);
     const count = Object.values(qty).reduce((a, b) => a + b, 0);
@@ -282,35 +271,14 @@ const Scan: React.FC = () => {
 
     if (stage === 'validating') {
         body = (
-            <div role="status" aria-live="polite" style={{ display: 'flex', flexDirection: 'column', gap: 24, alignItems: 'center', textAlign: 'center', paddingTop: 48 }}>
-                <div style={{ position: 'relative', width: 112, height: 112, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <LoadingRing size={112} />
-                    <div style={{ ...screen.ico('var(--brand-fg)', 72), position: 'absolute' }}>
-                        <Icon name="recycling" size={36} />
-                    </div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    <h1 style={screen.h1}>Validando tu entrega</h1>
-                    <p style={{ ...screen.p, maxWidth: 300 }}>El contenedor está verificando que dejaste lo que declaraste. Solo toma unos segundos.</p>
-                </div>
-                <div style={{ ...screen.card, width: '100%', textAlign: 'left', gap: 14 }}>
-                    {VALIDATION_STEPS.map((label, i) => {
-                        const state = i < vstep ? 'done' : i === vstep ? 'active' : 'todo';
-                        return (
-                            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 12, opacity: state === 'todo' ? 0.45 : 1, transition: 'opacity var(--dur-base)' }}>
-                                {state === 'done' ? (
-                                    <Icon name="check_circle" filled style={{ color: 'var(--brand-fg)' }} />
-                                ) : state === 'active' ? (
-                                    <LoadingRing size={24} />
-                                ) : (
-                                    <Icon name="radio_button_unchecked" style={{ color: 'var(--text-muted)' }} />
-                                )}
-                                <span style={{ fontSize: 14, fontWeight: state === 'active' ? 700 : 500 }}>{label}</span>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
+            <LoadingSteps
+                icon="recycling"
+                title="Validando tu entrega"
+                text="El contenedor está verificando que dejaste lo que declaraste. Solo toma unos segundos."
+                steps={VALIDATION_STEPS}
+                stepMs={1400}
+                onDone={finish}
+            />
         );
     }
 

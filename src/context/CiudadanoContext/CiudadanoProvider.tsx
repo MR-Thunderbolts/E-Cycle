@@ -45,6 +45,7 @@ export const CiudadanoProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const [account, setAccount] = useState(false);
     const [register, setRegister] = useState<RegisterMode | false>(false);
     const [nudge, setNudge] = useState<number | null>(null);
+    const nudgeSeen = useRef(false);
     const [confirm, setConfirm] = useState<ConfirmRequest | null>(null);
 
     const [toast, setToast] = useState<ToastState>({ open: false, message: '', variant: 'success' });
@@ -173,6 +174,13 @@ export const CiudadanoProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         say(on ? 'Te avisaremos por SMS.' : 'Ya no te enviaremos SMS.', 'info');
     };
 
+    /** The «crear cuenta» suggestion after a pickup shows once per visit (retiro/sugerencia-vista). */
+    const openNudge = (points: number) => {
+        if (nudgeSeen.current) return;
+        nudgeSeen.current = true;
+        setNudge(points);
+    };
+
     return (
         <CiudadanoContext.Provider
             value={{
@@ -206,7 +214,7 @@ export const CiudadanoProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 openRegister,
                 closeRegister: () => setRegister(false),
                 nudge,
-                openNudge: setNudge,
+                openNudge,
                 closeNudge: () => setNudge(null),
                 confirm,
                 ask: setConfirm,
