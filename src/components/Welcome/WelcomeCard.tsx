@@ -12,10 +12,12 @@ const STEPS: [string, string][] = [
 export interface WelcomeCardProps {
     onClose: () => void;
     onRegister: () => void;
+    /** «¿Ya tienes cuenta? Inicia sesión». */
+    onLogin: () => void;
 }
 
 /** First-visit welcome: a short card instead of the old 5-step onboarding. */
-export const WelcomeCard: React.FC<WelcomeCardProps> = ({ onClose, onRegister }) => {
+export const WelcomeCard: React.FC<WelcomeCardProps> = ({ onClose, onRegister, onLogin }) => {
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
         document.addEventListener('keydown', onKey);
@@ -114,6 +116,19 @@ export const WelcomeCard: React.FC<WelcomeCardProps> = ({ onClose, onRegister })
                     >
                         Crear cuenta
                     </Button>
+                    <p style={{ margin: 0, textAlign: 'center', fontSize: 14, lineHeight: 1.5, color: 'var(--text-muted)' }}>
+                        ¿Ya tienes cuenta?{' '}
+                        <button
+                            type="button"
+                            onClick={() => {
+                                onClose();
+                                onLogin();
+                            }}
+                            style={{ padding: 0, border: 0, background: 'none', cursor: 'pointer', font: 'inherit', fontWeight: 700, color: 'var(--link)' }}
+                        >
+                            Inicia sesión
+                        </button>
+                    </p>
                 </div>
             </motion.div>
         </motion.div>

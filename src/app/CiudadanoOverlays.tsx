@@ -46,7 +46,13 @@ export const CiudadanoOverlays: React.FC<{ desktop?: boolean }> = ({ desktop = f
             </Panel>
 
             <AnimatePresence>
-                {app.showWelcome && <WelcomeCard onClose={app.closeWelcome} onRegister={() => app.openRegister('signup')} />}
+                {app.showWelcome && (
+                    <WelcomeCard
+                        onClose={app.closeWelcome}
+                        onRegister={() => app.openRegister('signup')}
+                        onLogin={() => app.openRegister('login')}
+                    />
+                )}
             </AnimatePresence>
 
             <div style={{ position: 'relative', zIndex: 95 }}>
