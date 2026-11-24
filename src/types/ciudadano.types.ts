@@ -22,7 +22,7 @@ export interface CleanPoint {
     schedule?: string[];
     /** False when the point only serves its own community (e.g. a campus). Defaults to open. */
     community?: boolean;
-    type: 'Punto limpio' | 'Tienda asociada';
+    type: 'Punto limpio' | 'Punto municipal' | 'Tienda asociada' | 'Centro de salud';
     dist: string;
     materials: MaterialId[];
     /** Position on the map canvas, in % of its width/height. */

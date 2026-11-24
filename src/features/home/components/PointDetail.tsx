@@ -38,7 +38,7 @@ export const PointDetail: React.FC<{ point: CleanPoint; onClose: () => void }> =
                     </div>
                 </div>
                 {line('location_on', point.address)}
-                {point.community === false && line('lock', 'Solo para la comunidad de la sede')}
+                {line(point.community === false ? 'lock' : 'public', point.community === false ? 'Solo para la comunidad de la sede' : 'Abierto a todo público')}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div style={sectionLabel}>Recibe</div>
