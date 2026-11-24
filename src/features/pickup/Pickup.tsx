@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Button, Chip, Counter, Enter, Icon, IconButton, Input, ProgressBar, screen } from '@/components/ui';
+import React, { useLayoutEffect, useRef, useState } from 'react';
+import { Button, Chip, Counter, Enter, Icon, IconButton, Input, LoadingSteps, ProgressBar, screen } from '@/components/ui';
 import { COMUNAS, FREE_PICKUP_KG, PICKUP_ITEMS, PICKUP_POINTS_PER_KG, SECTOR } from '@/constants/ciudadano';
 import { useCiudadano } from '@/hooks';
 import { fmtKg } from '@/utils/format';
@@ -7,6 +7,32 @@ import { fmtKg } from '@/utils/format';
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 const SLOTS = ['9:00 – 13:00', '13:00 – 17:00', '17:00 – 20:00'];
 const NUDGE_DELAY_MS = 700;
+/** Bottom nav bar height; the checkout extends behind it. */
+const NAV = 100;
+/** Soft edge that fades the list into the checkout. */
+const FADE = 64;
+const SCHEDULING_STEPS = ['Revisando tu dirección', 'Reservando el horario', 'Calculando tus puntos'];
+
+const fade = (to: 'top' | 'bottom') => ({
+    position: 'absolute' as const,
+    left: 0,
+    right: 0,
+    pointerEvents: 'none' as const,
+    ...(to === 'bottom'
+        ? {
+              top: -FADE,
+              height: FADE,
+              // ease-in: stays clear for a while, then closes to the page colour.
+              background:
+                  'linear-gradient(to bottom, transparent, color-mix(in srgb, var(--surface-page) 12%, transparent) 40%, color-mix(in srgb, var(--surface-page) 55%, transparent) 75%, var(--surface-page))',
+          }
+        : {
+              top: 0,
+              height: 'calc(env(safe-area-inset-top) + 18px)',
+              background: 'linear-gradient(to bottom, var(--surface-page) env(safe-area-inset-top), transparent)',
+              zIndex: 1,
+          }),
+});
 
 type Errors = Partial<Record<'street' | 'comuna' | 'when' | 'phone', boolean>>;
 
@@ -24,6 +50,24 @@ const Pickup: React.FC = () => {
     const [phone, setPhone] = useState('');
     const [err, setErr] = useState<Errors>({});
     const [shake, setShake] = useState(0);
+    const [scheduling, setScheduling] = useState(false);
+    const [useSaved, setUseSaved] = useState(true);
+
+    const saved = app.signedIn ? app.addresses[0] : undefined;
+    const fromSaved = !!saved && useSaved;
+    /** The address the pickup goes to: the saved one, or what was typed. */
+    const where = fromSaved ? { street: saved.line, comuna: saved.comuna, extra: addr.extra } : addr;
+
+    // The checkout is fixed at the bottom; the list gets as much end padding as it covers.
+    const checkout = useRef<HTMLDivElement>(null);
+    const [coH, setCoH] = useState(260);
+    useLayoutEffect(() => {
+        const el = checkout.current;
+        if (!el) return;
+        const ro = new ResizeObserver(() => setCoH(el.offsetHeight));
+        ro.observe(el);
+        return () => ro.disconnect();
+    });
 
     const kg = PICKUP_ITEMS.reduce((s, i) => s + (qty[i.id] || 0) * i.kg, 0);
     const units = Object.values(qty).reduce((a, b) => a + b, 0);
@@ -37,17 +81,22 @@ const Pickup: React.FC = () => {
     };
 
     const next = () => {
-        if (step === 1) {
+        if (step === 1 && !fromSaved) {
             const e = { street: !addr.street.trim(), comuna: !addr.comuna };
             if (e.street || e.comuna) return fail(e);
         }
         if (step === 2 && (!days.length || !slots.length)) return fail({ when: true });
         if (step === 3 && !app.signedIn && digits(phone) < 8) return fail({ phone: true });
         setErr({});
+        // «Pedir retiro» books the slot first; the received screen follows (see scheduled()).
+        if (step === 3) return setScheduling(true);
         setStep(step + 1);
-        if (step === 3) {
-            if (!app.signedIn) setTimeout(() => app.openNudge(Math.round(kg * PICKUP_POINTS_PER_KG)), NUDGE_DELAY_MS);
-        }
+    };
+
+    const scheduled = () => {
+        setScheduling(false);
+        setStep(4);
+        if (!app.signedIn) setTimeout(() => app.openNudge(Math.round(kg * PICKUP_POINTS_PER_KG)), NUDGE_DELAY_MS);
     };
 
     const reset = () => {
@@ -63,7 +112,7 @@ const Pickup: React.FC = () => {
         <>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, minHeight: 44 }}>
                 {n > 0 && <IconButton icon="arrow_back" variant="ghost" ariaLabel="Paso anterior" onClick={() => setStep(n - 1)} />}
-                <span style={{ ...screen.label, color: 'var(--brand-fg)' }}>Paso {n + 1} de 4</span>
+                <span style={{ fontSize: 12, fontWeight: 700, lineHeight: 1.5, color: 'var(--brand-fg)' }}>Paso {n + 1} de 4</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <h1 style={screen.h1}>{title}</h1>
@@ -87,16 +136,19 @@ const Pickup: React.FC = () => {
                                 style={{
                                     ...screen.card,
                                     flexDirection: 'row',
+                                    flexWrap: 'wrap',
                                     alignItems: 'center',
+                                    gap: 12,
                                     padding: 14,
                                     borderColor: n ? 'var(--brand-fg)' : 'var(--border-card)',
                                     transition: 'border-color var(--dur-base)',
                                 }}
                             >
                                 <Icon name={it.icon} size={28} style={{ color: n ? 'var(--brand-fg)' : 'var(--text-muted)', flexShrink: 0 }} />
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                    <div style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.25 }}>{it.label}</div>
-                                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                                {/* min-content keeps long words whole: the counter wraps below instead of cutting «Electrodomésticos». */}
+                                <div style={{ flex: '1 0 120px', minWidth: 'min-content', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                    <div style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.3 }}>{it.label}</div>
+                                    <div style={{ fontSize: 12, fontWeight: 500, lineHeight: 1.5, color: 'var(--text-muted)' }}>
                                         {it.hint ? `${it.hint} · ` : ''}~{fmtKg(it.kg)} kg c/u
                                     </div>
                                 </div>
@@ -105,64 +157,92 @@ const Pickup: React.FC = () => {
                         );
                     })}
                 </div>
-                <div style={screen.card}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
-                        <span style={{ fontSize: 14, fontWeight: 700 }}>Peso estimado</span>
-                        <span style={{ fontSize: 16, fontWeight: 800 }}>{fmtKg(kg)} kg</span>
-                    </div>
-                    <ProgressBar value={Math.min(kg, FREE_PICKUP_KG)} max={FREE_PICKUP_KG} variant={free ? 'success' : 'primary'} size="sm" />
-                    <p style={{ ...screen.p, fontSize: 12 }}>
-                        {free
-                            ? 'Tu retiro es gratis.'
-                            : `El retiro es gratis desde ${FREE_PICKUP_KG} kg. Con menos, te conviene llevarlo a un punto limpio cercano.`}
-                    </p>
-                    {!free && units > 0 && (
-                        <Button variant="ghost" size="md" icon="map" iconPosition="left" onClick={() => app.go('explorar')}>
-                            Ver puntos cercanos
-                        </Button>
-                    )}
-                </div>
-                <Button size="lg" fullWidth disabled={!free} onClick={next}>
-                    Continuar
-                </Button>
             </>
         );
     }
 
     if (step === 1) {
+        const extra = (
+            <Input
+                label="Depto, casa o indicaciones (opcional)"
+                icon="info"
+                placeholder="Depto 402, timbre no funciona"
+                value={addr.extra}
+                onChange={(e) => setAddr({ ...addr, extra: e.target.value })}
+            />
+        );
+        const linkStyle: React.CSSProperties = {
+            alignSelf: 'flex-start',
+            padding: 0,
+            border: 0,
+            background: 'none',
+            cursor: 'pointer',
+            font: 'inherit',
+            fontSize: 14,
+            fontWeight: 700,
+            color: 'var(--link)',
+        };
         body = (
             <>
                 {head(1, '¿Dónde lo retiramos?', 'Solo llegamos a las comunas con cobertura.')}
-                <div key={shake} className={shakeIf(err.street || err.comuna)} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    <Input
-                        label="Calle y número"
-                        icon="home"
-                        placeholder="Av. Vicuña Mackenna 6100"
-                        autoComplete="street-address"
-                        value={addr.street}
-                        error={err.street ? 'Falta este dato' : false}
-                        onChange={(e) => setAddr({ ...addr, street: e.target.value })}
-                    />
-                    <div role="group" aria-label="Comuna" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                        <span style={{ ...screen.label, color: err.comuna ? 'var(--error-fg)' : 'var(--text-muted)' }}>
-                            Comuna{err.comuna ? ' · Elige una' : ''}
-                        </span>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                            {COMUNAS.map((c) => (
-                                <Chip key={c} active={addr.comuna === c} onClick={() => setAddr({ ...addr, comuna: c })}>
-                                    {c}
-                                </Chip>
-                            ))}
+                {fromSaved ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, lineHeight: 1.5, color: 'var(--text-muted)' }}>Tu dirección guardada</span>
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 12,
+                                padding: '12px 8px 12px 16px',
+                                borderRadius: 16,
+                                border: '2px solid var(--brand-solid)',
+                                background: 'var(--surface-page)',
+                            }}
+                        >
+                            <Icon name="home" size={24} style={{ color: 'var(--brand-fg)', flexShrink: 0 }} />
+                            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', lineHeight: 1.5 }}>
+                                <span style={{ fontSize: 14, fontWeight: 700 }}>{saved!.label}</span>
+                                <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>
+                                    {saved!.line} · {saved!.comuna}
+                                </span>
+                            </div>
                         </div>
+                        <button type="button" style={linkStyle} onClick={() => setUseSaved(false)}>
+                            Usar otra dirección
+                        </button>
+                        {extra}
                     </div>
-                    <Input
-                        label="Depto, casa o indicaciones (opcional)"
-                        icon="info"
-                        placeholder="Depto 402, timbre no funciona"
-                        value={addr.extra}
-                        onChange={(e) => setAddr({ ...addr, extra: e.target.value })}
-                    />
-                </div>
+                ) : (
+                    <div key={shake} className={shakeIf(err.street || err.comuna)} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                        <Input
+                            label="Calle y número"
+                            icon="home"
+                            placeholder="Av. Vicuña Mackenna 6100"
+                            autoComplete="street-address"
+                            value={addr.street}
+                            error={err.street ? 'Falta este dato' : false}
+                            onChange={(e) => setAddr({ ...addr, street: e.target.value })}
+                        />
+                        <div role="group" aria-label="Comuna" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                            <span style={{ ...screen.label, color: err.comuna ? 'var(--error-fg)' : 'var(--text-muted)' }}>
+                                Comuna{err.comuna ? ' · Elige una' : ''}
+                            </span>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                                {COMUNAS.map((c) => (
+                                    <Chip key={c} active={addr.comuna === c} onClick={() => setAddr({ ...addr, comuna: c })}>
+                                        {c}
+                                    </Chip>
+                                ))}
+                            </div>
+                        </div>
+                        {extra}
+                        {saved && (
+                            <button type="button" style={linkStyle} onClick={() => setUseSaved(true)}>
+                                Usar mi dirección guardada
+                            </button>
+                        )}
+                    </div>
+                )}
                 <Button size="lg" fullWidth onClick={next}>
                     Continuar
                 </Button>
@@ -222,7 +302,7 @@ const Pickup: React.FC = () => {
     if (step === 3) {
         const summary: [string, string][] = [
             ['inventory_2', PICKUP_ITEMS.filter((i) => qty[i.id]).map((i) => `${qty[i.id]} × ${i.label.toLowerCase()}`).join(', ')],
-            ['home', `${addr.street}${addr.extra ? `, ${addr.extra}` : ''} · ${addr.comuna}`],
+            ['home', `${where.street}${where.extra ? `, ${where.extra}` : ''} · ${where.comuna}`],
             ['event', `${days.join(', ')} · ${slots.join(', ')}`],
             ['payments', `Gratis · ${fmtKg(kg)} kg estimados`],
         ];
@@ -321,12 +401,87 @@ const Pickup: React.FC = () => {
         );
     }
 
+    const fixedCheckout = step === 0 && !scheduling;
+    const remaining = FREE_PICKUP_KG - kg;
+
     return (
-        <div className="no-scrollbar" style={screen.wrap}>
-            <Enter key={step} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                {body}
-            </Enter>
-        </div>
+        <>
+            <div className="no-scrollbar" style={{ ...screen.wrap, paddingBottom: fixedCheckout ? coH + FADE : 132 }}>
+                <Enter key={scheduling ? 'scheduling' : step} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                    {scheduling ? (
+                        <LoadingSteps
+                            title="Agendando tu retiro"
+                            text="Estamos reservando tu horario y calculando tus puntos. Solo toma unos segundos."
+                            steps={SCHEDULING_STEPS}
+                            stepMs={1000}
+                            endMs={300}
+                            onDone={scheduled}
+                        />
+                    ) : (
+                        body
+                    )}
+                </Enter>
+            </div>
+            {fixedCheckout && (
+                <>
+                    <div aria-hidden="true" style={fade('top')} />
+                    <div
+                        ref={checkout}
+                        style={{
+                            position: 'absolute',
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            zIndex: 2,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 12,
+                            padding: `12px 20px ${NAV + 12}px`,
+                            background: 'var(--surface-page)',
+                        }}
+                    >
+                        <div aria-hidden="true" style={fade('bottom')} />
+                        <div
+                            style={{
+                                ...screen.card,
+                                gap: 8,
+                                padding: '14px 16px',
+                                // The 2 px mint ring is a shadow so the card does not move when it appears.
+                                boxShadow: free ? '0 0 0 1px var(--brand-fg), 0 0 10px var(--brand-glow)' : 'none',
+                                borderColor: free ? 'var(--brand-fg)' : 'var(--border-card)',
+                                transition: 'box-shadow var(--dur-base), border-color var(--dur-base)',
+                            }}
+                        >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+                                <span style={{ fontSize: 14, fontWeight: 700, lineHeight: 1.5 }}>Peso estimado</span>
+                                <span style={{ fontSize: 16, fontWeight: 800, color: free ? 'var(--brand-fg)' : 'inherit' }}>{fmtKg(kg)} kg</span>
+                            </div>
+                            <ProgressBar value={Math.min(kg, FREE_PICKUP_KG)} max={FREE_PICKUP_KG} size="sm" />
+                            <p
+                                style={{
+                                    margin: 0,
+                                    fontSize: 12,
+                                    lineHeight: 1.5,
+                                    textAlign: free ? 'center' : 'left',
+                                    fontWeight: free ? 700 : 500,
+                                    color: free ? 'var(--brand-fg)' : 'var(--text-muted)',
+                                }}
+                            >
+                                {free ? '¡Tu retiro es gratis! Ya puedes continuar.' : `Te faltan ${fmtKg(remaining)} kg para el retiro gratis.`}
+                            </p>
+                            {!free && (
+                                <Button variant="ghost" size="md" icon="map" iconPosition="left" onClick={() => app.go('explorar')}>
+                                    Ver puntos cercanos
+                                </Button>
+                            )}
+                        </div>
+                        <Button size="lg" fullWidth disabled={!free} onClick={next}>
+                            {free ? 'Continuar' : units ? `Faltan ${fmtKg(remaining)} kg para continuar` : 'Agrega aparatos para continuar'}
+                        </Button>
+                    </div>
+                </>
+            )}
+        </>
     );
 };
 

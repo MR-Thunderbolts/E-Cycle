@@ -4,7 +4,7 @@ import type React from 'react';
 export const screen = {
     /** Scroll container; the bottom padding clears the 100 px nav bar. */
     wrap: { position: 'absolute', inset: 0, overflowY: 'auto', padding: '24px 20px 132px' } as React.CSSProperties,
-    h1: { fontSize: 26, fontWeight: 700, lineHeight: 1.2, margin: 0 } as React.CSSProperties,
+    h1: { fontSize: 26, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em', margin: 0 } as React.CSSProperties,
     p: { fontSize: 14, lineHeight: 1.5, color: 'var(--text-muted)', margin: 0 } as React.CSSProperties,
     card: {
         background: 'var(--surface-card)',

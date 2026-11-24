@@ -20,6 +20,7 @@ export * from './Toast';
 export * from './ProgressBar';
 export * from './Skeleton';
 export * from './LoadingRing';
+export * from './LoadingSteps';
 export * from './SuccessIcon';
 export * from './SplashScreen';
 export * from './Brand';

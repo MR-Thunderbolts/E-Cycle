@@ -119,7 +119,7 @@ export const DEMO_ACCOUNT: { name: string; phone: string; points: number; addres
     name: 'Trinidad Rojas',
     phone: '+56 9 8765 4321',
     points: 1850,
-    addresses: [{ id: 'a1', label: 'Casa', line: 'Av. Vicuña Mackenna 6100, depto 402', comuna: 'La Florida' }],
+    addresses: [{ id: 'a1', label: 'Casa', line: 'Av. Vicuña Mackenna 6.100, depto 402', comuna: 'La Florida' }],
     history: [
         { id: 't1', title: 'Entrega en Cesfam Los Castaños', sub: '2 celulares · 12 ago', points: 300, icon: 'recycling' },
         { id: 't2', title: 'Canje: 20% en un cable USB-C', sub: '3 ago', points: -500, icon: 'redeem' },
