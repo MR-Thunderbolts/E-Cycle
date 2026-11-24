@@ -25,6 +25,12 @@
   --fs-4xl:36px;       /* points balance */
   --fs-h2:26px;        /* v2 · h2 aprobado: títulos de página y sección (24–28) */
   --fs-h1:36px;        /* v2 · h1 aprobado: portada, onboarding, resultados (32–40) */
+  --fs-h3:22px;         /* v2.1 · Título/Sección */
+  --fs-stat-code:28px;  /* v2.1 */
+  --fs-driver-value:32px; /* v2.1 */
+  --fs-stat-balance:40px; /* v2.1 */
+  --fs-icon-xl:48px;    /* v2.1 */
+  --fs-stat-gain:56px;  /* v2.1 */
   --fs-6xl:60px;       /* earned-points celebration number */
   --fs-min-driver:18px; /* v2 · texto mínimo capa Conductor */
 
@@ -48,4 +54,15 @@
   --type-caption:var(--fw-medium) var(--fs-xs)/var(--lh-normal) var(--font-sans); /* @kind font */
   --type-nav-label:var(--fw-bold) var(--fs-tiny)/1 var(--font-sans); /* @kind font */
   --type-stat:var(--fw-black) var(--fs-4xl)/1 var(--font-sans); /* @kind font */
+
+  /* v2.1 · estilos de texto Stat (Plus Jakarta Sans ExtraBold) */
+  --type-stat-xs:var(--fw-extrabold) var(--fs-sm)/1.2 var(--font-sans); /* @kind font */
+  --type-stat-s:var(--fw-extrabold) var(--fs-base)/1.2 var(--font-sans); /* @kind font */
+  --type-stat-m:var(--fw-extrabold) var(--fs-lg)/1.2 var(--font-sans); /* @kind font */
+  --type-stat-l:var(--fw-extrabold) var(--fs-xl)/1.2 var(--font-sans); /* @kind font */
+  --type-stat-code:var(--fw-extrabold) var(--fs-stat-code)/1.1 var(--font-sans); /* @kind font */
+  --type-stat-balance:var(--fw-extrabold) var(--fs-stat-balance)/1 var(--font-sans); /* @kind font */
+  --type-stat-gain:var(--fw-extrabold) var(--fs-stat-gain)/1 var(--font-sans); /* @kind font */
+  --type-section-title:var(--fw-bold) var(--fs-h3)/var(--lh-snug) var(--font-sans); /* @kind font */
+  --type-chip-label:var(--fw-semibold) var(--fs-sm)/1 var(--font-sans); /* @kind font */
 }

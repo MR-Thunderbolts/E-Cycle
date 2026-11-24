@@ -125,7 +125,6 @@ const Home: React.FC = () => {
                 userPos={USER_POSITION}
                 selected={selected}
                 onSelect={select}
-                dark={app.dark}
                 loading={app.loading}
                 focus={focus}
                 controlsBottom={PEEK + 16}

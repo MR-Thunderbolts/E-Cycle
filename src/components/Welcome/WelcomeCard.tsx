@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Button, Icon, IconButton } from '@/components/ui';
+import { Button, IconButton, Isotipo } from '@/components/ui';
 import { DUR, EASE } from '@/constants/motion';
 
 const STEPS: [string, string][] = [
@@ -67,7 +67,7 @@ export const WelcomeCard: React.FC<WelcomeCardProps> = ({ onClose, onRegister })
                     <IconButton icon="close" variant="ghost" ariaLabel="Cerrar" onClick={onClose} />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 8 }}>
-                    <Icon name="recycling" filled size={40} style={{ color: 'var(--brand-fg)' }} />
+                    <Isotipo height={44} />
                     <h2 id="welcome-title" style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>
                         Tus aparatos viejos valen
                     </h2>

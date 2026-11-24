@@ -24,7 +24,7 @@ export interface CounterProps {
 
 /** − / number / + */
 export const Counter: React.FC<CounterProps> = ({ value, onChange, label }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <button
             type="button"
             aria-label={label ? `Quitar ${label}` : 'Quitar uno'}

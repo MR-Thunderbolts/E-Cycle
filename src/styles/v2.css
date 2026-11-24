@@ -57,7 +57,11 @@
 .ec-locdot__halo{position:absolute;inset:8px;border-radius:var(--radius-full);background:rgba(29,233,182,.15)}
 .ec-locdot__core{position:relative;width:14px;height:14px;border-radius:var(--radius-full);background:var(--ec-accent);border:3px solid var(--ec-dark-bg);box-shadow:var(--glow-teal-dark)}
 .ec-locdot__label{position:absolute;top:calc(100% - 2px);left:50%;transform:translateX(-50%);font-size:11px;font-weight:var(--fw-bold);color:var(--ec-dark-text);background:var(--ec-dark-bg);padding:2px 8px;border-radius:var(--radius-full);white-space:nowrap}
-.ec-pin{border:0;background:transparent;padding:4px;cursor:pointer;line-height:1;display:inline-flex}
-.ec-pin .material-symbols-rounded{font-size:36px;color:var(--brand-glow);transition:all var(--dur-base) var(--ease-standard)}
+.ec-pin{position:relative;border:0;background:transparent;padding:4px;cursor:pointer;line-height:1;display:inline-flex;transition:opacity var(--dur-base) var(--ease-standard)}
+.ec-pin .material-symbols-rounded{font-size:36px;color:var(--map-pin);transition:all var(--dur-base) var(--ease-standard)}
+.ec-pin--perk .material-symbols-rounded{color:var(--ec-perk-violet)}
 .ec-pin--selected .material-symbols-rounded{font-size:48px}
-.ec-pin--dimmed .material-symbols-rounded{color:var(--text-tertiary)}
+.ec-pin--dimmed{opacity:.4}
+.ec-pin__badge{position:absolute;top:4px;right:0;width:16px;height:16px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;background:var(--ec-dark-bg);color:var(--map-pin);border:1px solid var(--map-pin)}
+.ec-pin--perk .ec-pin__badge{color:var(--ec-perk-violet);border-color:var(--ec-perk-violet)}
+.ec-pin__badge .material-symbols-rounded{font-size:10px;color:inherit}

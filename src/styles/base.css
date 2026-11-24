@@ -22,17 +22,15 @@ a:hover{color:var(--link-hover);text-decoration:underline;text-underline-offset:
 
 /* Animations used by components */
 @keyframes ec-scan{0%{top:0;opacity:0}10%{opacity:1}90%{opacity:1}100%{top:100%;opacity:0}}
+@keyframes ec-success-in{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
 @keyframes ec-bounce-short{0%,100%{transform:translateY(0)}50%{transform:translateY(-15%)}}
 @keyframes ec-bounce-gentle{0%,100%{transform:translateY(-5%)}50%{transform:translateY(0)}}
-@keyframes ec-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes ec-skeleton-pulse{from{opacity:1}to{opacity:.45}}
 @keyframes ec-spin{to{transform:rotate(360deg)}}
 @keyframes ec-ping{75%,100%{transform:scale(2);opacity:0}}
 @keyframes ec-pulse{50%{opacity:.5}}
 .animate-bounce-short{animation:ec-bounce-short 1s infinite}
 .animate-bounce-gentle{animation:ec-bounce-gentle 2s infinite}
-.skeleton-shimmer{background:linear-gradient(90deg,#e8e8e8 25%,#f0f0f0 50%,#e8e8e8 75%);background-size:200% 100%;animation:ec-shimmer 1.5s infinite}
-html.dark .skeleton-shimmer,.ec-dark .skeleton-shimmer{background:linear-gradient(90deg,#2a2a2a 25%,#333 50%,#2a2a2a 75%);background-size:200% 100%;animation:ec-shimmer 1.5s infinite}
-@keyframes ec-loc-pulse{0%{transform:scale(.45);opacity:.7}100%{transform:scale(2);opacity:0}}
 @keyframes ec-fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes ec-shake{0%,100%{transform:translateX(0)}15%,55%{transform:translateX(-8px)}35%,75%{transform:translateX(8px)}90%{transform:translateX(-3px)}}
 @keyframes ec-scale-in{from{opacity:0;transform:scale(.94) translateY(8px)}to{opacity:1;transform:none}}
