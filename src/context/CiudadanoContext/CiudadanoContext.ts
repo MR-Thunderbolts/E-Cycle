@@ -68,7 +68,11 @@ export interface CiudadanoContextValue {
 
     // Feedback
     toast: ToastState;
-    say: (message: string, variant?: ToastVariant) => void;
+    say: (message: string, variant?: ToastVariant, ms?: number) => void;
+    /** Beneficios → Explorar already filtered by «Con beneficios». One-shot: Explorar clears it. */
+    benefitsMap: boolean;
+    showBenefitsMap: () => void;
+    clearBenefitsMap: () => void;
 }
 
 export const CiudadanoContext = createContext<CiudadanoContextValue | undefined>(undefined);

@@ -1,16 +1,26 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { AnimatePresence, animate, motion, useMotionValue, useTransform } from 'framer-motion';
-import type { CleanPoint, MapPosition } from '@/types';
+import type { MapPosition } from '@/types';
 import { IconButton, LocationDot, MapPin } from '@/components/ui';
+import type { MapPinKind } from '@/components/ui';
 import { MapSkeleton } from './MapSkeleton';
 import { DUR, EASE } from '@/constants/motion';
 import mapBg from '@/assets/map-bg.jpg';
 
+/** Anything that gets a pin: a clean point or a shop with a benefit. */
+export interface MapPlace {
+    id: string;
+    name: string;
+    x: number;
+    y: number;
+    kind: MapPinKind;
+}
+
 interface InteractiveMapProps {
-    points: CleanPoint[];
+    points: MapPlace[];
     userPos: MapPosition;
-    selected: CleanPoint | null;
-    onSelect: (point: CleanPoint) => void;
+    selected: MapPlace | null;
+    onSelect: (id: string) => void;
     loading?: boolean;
     /** Re-centres on this position when it changes (e.g. the centroid of a search). */
     focus?: MapPosition | null;
@@ -250,7 +260,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
                                 zIndex: isSel ? 2 : 1,
                             }}
                         >
-                            <MapPin label={p.name} kind={p.community === false ? 'privado' : 'punto'} selected={isSel} dimmed={!!selected && !isSel} onClick={() => onSelect(p)} />
+                            <MapPin label={p.name} kind={p.kind} selected={isSel} dimmed={!!selected && !isSel} onClick={() => onSelect(p.id)} />
                         </motion.div>
                     );
                 })}

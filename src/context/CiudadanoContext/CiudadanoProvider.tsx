@@ -45,6 +45,7 @@ export const CiudadanoProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const [account, setAccount] = useState(false);
     const [register, setRegister] = useState<RegisterMode | false>(false);
     const [nudge, setNudge] = useState<number | null>(null);
+    const [benefitsMap, setBenefitsMap] = useState(false);
     const nudgeSeen = useRef(false);
     const [confirm, setConfirm] = useState<ConfirmRequest | null>(null);
 
@@ -86,15 +87,21 @@ export const CiudadanoProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     useEffect(() => () => clearTimeout(toastTimer.current), []);
 
-    const say = useCallback((message: string, variant: ToastVariant = 'success') => {
+    const say = useCallback((message: string, variant: ToastVariant = 'success', ms = TOAST_MS) => {
         setToast({ open: true, message, variant });
         clearTimeout(toastTimer.current);
-        toastTimer.current = setTimeout(() => setToast((t) => ({ ...t, open: false })), TOAST_MS);
+        toastTimer.current = setTimeout(() => setToast((t) => ({ ...t, open: false })), ms);
     }, []);
 
     const go = useCallback((next: TabType) => {
         setTab(next);
     }, []);
+
+    const showBenefitsMap = useCallback(() => {
+        setBenefitsMap(true);
+        setTab('explorar');
+    }, []);
+    const clearBenefitsMap = useCallback(() => setBenefitsMap(false), []);
 
     const setDark = (value: boolean) => {
         setDarkState(value);
@@ -221,6 +228,9 @@ export const CiudadanoProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 closeConfirm: () => setConfirm(null),
                 toast,
                 say,
+                benefitsMap,
+                showBenefitsMap,
+                clearBenefitsMap,
             }}
         >
             {children}

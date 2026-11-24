@@ -2,19 +2,17 @@ import { useMemo } from 'react';
 import type { CleanPoint, MapPosition, MaterialId } from '@/types';
 import { CLEAN_POINTS, HOME_COMUNA } from '@/constants/ciudadano';
 
-export type ChipId = 'todos' | MaterialId;
-
 /** No search: the points in the person's comuna. With a search: matches by name, address or comuna. */
-export const usePointFilter = (chip: ChipId, query: string): CleanPoint[] =>
+export const usePointFilter = (materials: MaterialId[], query: string): CleanPoint[] =>
     useMemo(() => {
         const q = query.trim().toLowerCase();
         const home = HOME_COMUNA.toLowerCase();
         return CLEAN_POINTS.filter(
             (p) =>
-                (chip === 'todos' || p.materials.includes(chip)) &&
+                (!materials.length || materials.some((m) => p.materials.includes(m))) &&
                 (q ? `${p.name} ${p.address}`.toLowerCase().includes(q) : p.address.toLowerCase().includes(home)),
         );
-    }, [chip, query]);
+    }, [materials, query]);
 
 export const centroid = (list: CleanPoint[]): MapPosition | null =>
     list.length

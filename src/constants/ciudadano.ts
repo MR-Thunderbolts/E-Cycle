@@ -2,6 +2,7 @@ import type {
     Address,
     Campaign,
     CleanPoint,
+    Merchant,
     HistoryEntry,
     MapPosition,
     MaterialCategory,
@@ -103,6 +104,13 @@ export const CLEAN_POINTS: CleanPoint[] = [
     { id: '7', name: 'Mall Plaza Sur La Granja', address: 'Av. Santa Rosa 9500, La Granja', hours: 'Abierto hasta las 22:00', type: 'Tienda asociada', dist: 'A 14 min en auto', materials: ['celulares', 'baterias', 'cables'], x: 8, y: 34 },
     { id: '8', name: 'Municipalidad de El Bosque', address: 'Av. Gran Avenida 10305, El Bosque', hours: 'Abierto hasta las 17:00', type: 'Punto limpio', dist: 'A 25 min en auto', materials: ['baterias', 'cables', 'laptops'], x: 10, y: 82 },
     { id: '9', name: 'Punto Limpio San Bernardo', address: 'Av. Portales 2600, San Bernardo', hours: 'Abierto hasta las 18:30', type: 'Punto limpio', dist: 'A 32 min en auto', materials: ['celulares', 'baterias', 'laptops', 'cables'], x: -4, y: 104 },
+];
+
+/** «Con beneficios»: example shops that honour the rewards. Real partners replace these. */
+export const MERCHANTS: Merchant[] = [
+    { id: 'm1', name: 'Tienda de accesorios (ejemplo)', category: 'Accesorios para celular', benefit: '20% en un cable USB-C', minutes: 5, hours: 'L a S 10:00–20:00', address: 'Dirección de ejemplo, La Florida', x: 46, y: 44 },
+    { id: 'm2', name: 'Servicio técnico (ejemplo)', category: 'Servicio técnico', benefit: '$5.000 en reparación de celular', minutes: 8, hours: 'L a S 10:00–20:00', address: 'Dirección de ejemplo, La Florida', x: 28, y: 58 },
+    { id: 'm3', name: 'Tienda de tecnología (ejemplo)', category: 'Tecnología', benefit: '15% en un cargador nuevo', minutes: 12, hours: 'L a S 10:00–20:00', address: 'Dirección de ejemplo, La Florida', x: 52, y: 63 },
 ];
 
 export const USER_POSITION: MapPosition = { x: 38, y: 50 };
