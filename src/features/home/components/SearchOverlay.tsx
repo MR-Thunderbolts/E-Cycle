@@ -162,7 +162,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ open, query, setQu
                     ))}
                     {!suggestions.length && (
                         <div style={{ padding: 12, fontSize: 14, lineHeight: 1.5, color: 'var(--text-muted)' }}>
-                            No encontramos «{query}». Por ahora E-Cycle funciona en Puente Alto, La Florida, La Granja, El Bosque y San
+                            No encontramos «{query}». Por ahora E-Cycle funciona en Puente Alto, La Florida, La Cisterna, El Bosque y San
                             Bernardo.
                         </div>
                     )}
