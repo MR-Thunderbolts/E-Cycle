@@ -135,7 +135,41 @@ export interface AnimatedLogoProps {
     gap?: number;
     tagline?: string;
     taglineClassName?: string;
+    /** Called once the logo is built and has been on screen for a short beat. */
+    onDone?: () => void;
 }
+
+/**
+ * Hand-off from the loading spiral in index.html (#boot): wait for the fonts (at most 2 s), then for the
+ * spiral to finish a turn, so its pixels sit where the animation picks them up; then fade it out.
+ */
+const handOff = (motion: boolean, isCancelled: () => boolean): Promise<void> =>
+    new Promise((resolve) => {
+        const boot = document.getElementById('boot');
+        const fonts = Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise((r) => setTimeout(r, 2000))]);
+        fonts.then(() => {
+            if (isCancelled()) return;
+            const finish = () => {
+                if (isCancelled()) return;
+                if (boot) {
+                    boot.classList.add('is-done');
+                    setTimeout(() => boot.remove(), 200);
+                }
+                resolve();
+            };
+            const lead = boot?.querySelector('.b0');
+            if (!motion || !lead) return finish();
+            let done = false;
+            const once = () => {
+                if (done) return;
+                done = true;
+                lead.removeEventListener('animationiteration', once);
+                finish();
+            };
+            lead.addEventListener('animationiteration', once);
+            setTimeout(once, 1300); // one turn is 1.2 s
+        });
+    });
 
 /** Stacked logo that builds itself: icon, then the name and the tagline coming out downward. */
 export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
@@ -144,7 +178,10 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
     gap = 20,
     tagline,
     taglineClassName,
+    onDone,
 }) => {
+    const doneRef = useRef(onDone);
+    doneRef.current = onDone;
     const svgRef = useRef<SVGSVGElement>(null);
     const tagRef = useRef<HTMLParagraphElement>(null);
     const tagLine = 21; // px, one line of the tagline
@@ -289,20 +326,32 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
             }
         };
 
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            draw(LOGO_INTRO_S);
-            return;
-        }
+        const motion = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let cancelled = false;
         let raf = 0;
-        const start = performance.now();
-        const tick = (now: number) => {
-            const t = (now - start) / 1000;
-            draw(Math.min(t, LOGO_INTRO_S));
-            if (t < LOGO_INTRO_S) raf = requestAnimationFrame(tick);
+        let doneTimer = 0;
+        draw(0); // nothing visible yet: the loading spiral is on top
+        handOff(motion, () => cancelled).then(() => {
+            if (cancelled) return;
+            if (!motion) {
+                draw(LOGO_INTRO_S);
+                doneTimer = window.setTimeout(() => doneRef.current?.(), 1200);
+                return;
+            }
+            const start = performance.now();
+            const tick = (now: number) => {
+                const t = (now - start) / 1000;
+                draw(Math.min(t, LOGO_INTRO_S));
+                if (t < LOGO_INTRO_S) raf = requestAnimationFrame(tick);
+            };
+            raf = requestAnimationFrame(tick);
+            doneTimer = window.setTimeout(() => doneRef.current?.(), LOGO_SPLASH_MS);
+        });
+        return () => {
+            cancelled = true;
+            cancelAnimationFrame(raf);
+            clearTimeout(doneTimer);
         };
-        draw(0);
-        raf = requestAnimationFrame(tick);
-        return () => cancelAnimationFrame(raf);
     }, [SHIFT, wordH, wordX, wordY, ws]);
 
     return (

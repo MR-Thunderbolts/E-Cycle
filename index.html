@@ -43,11 +43,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap">
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block">
+  <!-- Not render-blocking: the loading spiral below paints right away instead of a blank screen. -->
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
-    rel="stylesheet">
+    rel="stylesheet" media="print" onload="this.media='all'">
   <link
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block"
-    rel="stylesheet" />
+    rel="stylesheet" media="print" onload="this.media='all'" />
   <style>
     /* Critical styles before the bundle loads. Everything else lives in src/styles. */
     html,
@@ -78,6 +79,63 @@
     html.fonts-loaded .material-symbols-rounded {
       opacity: 1;
     }
+
+    /* Loading spiral, before the bundle: the two pixels of the logo orbiting counter-clockwise
+       («Vuelta cerrada»), at the exact spot where the splash animation picks them up. */
+    #boot {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #FFFFFF;
+      transition: opacity .15s ease;
+    }
+
+    html.dark #boot {
+      background: #121212;
+    }
+
+    #boot.is-done {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #boot svg {
+      position: absolute;
+      width: 140px;
+      height: 140px;
+      overflow: visible;
+      animation: ec-boot-orbit 1.2s linear infinite;
+    }
+
+    #boot svg path {
+      fill: none;
+      stroke: #19B99A;
+      stroke-width: 1.2px;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+    }
+
+    html.dark #boot svg path {
+      stroke: #1DE9B6;
+    }
+
+    #boot .b1 { animation-delay: .05s; opacity: .5; }
+    #boot .b2 { animation-delay: .1s; opacity: .32; }
+    #boot .b3 { animation-delay: .15s; opacity: .18; }
+
+    @keyframes ec-boot-orbit {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(-360deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #boot svg { animation: ec-boot-breathe 1.6s ease-in-out infinite; }
+      #boot .b1, #boot .b2, #boot .b3 { display: none; }
+      @keyframes ec-boot-breathe { 50% { opacity: .35; } }
+    }
   </style>
   <script>
     // Apply the saved theme before first paint (dark by default).
@@ -92,6 +150,13 @@
 
 <body>
   <div id="root"></div>
+  <!-- Until the app is ready; the splash hands off from here (src/components/ui/Brand/AnimatedLogo.tsx). -->
+  <div id="boot" role="status" aria-label="Cargando E-Cycle">
+    <svg class="b3" viewBox="-15.25 -15.5 80 80" aria-hidden="true"><g transform="translate(49.505 43.316) scale(.45) translate(-38.3669 -6.1882)"><path d="M40.0171 2.47528H36.7167C35.5775 2.47528 34.654 3.3988 34.654 4.53802V7.83839C34.654 8.9776 35.5775 9.90112 36.7167 9.90112H40.0171C41.1563 9.90112 42.0798 8.9776 42.0798 7.83839V4.53802C42.0798 3.3988 41.1563 2.47528 40.0171 2.47528Z"/></g><g transform="translate(42.493 54.455) scale(.45) translate(-47.443 -11.1388)"><path d="M48.268 9.07604H46.6179C45.9343 9.07604 45.3802 9.63015 45.3802 10.3137V11.9639C45.3802 12.6474 45.9343 13.2015 46.6179 13.2015H48.268C48.9516 13.2015 49.5057 12.6474 49.5057 11.9639V10.3137C49.5057 9.63015 48.9516 9.07604 48.268 9.07604Z"/></g></svg>
+    <svg class="b2" viewBox="-15.25 -15.5 80 80" aria-hidden="true"><g transform="translate(49.505 43.316) scale(.45) translate(-38.3669 -6.1882)"><path d="M40.0171 2.47528H36.7167C35.5775 2.47528 34.654 3.3988 34.654 4.53802V7.83839C34.654 8.9776 35.5775 9.90112 36.7167 9.90112H40.0171C41.1563 9.90112 42.0798 8.9776 42.0798 7.83839V4.53802C42.0798 3.3988 41.1563 2.47528 40.0171 2.47528Z"/></g><g transform="translate(42.493 54.455) scale(.45) translate(-47.443 -11.1388)"><path d="M48.268 9.07604H46.6179C45.9343 9.07604 45.3802 9.63015 45.3802 10.3137V11.9639C45.3802 12.6474 45.9343 13.2015 46.6179 13.2015H48.268C48.9516 13.2015 49.5057 12.6474 49.5057 11.9639V10.3137C49.5057 9.63015 48.9516 9.07604 48.268 9.07604Z"/></g></svg>
+    <svg class="b1" viewBox="-15.25 -15.5 80 80" aria-hidden="true"><g transform="translate(49.505 43.316) scale(.45) translate(-38.3669 -6.1882)"><path d="M40.0171 2.47528H36.7167C35.5775 2.47528 34.654 3.3988 34.654 4.53802V7.83839C34.654 8.9776 35.5775 9.90112 36.7167 9.90112H40.0171C41.1563 9.90112 42.0798 8.9776 42.0798 7.83839V4.53802C42.0798 3.3988 41.1563 2.47528 40.0171 2.47528Z"/></g><g transform="translate(42.493 54.455) scale(.45) translate(-47.443 -11.1388)"><path d="M48.268 9.07604H46.6179C45.9343 9.07604 45.3802 9.63015 45.3802 10.3137V11.9639C45.3802 12.6474 45.9343 13.2015 46.6179 13.2015H48.268C48.9516 13.2015 49.5057 12.6474 49.5057 11.9639V10.3137C49.5057 9.63015 48.9516 9.07604 48.268 9.07604Z"/></g></svg>
+    <svg class="b0" viewBox="-15.25 -15.5 80 80" aria-hidden="true"><g transform="translate(49.505 43.316) scale(.45) translate(-38.3669 -6.1882)"><path d="M40.0171 2.47528H36.7167C35.5775 2.47528 34.654 3.3988 34.654 4.53802V7.83839C34.654 8.9776 35.5775 9.90112 36.7167 9.90112H40.0171C41.1563 9.90112 42.0798 8.9776 42.0798 7.83839V4.53802C42.0798 3.3988 41.1563 2.47528 40.0171 2.47528Z"/></g><g transform="translate(42.493 54.455) scale(.45) translate(-47.443 -11.1388)"><path d="M48.268 9.07604H46.6179C45.9343 9.07604 45.3802 9.63015 45.3802 10.3137V11.9639C45.3802 12.6474 45.9343 13.2015 46.6179 13.2015H48.268C48.9516 13.2015 49.5057 12.6474 49.5057 11.9639V10.3137C49.5057 9.63015 48.9516 9.07604 48.268 9.07604Z"/></g></svg>
+  </div>
   <script type="module" src="/index.tsx"></script>
   <!-- FOUT fix: add .fonts-loaded to <html> once Material Symbols font resolves -->
   <script>
