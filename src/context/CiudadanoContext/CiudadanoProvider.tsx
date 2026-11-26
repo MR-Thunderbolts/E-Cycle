@@ -2,14 +2,16 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { Address, HistoryEntry, Profile, TabType } from '@/types';
 import type { ToastVariant } from '@/components/ui/Toast';
 import { DEMO_ACCOUNT, GUEST_POINTS_TTL_MS } from '@/constants/ciudadano';
+import { LOGO_SPLASH_MS } from '@/components/ui/Brand/AnimatedLogo';
 import { storage } from '@/utils/storage';
 import { CiudadanoContext, ConfirmRequest, RegisterMode, ToastState } from './CiudadanoContext';
 
 const KEY_THEME = 'theme';
 const KEY_GUEST = 'ec-guest-points';
 
-const LOADING_MS = 4200;
-const WELCOME_MS = 4600;
+// The map skeleton stays 1.9 s after the splash (the animated logo sets how long that is); the welcome card 0.4 s later.
+const LOADING_MS = LOGO_SPLASH_MS + 1900;
+const WELCOME_MS = LOADING_MS + 400;
 const TOAST_MS = 3200;
 
 interface GuestPoints {
@@ -69,7 +71,7 @@ export const CiudadanoProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         return () => clearTimeout(t);
     }, [dark]);
 
-    // Skeleton until 4.2 s (the splash covers the first 2.3 s); welcome card at 4.6 s on every load. The handoff shows it only on
+    // Skeleton until 1.9 s after the splash; welcome card 0.4 s later, on every load. The handoff shows it only on
     // the first visit; this high-fidelity prototype shows it always so demos and tests see it.
     useEffect(() => {
         const a = setTimeout(() => setLoading(false), LOADING_MS);

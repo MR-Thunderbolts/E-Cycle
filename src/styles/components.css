@@ -273,3 +273,11 @@
 .ec-splash__brand{display:flex;flex-direction:column;align-items:center;margin-bottom:20px;animation:ec-fade-up .6s var(--ease-enter) both}
 .ec-splash__tag{font-size:var(--fs-sm);font-weight:var(--fw-medium);color:var(--ec-gray-500);text-transform:uppercase;letter-spacing:var(--tracking-wide);margin:0}
 .ec-dark .ec-splash,html.dark .ec-splash{background:var(--ec-dark-bg)}
+/* Logo animado (splash): contorno con serpiente y relleno con fundido; colores logo/* */
+.ec-alogo .sym{fill:var(--logo-symbol)}
+.ec-alogo .pix{fill:var(--logo-pixel)}
+.ec-alogo .word{fill:var(--logo-wordmark)}
+.ec-alogo .trace{stroke-width:.5;stroke-linejoin:round;fill:none}
+.ec-alogo .t-pix{stroke:var(--logo-pixel)}
+.ec-alogo .t-sym{stroke:var(--logo-symbol)}
+.ec-alogo .t-word{stroke:var(--logo-wordmark)}
