@@ -86,7 +86,7 @@
 .ec-badge-dot__dot{border-radius:var(--radius-full);display:block}
 
 /* ── Chip ─────────────────────────────────────────────── */
-.ec-chip{position:relative;padding:6px 16px;border-radius:var(--radius-full);font-size:var(--fs-xs);font-weight:var(--fw-bold);text-transform:capitalize;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;border:1px solid transparent;flex-shrink:0;transition:background-color var(--dur-fast),color var(--dur-fast);font-family:var(--font-sans);cursor:default}
+.ec-chip{position:relative;padding:6px 16px;border-radius:var(--radius-full);font-size:var(--fs-xs);font-weight:var(--fw-bold);text-transform:capitalize;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;border:1px solid transparent;flex-shrink:0;transition:background-color var(--dur-fast),color var(--dur-fast),border-color var(--dur-fast);font-family:var(--font-sans);cursor:default}
 .ec-chip--keepcase{text-transform:none}
 .ec-chip[data-clickable="true"]{cursor:pointer}
 .ec-chip[data-clickable="true"]::before{content:"";position:absolute;inset:-8px -2px} /* v2 · área táctil 44px */
@@ -94,8 +94,11 @@
 .ec-chip--default-on,.ec-chip--primary-on{background:var(--brand-solid);color:var(--brand-on-solid);border-color:var(--brand-solid);box-shadow:0 4px 6px -1px rgba(0,77,64,.2)}
 .ec-dark .ec-chip--default-on,.ec-dark .ec-chip--primary-on,html.dark .ec-chip--default-on,html.dark .ec-chip--primary-on{box-shadow:none}
 .ec-chip--default-off{background:var(--surface-card);color:var(--ec-gray-500);border-color:var(--ec-gray-100)}
-.ec-chip--default-off:hover{background:var(--ec-gray-50)}
-.ec-dark .ec-chip--default-off:hover,html.dark .ec-chip--default-off:hover{background:var(--surface-inset);color:var(--text-body)}
+/* Hover: an opaque, slightly stronger surface, so the chip still reads over the map in both themes. */
+.ec-chip--default-off[data-clickable="true"]:hover{background:var(--ec-gray-100);border-color:var(--ec-gray-200);color:var(--text-body)}
+.ec-dark .ec-chip--default-off[data-clickable="true"]:hover,html.dark .ec-chip--default-off[data-clickable="true"]:hover{background:color-mix(in oklch,var(--surface-card),#fff 10%);border-color:color-mix(in oklch,var(--surface-card),#fff 22%);color:var(--text-body)}
+.ec-chip--default-on[data-clickable="true"]:hover{background:color-mix(in oklch,var(--brand-solid),#fff 12%)}
+.ec-dark .ec-chip--default-on[data-clickable="true"]:hover,html.dark .ec-chip--default-on[data-clickable="true"]:hover{background:color-mix(in oklch,var(--brand-solid),#000 12%)}
 .ec-chip--primary-off{background:var(--brand-tint);color:var(--brand-fg);border-color:transparent}
 .ec-chip--secondary-on{background:var(--ec-accent);color:var(--ec-primary);border-color:var(--ec-accent);box-shadow:0 4px 6px -1px rgba(29,233,182,.2)}
 .ec-chip--secondary-off{background:var(--ec-gray-100);color:var(--ec-gray-500);border-color:var(--ec-gray-200)}
