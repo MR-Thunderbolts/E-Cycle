@@ -91,8 +91,9 @@ export const AppRouter: React.FC = () => {
     const desktop = useIsDesktop();
     const [splash, setSplash] = useState(true);
 
+    // The splash leaves when its logo is built; this is only a safety net if that never reports.
     useEffect(() => {
-        const t = setTimeout(() => setSplash(false), SPLASH_MS);
+        const t = setTimeout(() => setSplash(false), SPLASH_MS + 6000);
         return () => clearTimeout(t);
     }, []);
 
@@ -104,7 +105,7 @@ export const AppRouter: React.FC = () => {
     return (
         <div style={{ height: '100%', width: '100%', position: 'relative', overflow: 'hidden' }}>
             {desktop ? <DesktopApp /> : <MobileApp />}
-            <AnimatePresence>{splash && <SplashScreen key="splash" />}</AnimatePresence>
+            <AnimatePresence>{splash && <SplashScreen key="splash" onDone={() => setSplash(false)} />}</AnimatePresence>
         </div>
     );
 };

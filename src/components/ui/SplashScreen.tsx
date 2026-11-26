@@ -5,10 +5,12 @@ import { AnimatedLogo } from './Brand';
 
 export interface SplashScreenProps {
     tagline?: string;
+    /** The logo finished building (plus a short beat). */
+    onDone?: () => void;
 }
 
 /** Splash: the stacked logo builds itself (icon, then «e-cycle» and the tagline coming out downward). */
-export const SplashScreen: React.FC<SplashScreenProps> = ({ tagline = 'Recicla. Gana. Repite.' }) => (
+export const SplashScreen: React.FC<SplashScreenProps> = ({ tagline = 'Recicla. Gana. Repite.', onDone }) => (
     <motion.div
         className="ec-splash"
         role="status"
@@ -18,7 +20,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ tagline = 'Recicla. 
     >
         <div className="ec-splash__glow" />
         <div style={{ position: 'relative', zIndex: 10 }}>
-            <AnimatedLogo iconHeight={84} wordHeight={36} gap={20} tagline={tagline} taglineClassName="ec-splash__tag" />
+            <AnimatedLogo iconHeight={84} wordHeight={36} gap={20} tagline={tagline} taglineClassName="ec-splash__tag" onDone={onDone} />
         </div>
     </motion.div>
 );

@@ -9,8 +9,9 @@ import { CiudadanoContext, ConfirmRequest, RegisterMode, ToastState } from './Ci
 const KEY_THEME = 'theme';
 const KEY_GUEST = 'ec-guest-points';
 
-// The map skeleton stays 1.9 s after the splash (the animated logo sets how long that is); the welcome card 0.4 s later.
-const LOADING_MS = LOGO_SPLASH_MS + 1900;
+// The map skeleton stays ~1.9 s after the splash (the animated logo sets how long that is, plus up to 1.2 s waiting
+// for the loading spiral to finish a turn); the welcome card 0.4 s later.
+const LOADING_MS = LOGO_SPLASH_MS + 1200 + 1900;
 const WELCOME_MS = LOADING_MS + 400;
 const TOAST_MS = 3200;
 
