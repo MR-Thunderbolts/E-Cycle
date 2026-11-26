@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import type { TabType } from '@/types';
-import { Button, Enter, SplashScreen } from '@/components/ui';
+import { Button, Enter, LOGO_SPLASH_MS, SplashScreen } from '@/components/ui';
 import { MobileLayout, NAV_TABS, TopBar } from '@/components/layout';
 import { DesktopExplore, Home } from '@/features/home';
 import { Pickup } from '@/features/pickup';
@@ -11,7 +11,7 @@ import { useCiudadano, useIsDesktop } from '@/hooks';
 import { initials } from '@/utils/format';
 import { CiudadanoOverlays } from './CiudadanoOverlays';
 
-const SPLASH_MS = 2300;
+const SPLASH_MS = LOGO_SPLASH_MS;
 
 const SCREENS: Record<TabType, React.FC> = { explorar: Home, retiro: Pickup, escaner: Scan, ehub: Hub };
 
