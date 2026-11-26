@@ -100,6 +100,9 @@
 .ec-chip--secondary-on{background:var(--ec-accent);color:var(--ec-primary);border-color:var(--ec-accent);box-shadow:0 4px 6px -1px rgba(29,233,182,.2)}
 .ec-chip--secondary-off{background:var(--ec-gray-100);color:var(--ec-gray-500);border-color:var(--ec-gray-200)}
 .ec-dark .ec-chip--default-off,html.dark .ec-chip--default-off{border-color:var(--ec-dark-border);color:var(--ec-gray-400)}
+/* v2.1 · chips sobre el mapa (bajo el buscador) */
+.ec-chip--onmap{box-shadow:0 2px 6px rgba(0,0,0,.28)}
+.ec-chip--onmap.ec-chip--default-on{border:1.5px solid var(--ec-teal-400);box-shadow:0 2px 6px rgba(0,0,0,.28)}
 
 /* ── Avatar ───────────────────────────────────────────── */
 .ec-avatar{border-radius:var(--radius-full);border-style:solid;border-color:var(--ec-primary);background:var(--surface-card);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;aspect-ratio:1;box-shadow:var(--shadow-sm)}

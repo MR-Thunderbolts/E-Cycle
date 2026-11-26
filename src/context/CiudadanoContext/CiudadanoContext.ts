@@ -51,6 +51,9 @@ export interface CiudadanoContextValue {
     removeAddress: (id: string) => void;
     sms: boolean;
     setSms: (on: boolean) => void;
+    /** The person allowed the app to use their current location («Usar mi ubicación actual»). */
+    located: boolean;
+    setLocated: (on: boolean) => void;
 
     // Open layers
     account: boolean;
