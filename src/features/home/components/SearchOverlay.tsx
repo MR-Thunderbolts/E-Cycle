@@ -4,16 +4,23 @@ import type { CleanPoint } from '@/types';
 import { Icon, IconButton } from '@/components/ui';
 import { CLEAN_POINTS, COMUNAS } from '@/constants/ciudadano';
 import { DUR, EASE } from '@/constants/motion';
-import { sectionLabel } from './exploreStyles';
 
 interface SearchOverlayProps {
     open: boolean;
     query: string;
     setQuery: (q: string) => void;
     onClose: () => void;
-    /** A point, or null when a comuna / «mi ubicación» was chosen. */
+    /** A point, or null when a comuna was chosen. */
     onPick: (point: CleanPoint | null) => void;
+    /** «Usar mi ubicación actual». */
+    onLocate: () => void;
+    /** Suggestions shown before typing (v2.1): the points, or the shops, near the person. */
+    nearbyTitle: string;
+    nearby: React.ReactNode;
 }
+
+/** Section title: Caption/Bold, sentence case (v2.1). */
+const label: React.CSSProperties = { fontSize: 12, fontWeight: 700, lineHeight: 1.5, color: 'var(--text-muted)', padding: '8px 12px 0' };
 
 interface Suggestion {
     key: string;
@@ -39,8 +46,8 @@ const rowStyle: React.CSSProperties = {
     color: 'inherit',
 };
 
-/** Full-screen search: comuna or address, «Usar mi ubicación actual», suggestions. */
-export const SearchOverlay: React.FC<SearchOverlayProps> = ({ open, query, setQuery, onClose, onPick }) => {
+/** Full-screen search: comuna or address, «Usar mi ubicación actual», nearby points, comunas. */
+export const SearchOverlay: React.FC<SearchOverlayProps> = ({ open, query, setQuery, onClose, onPick, onLocate, nearbyTitle, nearby }) => {
     const input = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -100,7 +107,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ open, query, setQu
                         overflowY: 'auto',
                     }}
                 >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <IconButton icon="arrow_back" variant="ghost" ariaLabel="Volver" onClick={onClose} />
                         <div
                             style={{
@@ -139,18 +146,17 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ open, query, setQu
                             )}
                         </div>
                     </div>
-                    <button
-                        type="button"
-                        style={rowStyle}
-                        onClick={() => {
-                            setQuery('');
-                            onPick(null);
-                        }}
-                    >
+                    <button type="button" style={rowStyle} onClick={onLocate}>
                         <Icon name="my_location" style={{ color: 'var(--brand-fg)' }} />
                         <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--brand-fg)' }}>Usar mi ubicación actual</span>
                     </button>
-                    <div style={{ ...sectionLabel, padding: '8px 12px 0' }}>{q ? 'Resultados' : 'Comunas con cobertura'}</div>
+                    {!q && (
+                        <>
+                            <div style={label}>{nearbyTitle}</div>
+                            {nearby}
+                        </>
+                    )}
+                    <div style={label}>{q ? 'Resultados' : 'Comunas con cobertura'}</div>
                     {suggestions.map((s) => (
                         <button type="button" key={s.key} style={rowStyle} onClick={s.pick}>
                             <Icon name={s.icon} style={{ color: 'var(--text-muted)' }} />

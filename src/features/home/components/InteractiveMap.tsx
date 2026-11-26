@@ -133,6 +133,8 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
         const el = box.current;
         if (!el) return;
         const onWheel = (e: WheelEvent) => {
+            // Overlays that scroll on their own (the chip row) keep their wheel.
+            if ((e.target as HTMLElement).closest('[data-map-ui]')) return;
             e.preventDefault();
             stop();
             const r = el.getBoundingClientRect();

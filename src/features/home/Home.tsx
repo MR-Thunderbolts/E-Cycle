@@ -1,30 +1,24 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { animate, motion, useMotionValue } from 'framer-motion';
-import type { CleanPoint, Merchant } from '@/types';
-import { BottomSheet, Icon, IconButton, Skeleton } from '@/components/ui';
-import { CAMPAIGN, MERCHANTS, USER_POSITION } from '@/constants/ciudadano';
-import { SPRING_SHEET } from '@/constants/motion';
+import React, { useEffect, useMemo, useState } from 'react';
+import type { CleanPoint, MapPosition, Merchant } from '@/types';
+import { BottomSheet, Icon, IconButton } from '@/components/ui';
+import { CLEAN_POINTS, MERCHANTS, USER_POSITION } from '@/constants/ciudadano';
 import { useCiudadano } from '@/hooks';
 import { initials } from '@/utils/format';
 import InteractiveMap, { type MapPlace } from './components/InteractiveMap';
 import { SearchOverlay } from './components/SearchOverlay';
 import { PointRow } from './components/PointRow';
 import { PointDetail } from './components/PointDetail';
-import { CampaignNotice } from './components/CampaignNotice';
 import { FilterChips } from './components/FilterChips';
 import { MerchantRow } from './components/MerchantRow';
 import { MerchantDetail } from './components/MerchantDetail';
 import { centroid, usePointFilter } from './usePointFilter';
 import { useExploreFilters } from './useExploreFilters';
+import { useNearby } from './useNearby';
 
-/** Bottom nav bar height; the collapsed list shows only its handle, title and chips above it. */
-const NAV = 100;
-/** Collapsed list: its top edge sits this far above the bottom of the screen (handle + title + chips). */
-const PEEK = NAV + 108;
-/** Expanded list stops just under the search bar. */
-const FULL_TOP = 88;
-/** Drag further than this to snap open or closed. */
-const SNAP = 60;
+/** Zoom and «mi ubicación» float this far above the bottom edge (v2.1: above the nav bar, no drawer). */
+const CONTROLS_BOTTOM = 210;
+/** Search pill: 16 from the top, 56 tall; the filter chips sit 10 below it. */
+const CHIPS_TOP = 82;
 
 export const placeOf = (p: CleanPoint): MapPlace => ({ id: p.id, name: p.name, x: p.x, y: p.y, kind: p.community === false ? 'privado' : 'punto' });
 export const merchantPlace = (m: Merchant): MapPlace => ({ id: m.id, name: m.name, x: m.x, y: m.y, kind: 'beneficio' });
@@ -38,7 +32,10 @@ export const listTitle = (count: number, query: string) =>
           ? '1 punto cerca de ti'
           : `${count} puntos cerca de ti`;
 
-/** Explorar (mobile): full-screen map, Google Maps-style search, draggable list. */
+/**
+ * Explorar (mobile, v2.1): full-screen map with the search pill and the filter chips floating on top.
+ * No drawer: the search suggests the points near you (current location or the profile address).
+ */
 const Home: React.FC = () => {
     const app = useCiudadano();
     const filters = useExploreFilters();
@@ -46,8 +43,11 @@ const Home: React.FC = () => {
     const [searchOpen, setSearchOpen] = useState(false);
     const [selected, setSelected] = useState<CleanPoint | null>(null);
     const [shop, setShop] = useState<Merchant | null>(null);
-    const [open, setOpen] = useState(false);
-    const list = usePointFilter(filters.materials, query);
+    const [here, setHere] = useState<MapPosition | null>(null);
+    const nearby = useNearby(filters.materials);
+    const found = usePointFilter(filters.materials, query);
+    // Without a search the map shows the same points the search suggests.
+    const list = query ? found : nearby.points;
     const benefits = filters.benefits;
     const places = useMemo(() => (benefits ? MERCHANTS.map(merchantPlace) : list.map(placeOf)), [benefits, list]);
     const selectedPlace = benefits ? (shop ? merchantPlace(shop) : null) : selected ? placeOf(selected) : null;
@@ -65,79 +65,15 @@ const Home: React.FC = () => {
     useEffect(() => {
         if (!benefits) setShop(null);
     }, [benefits]);
-    // Re-centre only when the search changes, not when a chip filters the list.
-    const focus = useMemo(() => (query ? centroid(list) : null), [query]); // eslint-disable-line react-hooks/exhaustive-deps
+    // Re-centre when the search changes (not when a chip filters the list), or on «Usar mi ubicación actual».
+    const searched = useMemo(() => (query ? centroid(list) : null), [query]); // eslint-disable-line react-hooks/exhaustive-deps
+    // Near the profile address: frame those points instead of the «Tú» dot.
+    const nearHome = useMemo(
+        () => (nearby.fromAddress ? centroid(CLEAN_POINTS.filter((p) => p.address.includes(nearby.comuna))) : null),
+        [nearby.fromAddress, nearby.comuna],
+    );
+    const focus = query ? searched : (here ?? nearHome);
 
-    // Sheet geometry: collapsed at h − PEEK, expanded at FULL_TOP (just under the search bar).
-    const root = useRef<HTMLDivElement>(null);
-    const [h, setH] = useState(800);
-    useLayoutEffect(() => {
-        const el = root.current;
-        if (!el) return;
-        const ro = new ResizeObserver(() => setH(el.clientHeight));
-        ro.observe(el);
-        return () => ro.disconnect();
-    }, []);
-    const minTop = FULL_TOP;
-    const maxTop = h - PEEK;
-    const top = useMotionValue(maxTop);
-    useEffect(() => {
-        animate(top, open ? minTop : maxTop, SPRING_SHEET);
-    }, [open, minTop, maxTop, top]);
-
-    const drag = useRef<{ y: number; start: number; moved: boolean } | null>(null);
-    const onDown = (e: React.PointerEvent) => {
-        top.stop();
-        drag.current = { y: e.clientY, start: top.get(), moved: false };
-        e.currentTarget.setPointerCapture(e.pointerId);
-    };
-    const onMove = (e: React.PointerEvent) => {
-        const d = drag.current;
-        if (!d) return;
-        const dy = e.clientY - d.y;
-        if (Math.abs(dy) > 4) d.moved = true;
-        top.set(Math.min(maxTop, Math.max(minTop, d.start + dy)));
-    };
-    const onUp = (e: React.PointerEvent) => {
-        const d = drag.current;
-        drag.current = null;
-        if (!d) return;
-        const dy = e.clientY - d.y;
-        const next = !d.moved ? !open : dy < -SNAP ? true : dy > SNAP ? false : open;
-        if (next === open) animate(top, open ? minTop : maxTop, SPRING_SHEET);
-        else setOpen(next);
-    };
-
-    // Swiping or scrolling up on the list opens the sheet; pulling down at the top closes it.
-    const scroller = useRef<HTMLDivElement>(null);
-    const swipe = useRef<{ x: number; y: number; done: boolean } | null>(null);
-    const swipeStart = (x: number, y: number) => {
-        swipe.current = { x, y, done: false };
-    };
-    const swipeMove = (x: number, y: number) => {
-        const g = swipe.current;
-        if (!g || g.done) return;
-        const dy = g.y - y;
-        if (Math.abs(dy) < 24 || Math.abs(dy) < Math.abs(g.x - x)) return;
-        const atTop = (scroller.current?.scrollTop ?? 0) <= 0;
-        if (!open && dy > 0) {
-            g.done = true;
-            setOpen(true);
-        } else if (open && dy < 0 && atTop) {
-            g.done = true;
-            setOpen(false);
-        }
-    };
-    const swipeEnd = () => {
-        swipe.current = null;
-    };
-    const onWheel = (e: React.WheelEvent) => {
-        const atTop = (scroller.current?.scrollTop ?? 0) <= 0;
-        if (!open && e.deltaY > 8) setOpen(true);
-        else if (open && e.deltaY < -8 && atTop) setOpen(false);
-    };
-
-    const select = (p: CleanPoint) => setSelected(p);
     const selectPlace = (id: string) => {
         if (benefits) setShop(MERCHANTS.find((m) => m.id === id) ?? null);
         else {
@@ -146,8 +82,25 @@ const Home: React.FC = () => {
         }
     };
 
+    const locate = () => {
+        setQuery('');
+        setSearchOpen(false);
+        setHere({ ...USER_POSITION });
+        if (app.located) return;
+        if (!('geolocation' in navigator)) {
+            app.say('Tu navegador no comparte la ubicación. Te mostramos los puntos de tu comuna.', 'info');
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            () => app.setLocated(true),
+            () => app.say('No pudimos usar tu ubicación. Te mostramos los puntos de tu comuna.', 'info'),
+            { timeout: 8000, maximumAge: 60000 },
+        );
+    };
+
     return (
-        <div ref={root} style={{ position: 'absolute', inset: 0 }}>
+        <div style={{ position: 'absolute', inset: 0 }}>
+            <h1 className="sr-only">Explorar puntos limpios</h1>
             <InteractiveMap
                 points={places}
                 userPos={USER_POSITION}
@@ -155,8 +108,7 @@ const Home: React.FC = () => {
                 onSelect={selectPlace}
                 loading={app.loading}
                 focus={focus}
-                controlsBottom={PEEK + 16}
-                hideControls={open}
+                controlsBottom={CONTROLS_BOTTOM}
             >
                 <div
                     style={{
@@ -232,125 +184,72 @@ const Home: React.FC = () => {
                         {app.signedIn ? <span style={{ fontSize: 14, fontWeight: 800 }}>{initials(app.profile.name)}</span> : <Icon name="person" />}
                     </button>
                 </div>
-            </InteractiveMap>
-
-            <motion.section
-                aria-label="Puntos limpios"
-                style={{
-                    position: 'absolute',
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    top,
-                    background: 'var(--surface-page)',
-                    borderTop: '1px solid var(--border-card)',
-                    borderRadius: '32px 32px 0 0',
-                    boxShadow: '0 -10px 30px rgba(0,0,0,.25)',
-                    zIndex: 2,
-                    display: 'flex',
-                    flexDirection: 'column',
-                }}
-            >
                 <div
-                    onPointerDown={onDown}
-                    onPointerMove={onMove}
-                    onPointerUp={onUp}
-                    onPointerCancel={onUp}
-                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setOpen(!open))}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={open ? 'Bajar lista' : 'Ver lista completa'}
-                    aria-expanded={open}
-                    style={{
-                        flexShrink: 0,
-                        padding: '12px 20px 4px',
-                        cursor: 'grab',
-                        touchAction: 'none',
-                        userSelect: 'none',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 12,
-                    }}
-                >
-                    <div style={{ width: 40, height: 4, borderRadius: 9999, background: 'var(--border-strong)', alignSelf: 'center' }} />
-                    {app.loading ? (
-                        <Skeleton style={{ height: 22, width: 180, borderRadius: 8 }} />
-                    ) : (
-                        <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>{benefits ? benefitsTitle(MERCHANTS.length) : listTitle(list.length, query)}</h1>
-                    )}
-                </div>
-                <div
-                    ref={scroller}
+                    role="group"
+                    aria-label="Filtrar el mapa"
+                    data-map-ui
                     className="no-scrollbar"
-                    onWheel={onWheel}
-                    onTouchStart={(e) => swipeStart(e.touches[0].clientX, e.touches[0].clientY)}
-                    onTouchMove={(e) => swipeMove(e.touches[0].clientX, e.touches[0].clientY)}
-                    onTouchEnd={swipeEnd}
-                    onTouchCancel={swipeEnd}
-                    onPointerDown={(e) => e.pointerType === 'mouse' && swipeStart(e.clientX, e.clientY)}
-                    onPointerMove={(e) => e.pointerType === 'mouse' && e.buttons === 1 && swipeMove(e.clientX, e.clientY)}
-                    onPointerUp={swipeEnd}
+                    onPointerDown={(e) => e.stopPropagation()}
                     style={{
-                        flex: 1,
-                        minHeight: 0,
-                        overflowY: open ? 'auto' : 'hidden',
-                        overflowX: 'hidden',
-                        overscrollBehavior: 'contain',
-                        padding: `8px 20px ${NAV + 28}px`,
+                        position: 'absolute',
+                        top: CHIPS_TOP,
+                        left: 0,
+                        right: 0,
+                        zIndex: 4,
                         display: 'flex',
-                        flexDirection: 'column',
-                        gap: 12,
+                        gap: 8,
+                        overflowX: 'auto',
+                        overflowY: 'hidden',
+                        touchAction: 'pan-x',
+                        overscrollBehavior: 'contain',
+                        // Room for the chip shadow and the 44px touch area.
+                        padding: '2px 16px 10px',
                     }}
                 >
-                    {app.loading ? (
-                        [0, 1, 2].map((i) => <Skeleton key={i} style={{ height: 70, borderRadius: 16, flexShrink: 0 }} />)
-                    ) : (
-                        <>
-                            <div
-                                className="no-scrollbar"
-                                style={{
-                                    display: 'flex',
-                                    gap: 8,
-                                    overflowX: 'auto',
-                                    overflowY: 'hidden',
-                                    touchAction: 'pan-x',
-                                    overscrollBehavior: 'contain',
-                                    flexShrink: 0,
-                                    margin: '0 -20px',
-                                    padding: '2px 20px',
-                                }}
-                            >
-                                <FilterChips filters={filters} />
-                            </div>
-                            {benefits ? (
-                                MERCHANTS.map((m) => <MerchantRow key={m.id} merchant={m} onClick={() => setShop(m)} />)
-                            ) : (
-                                <>
-                                    {list.map((p) => (
-                                        <PointRow key={p.id} point={p} onClick={() => select(p)} />
-                                    ))}
-                                    {!list.length && (
-                                        <div style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                                            No hay puntos con ese filtro. Prueba con «Todos» o pide un retiro a domicilio.
-                                        </div>
-                                    )}
-                                    <CampaignNotice campaign={CAMPAIGN} onClick={() => filters.only(CAMPAIGN.chip)} />
-                                </>
-                            )}
-                        </>
-                    )}
+                    <FilterChips filters={filters} onMap />
                 </div>
-            </motion.section>
+            </InteractiveMap>
 
             <SearchOverlay
                 open={searchOpen}
                 query={query}
                 setQuery={setQuery}
                 onClose={() => setSearchOpen(false)}
+                onLocate={locate}
                 onPick={(p) => {
                     setSearchOpen(false);
-                    if (p) select(p);
+                    if (p) setSelected(p);
                 }}
+                nearbyTitle={benefits ? benefitsTitle(MERCHANTS.length) : nearby.title}
+                nearby={
+                    benefits ? (
+                        MERCHANTS.map((m) => (
+                            <MerchantRow
+                                key={m.id}
+                                merchant={m}
+                                onClick={() => {
+                                    setSearchOpen(false);
+                                    setShop(m);
+                                }}
+                            />
+                        ))
+                    ) : nearby.points.length ? (
+                        nearby.points.map((p) => (
+                            <PointRow
+                                key={p.id}
+                                point={p}
+                                onClick={() => {
+                                    setSearchOpen(false);
+                                    setSelected(p);
+                                }}
+                            />
+                        ))
+                    ) : (
+                        <div style={{ padding: '4px 12px', fontSize: 14, lineHeight: 1.5, color: 'var(--text-muted)' }}>
+                            No hay puntos cerca con ese filtro. Prueba con «Todos» o pide un retiro a domicilio.
+                        </div>
+                    )
+                }
             />
             <BottomSheet contained open={!!selected} onClose={() => setSelected(null)}>
                 {selected && <PointDetail point={selected} onClose={() => setSelected(null)} />}

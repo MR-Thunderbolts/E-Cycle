@@ -41,6 +41,7 @@ export const CiudadanoProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const [saved, setSaved] = useState<string[]>([]);
     const [addresses, setAddresses] = useState<Address[]>([]);
     const [sms, setSmsState] = useState(true);
+    const [located, setLocated] = useState(false);
 
     const [account, setAccount] = useState(false);
     const [register, setRegister] = useState<RegisterMode | false>(false);
@@ -214,6 +215,8 @@ export const CiudadanoProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 removeAddress,
                 sms,
                 setSms,
+                located,
+                setLocated,
                 account,
                 openAccount: () => setAccount(true),
                 closeAccount: () => setAccount(false),
