@@ -107,7 +107,6 @@
       width: 140px;
       height: 140px;
       overflow: visible;
-      animation: ec-boot-orbit 1.2s linear infinite;
     }
 
     #boot svg path {
@@ -122,18 +121,26 @@
       stroke: #1DE9B6;
     }
 
-    #boot .b1 { animation-delay: .05s; opacity: .5; }
-    #boot .b2 { animation-delay: .1s; opacity: .32; }
-    #boot .b3 { animation-delay: .15s; opacity: .18; }
+    /* Same soft glow as the splash (.ec-splash__glow), so the hand-off goes unnoticed. */
+    #boot .glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 384px;
+      height: 384px;
+      transform: translate(-50%, -50%);
+      border-radius: 9999px;
+      background: rgba(0, 77, 64, .2);
+      filter: blur(100px);
+      animation: ec-boot-glow 2s cubic-bezier(.4, 0, .2, 1) infinite;
+    }
 
-    @keyframes ec-boot-orbit {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(-360deg); }
+    @keyframes ec-boot-glow {
+      50% { opacity: .5; }
     }
 
     @media (prefers-reduced-motion: reduce) {
       #boot svg { animation: ec-boot-breathe 1.6s ease-in-out infinite; }
-      #boot .b1, #boot .b2, #boot .b3 { display: none; }
       @keyframes ec-boot-breathe { 50% { opacity: .35; } }
     }
   </style>
@@ -152,11 +159,69 @@
   <div id="root"></div>
   <!-- Until the app is ready; the splash hands off from here (src/components/ui/Brand/AnimatedLogo.tsx). -->
   <div id="boot" role="status" aria-label="Cargando E-Cycle">
-    <svg class="b3" viewBox="-15.25 -15.5 80 80" aria-hidden="true"><g transform="translate(49.505 43.316) scale(.45) translate(-38.3669 -6.1882)"><path d="M40.0171 2.47528H36.7167C35.5775 2.47528 34.654 3.3988 34.654 4.53802V7.83839C34.654 8.9776 35.5775 9.90112 36.7167 9.90112H40.0171C41.1563 9.90112 42.0798 8.9776 42.0798 7.83839V4.53802C42.0798 3.3988 41.1563 2.47528 40.0171 2.47528Z"/></g><g transform="translate(42.493 54.455) scale(.45) translate(-47.443 -11.1388)"><path d="M48.268 9.07604H46.6179C45.9343 9.07604 45.3802 9.63015 45.3802 10.3137V11.9639C45.3802 12.6474 45.9343 13.2015 46.6179 13.2015H48.268C48.9516 13.2015 49.5057 12.6474 49.5057 11.9639V10.3137C49.5057 9.63015 48.9516 9.07604 48.268 9.07604Z"/></g></svg>
-    <svg class="b2" viewBox="-15.25 -15.5 80 80" aria-hidden="true"><g transform="translate(49.505 43.316) scale(.45) translate(-38.3669 -6.1882)"><path d="M40.0171 2.47528H36.7167C35.5775 2.47528 34.654 3.3988 34.654 4.53802V7.83839C34.654 8.9776 35.5775 9.90112 36.7167 9.90112H40.0171C41.1563 9.90112 42.0798 8.9776 42.0798 7.83839V4.53802C42.0798 3.3988 41.1563 2.47528 40.0171 2.47528Z"/></g><g transform="translate(42.493 54.455) scale(.45) translate(-47.443 -11.1388)"><path d="M48.268 9.07604H46.6179C45.9343 9.07604 45.3802 9.63015 45.3802 10.3137V11.9639C45.3802 12.6474 45.9343 13.2015 46.6179 13.2015H48.268C48.9516 13.2015 49.5057 12.6474 49.5057 11.9639V10.3137C49.5057 9.63015 48.9516 9.07604 48.268 9.07604Z"/></g></svg>
-    <svg class="b1" viewBox="-15.25 -15.5 80 80" aria-hidden="true"><g transform="translate(49.505 43.316) scale(.45) translate(-38.3669 -6.1882)"><path d="M40.0171 2.47528H36.7167C35.5775 2.47528 34.654 3.3988 34.654 4.53802V7.83839C34.654 8.9776 35.5775 9.90112 36.7167 9.90112H40.0171C41.1563 9.90112 42.0798 8.9776 42.0798 7.83839V4.53802C42.0798 3.3988 41.1563 2.47528 40.0171 2.47528Z"/></g><g transform="translate(42.493 54.455) scale(.45) translate(-47.443 -11.1388)"><path d="M48.268 9.07604H46.6179C45.9343 9.07604 45.3802 9.63015 45.3802 10.3137V11.9639C45.3802 12.6474 45.9343 13.2015 46.6179 13.2015H48.268C48.9516 13.2015 49.5057 12.6474 49.5057 11.9639V10.3137C49.5057 9.63015 48.9516 9.07604 48.268 9.07604Z"/></g></svg>
-    <svg class="b0" viewBox="-15.25 -15.5 80 80" aria-hidden="true"><g transform="translate(49.505 43.316) scale(.45) translate(-38.3669 -6.1882)"><path d="M40.0171 2.47528H36.7167C35.5775 2.47528 34.654 3.3988 34.654 4.53802V7.83839C34.654 8.9776 35.5775 9.90112 36.7167 9.90112H40.0171C41.1563 9.90112 42.0798 8.9776 42.0798 7.83839V4.53802C42.0798 3.3988 41.1563 2.47528 40.0171 2.47528Z"/></g><g transform="translate(42.493 54.455) scale(.45) translate(-47.443 -11.1388)"><path d="M48.268 9.07604H46.6179C45.9343 9.07604 45.3802 9.63015 45.3802 10.3137V11.9639C45.3802 12.6474 45.9343 13.2015 46.6179 13.2015H48.268C48.9516 13.2015 49.5057 12.6474 49.5057 11.9639V10.3137C49.5057 9.63015 48.9516 9.07604 48.268 9.07604Z"/></g></svg>
+    <div class="glow"></div>
+    <svg viewBox="-15.25 -15.5 80 80" aria-hidden="true"></svg>
   </div>
+  <script>
+    // Loading spiral («Vuelta cerrada»), drawn with the same maths as the splash (AnimatedLogo.tsx): each pixel on
+    // its own orbit around the C, counter-clockwise, easing in and out of every turn, the radius breathing, moving
+    // in quarter-cell steps with a trail of outlines. Every turn ends exactly where the splash picks the pixels up
+    // (u = 0 of its spiral), and window.__ecBoot tells the splash when the next turn ends.
+    (function () {
+      var svg = document.querySelector('#boot svg');
+      if (!svg) return;
+      var DOTS = [
+        { c: [38.3669, 6.1882], d: 'M40.0171 2.47528H36.7167C35.5775 2.47528 34.654 3.3988 34.654 4.53802V7.83839C34.654 8.9776 35.5775 9.90112 36.7167 9.90112H40.0171C41.1563 9.90112 42.0798 8.9776 42.0798 7.83839V4.53802C42.0798 3.3988 41.1563 2.47528 40.0171 2.47528Z' },
+        { c: [47.443, 11.1388], d: 'M48.268 9.07604H46.6179C45.9343 9.07604 45.3802 9.63015 45.3802 10.3137V11.9639C45.3802 12.6474 45.9343 13.2015 46.6179 13.2015H48.268C48.9516 13.2015 49.5057 12.6474 49.5057 11.9639V10.3137C49.5057 9.63015 48.9516 9.07604 48.268 9.07604Z' }
+      ];
+      var CX = 24.75, CY = 24.5, Q = 4.95057 / 4, T = 1.2, TRAIL = 6, GAP = 0.03;
+      var html = '';
+      DOTS.forEach(function (dot, i) {
+        for (var k = TRAIL; k >= 0; k--) html += '<path data-d="' + i + '" data-k="' + k + '" d="' + dot.d + '"' + (k ? ' opacity="' + (0.5 * (1 - (k - 1) / TRAIL)).toFixed(2) + '"' : '') + '/>';
+      });
+      svg.innerHTML = html;
+      var paths = Array.prototype.slice.call(svg.querySelectorAll('path'));
+      DOTS.forEach(function (dot) {
+        dot.a1 = Math.atan2(dot.c[1] - CY, dot.c[0] - CX);
+        dot.r1 = Math.hypot(dot.c[0] - CX, dot.c[1] - CY);
+      });
+      function place(dot, t) {
+        var x = t / T, w = x - Math.floor(x), lap = Math.floor(x);
+        // one full turn per lap, slow at both ends (like the splash spiral when it starts)
+        var phi = -2 * Math.PI * (lap + w - Math.sin(2 * Math.PI * w) / (2 * Math.PI));
+        var breathe = Math.pow(Math.sin(Math.PI * w), 2);
+        var a = dot.a1 + Math.PI * 2.5 + phi, r = dot.r1 + 8 + 3 * breathe;
+        var ox = Math.round((CX + Math.cos(a) * r - dot.c[0]) / Q) * Q, oy = Math.round((CY + Math.sin(a) * r - dot.c[1]) / Q) * Q;
+        return { x: dot.c[0] + ox, y: dot.c[1] + oy, s: 0.45 + 0.12 * breathe };
+      }
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var t0 = performance.now(), raf = 0;
+      function frame(now) {
+        var t = reduce ? 0 : (now - t0) / 1000;
+        paths.forEach(function (p) {
+          var dot = DOTS[+p.getAttribute('data-d')], k = +p.getAttribute('data-k');
+          var tk = t - k * GAP;
+          if (tk < 0 || (reduce && k)) { p.setAttribute('visibility', 'hidden'); return; }
+          var q = place(dot, tk), s = q.s * (k ? 1 - k * (0.5 / TRAIL) : 1);
+          p.setAttribute('visibility', 'visible');
+          p.setAttribute('transform', 'translate(' + q.x + ' ' + q.y + ') scale(' + s.toFixed(3) + ') translate(' + -dot.c[0] + ' ' + -dot.c[1] + ')');
+        });
+        if (!reduce) raf = requestAnimationFrame(frame);
+      }
+      frame(t0);
+      window.__ecBoot = {
+        motion: !reduce,
+        /** ms until the current turn ends (pixels back at the splash's starting point). */
+        untilTurnEnds: function () {
+          var x = (performance.now() - t0) / 1000 / T;
+          return (Math.ceil(x) - x) * T * 1000;
+        },
+        /** ms since the loader started; the splash glow continues the same pulse from here. */
+        elapsed: function () { return performance.now() - t0; },
+        stop: function () { cancelAnimationFrame(raf); }
+      };
+    })();
+  </script>
   <script type="module" src="/index.tsx"></script>
   <!-- FOUT fix: add .fonts-loaded to <html> once Material Symbols font resolves -->
   <script>

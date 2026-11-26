@@ -139,35 +139,38 @@ export interface AnimatedLogoProps {
     onDone?: () => void;
 }
 
+interface BootLoader {
+    motion: boolean;
+    untilTurnEnds: () => number;
+    elapsed: () => number;
+    stop: () => void;
+}
+/** The loading spiral drawn by index.html before the bundle (#boot), if it is still on screen. */
+export const bootLoader = (): BootLoader | undefined =>
+    document.getElementById('boot') ? (window as unknown as { __ecBoot?: BootLoader }).__ecBoot : undefined;
+
 /**
- * Hand-off from the loading spiral in index.html (#boot): wait for the fonts (at most 2 s), then for the
- * spiral to finish a turn, so its pixels sit where the animation picks them up; then fade it out.
+ * Hand-off from the loading spiral: wait for the fonts (at most 2 s), then for its current turn to end, which
+ * leaves the pixels exactly where this animation picks them up; then fade it out.
  */
-const handOff = (motion: boolean, isCancelled: () => boolean): Promise<void> =>
+const handOff = (isCancelled: () => boolean): Promise<void> =>
     new Promise((resolve) => {
-        const boot = document.getElementById('boot');
         const fonts = Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise((r) => setTimeout(r, 2000))]);
         fonts.then(() => {
             if (isCancelled()) return;
+            const boot = bootLoader();
             const finish = () => {
                 if (isCancelled()) return;
-                if (boot) {
-                    boot.classList.add('is-done');
-                    setTimeout(() => boot.remove(), 200);
+                boot?.stop();
+                const el = document.getElementById('boot');
+                if (el) {
+                    el.classList.add('is-done');
+                    setTimeout(() => el.remove(), 200);
                 }
                 resolve();
             };
-            const lead = boot?.querySelector('.b0');
-            if (!motion || !lead) return finish();
-            let done = false;
-            const once = () => {
-                if (done) return;
-                done = true;
-                lead.removeEventListener('animationiteration', once);
-                finish();
-            };
-            lead.addEventListener('animationiteration', once);
-            setTimeout(once, 1300); // one turn is 1.2 s
+            if (boot?.motion) setTimeout(finish, boot.untilTurnEnds());
+            else finish();
         });
     });
 
@@ -331,7 +334,7 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
         let raf = 0;
         let doneTimer = 0;
         draw(0); // nothing visible yet: the loading spiral is on top
-        handOff(motion, () => cancelled).then(() => {
+        handOff(() => cancelled).then(() => {
             if (cancelled) return;
             if (!motion) {
                 draw(LOGO_INTRO_S);
