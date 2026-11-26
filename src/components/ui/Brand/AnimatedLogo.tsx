@@ -20,9 +20,6 @@ const ISO_H = 47.8554;
 const WORD_W = 143.068;
 const WORD_H = 40.1985;
 const CELL = 4.95057;
-const COLS = 10;
-const ROWS = 10;
-const SLICES = 22;
 
 const pathsOf = (raw: string) => [...raw.matchAll(/<path[^>]*\sd="([^"]+)"/g)].map((m) => m[1]);
 const [ISO_BODY, ...ISO_DOTS] = pathsOf(isotipoSvg);
@@ -100,70 +97,23 @@ export const LOGO_INTRO_S = E + 1.5;
 /** How long the splash stays: the build plus a short beat to read it. */
 export const LOGO_SPLASH_MS = Math.round(LOGO_INTRO_S * 1000) + 600;
 
-// ── Grid cells that touch the symbol, in the order the snake reveals them.
-interface Cell { c: number; r: number; x: number; y: number; hits: number; mx: number; my: number; step: number }
-let CELLS: Cell[] | null = null;
-let STEPS = 0;
-const cellsOf = (): Cell[] => {
-    if (CELLS) return CELLS;
-    const ctx = document.createElement('canvas').getContext('2d')!;
-    const shape = new Path2D(ISO_BODY);
-    const cells: (Cell & { slice: number; side: number })[] = [];
-    for (let r = 0; r < ROWS; r++)
-        for (let c = 0; c < COLS; c++) {
-            let hits = 0, mx = 0, my = 0;
-            for (let a = 0; a < 5; a++)
-                for (let b = 0; b < 5; b++) {
-                    const px = (c + (a + 0.5) / 5) * CELL, py = (r + (b + 0.5) / 5) * CELL;
-                    if (ctx.isPointInPath(shape, px, py)) {
-                        hits++;
-                        mx += px;
-                        my += py;
-                    }
-                }
-            if (hits) cells.push({ c, r, x: c * CELL, y: r * CELL, hits, mx: mx / hits, my: my / hits, step: 0, slice: 0, side: 0 });
-        }
-    for (const k of cells) {
-        let bi = 0, bd = Infinity;
-        SAMPLES.forEach((sp, qi) => {
-            const d = Math.hypot(sp[0] - k.mx, sp[1] - k.my);
-            if (d < bd) {
-                bd = d;
-                bi = qi;
-            }
-        });
-        const a = SAMPLES[Math.max(0, bi - 1)], b = SAMPLES[Math.min(SAMPLES.length - 1, bi + 1)];
-        k.side = (b[0] - a[0]) * (k.my - SAMPLES[bi][1]) - (b[1] - a[1]) * (k.mx - SAMPLES[bi][0]);
-        k.slice = Math.floor((bi / (SAMPLES.length - 1)) * SLICES);
-    }
-    const order = cells.map((_, i) => i).sort((p, q) => cells[p].slice - cells[q].slice || cells[p].side - cells[q].side);
-    const sliceIds: number[] = [];
-    order.forEach((i) => !sliceIds.includes(cells[i].slice) && sliceIds.push(cells[i].slice));
-    for (const k of cells) k.step = sliceIds.indexOf(k.slice);
-    // Rounded edge pieces light up with the full cell they lean on, so every step adds whole blocks.
-    const at = new Map(cells.map((k) => [`${k.c},${k.r}`, k]));
-    const full = (k?: Cell) => !!k && k.hits === 25;
-    for (const k of cells) {
-        if (full(k)) continue;
-        let best: Cell | null = null, bd = Infinity;
-        for (let dc = -1; dc <= 1; dc++)
-            for (let dr = -1; dr <= 1; dr++) {
-                const nb = at.get(`${k.c + dc},${k.r + dr}`);
-                if (!nb || !full(nb)) continue;
-                const d = Math.hypot(nb.x + CELL / 2 - k.mx, nb.y + CELL / 2 - k.my) + (dc && dr ? 1.5 : 0);
-                if (d < bd) {
-                    bd = d;
-                    best = nb;
-                }
-            }
-        if (best) k.step = best.step;
-    }
-    const used = [...new Set(cells.map((k) => k.step))].sort((p, q) => p - q);
-    for (const k of cells) k.step = used.indexOf(k.step);
-    STEPS = used.length;
-    CELLS = cells;
-    return cells;
-};
+// ── Grid cells (10 × 10) that touch the symbol, with the step at which the snake reveals each one:
+// [column, row, step]. Computed once from the artwork (25 samples per cell, ordered along the guide line, rounded
+// edge pieces grouped with the full cell they lean on) and stored here: measuring it at runtime needs a <canvas>,
+// and Brave and Safari scramble canvas reads against fingerprinting, which left the snake without cells.
+const CELL_TABLE: [number, number, number][] = [
+    [3, 0, 1], [4, 0, 1], [5, 0, 0], [6, 0, 0], [1, 1, 3], [2, 1, 3], [3, 1, 2], [4, 1, 1],
+    [5, 1, 0], [6, 1, 0], [0, 2, 4], [1, 2, 3], [2, 2, 3], [3, 2, 3], [0, 3, 4], [1, 3, 4],
+    [2, 3, 4], [3, 3, 3], [0, 4, 5], [1, 4, 5], [2, 4, 5], [8, 4, 16], [9, 4, 16], [0, 5, 6],
+    [1, 5, 6], [2, 5, 6], [7, 5, 16], [8, 5, 16], [9, 5, 16], [0, 6, 6], [1, 6, 7], [2, 6, 8],
+    [3, 6, 8], [6, 6, 14], [7, 6, 14], [8, 6, 15], [9, 6, 15], [1, 7, 8], [2, 7, 8], [3, 7, 8],
+    [4, 7, 10], [5, 7, 11], [6, 7, 14], [7, 7, 14], [8, 7, 15], [9, 7, 15], [1, 8, 8], [2, 8, 8],
+    [3, 8, 9], [4, 8, 10], [5, 8, 11], [6, 8, 12], [7, 8, 13], [8, 8, 13], [3, 9, 9], [4, 9, 10],
+    [5, 9, 11], [6, 9, 12],
+];
+interface Cell { x: number; y: number; step: number }
+const CELLS: Cell[] = CELL_TABLE.map(([c, r, step]) => ({ x: c * CELL, y: r * CELL, step }));
+const STEPS = Math.max(...CELL_TABLE.map((k) => k[2])) + 1;
 const padD = (k: Cell) => {
     const p = 0.6, s = CELL + 2 * p;
     return `M${k.x - p} ${k.y - p}h${s}v${s}h${-s}z`;
@@ -214,26 +164,30 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
         const svg = svgRef.current;
         if (!svg) return;
         while (svg.firstChild) svg.removeChild(svg.firstChild);
-        const cells = cellsOf();
+        const cells = CELLS;
         const id = `alogo${Math.random().toString(36).slice(2, 7)}`;
 
         const defs = el('defs', {}, svg);
         el('path', { d: ISO_BODY }, el('clipPath', { id: `${id}s` }, defs));
-        const drawnPath = el('path', { d: '' }, el('clipPath', { id: `${id}d` }, defs));
+        // One clip per snake step, built once: Safari does not always repaint when a clipPath's
+        // content changes, but it does when the clipped element points to another clip.
+        for (let s = 0; s < STEPS; s++)
+            el('path', { d: cells.filter((c) => c.step <= s).map(padD).join('') }, el('clipPath', { id: `${id}d${s}` }, defs));
         const glow = el('filter', { id: `${id}g`, x: '-10%', y: '-30%', width: '120%', height: '160%' }, defs);
         el('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: 0.6, result: 'b' }, glow);
         const mg = el('feMerge', {}, glow);
         el('feMergeNode', { in: 'b' }, mg);
         el('feMergeNode', { in: 'SourceGraphic' }, mg);
 
-        // Icon
-        const icon = el('g', {}, svg);
+        // Icon and name share a stage that rises; the name's fade edge stays fixed inside it.
+        const stage = el('g', {}, svg);
+        const icon = el('g', {}, stage);
         const iconFill = el('path', { class: 'sym', d: ISO_BODY, opacity: 0 }, icon);
         const headG = el('g', { 'clip-path': `url(#${id}s)` }, icon);
         const heads = cells.map((c) =>
             el('rect', { class: 'pix', x: c.x - 0.02, y: c.y - 0.02, width: CELL + 0.04, height: CELL + 0.04, visibility: 'hidden' }, headG),
         );
-        const outlineG = el('g', { 'clip-path': `url(#${id}d)`, visibility: 'hidden' }, icon);
+        const outlineG = el('g', { visibility: 'hidden' }, icon);
         const outlinePix = el('path', { class: 'trace t-pix', d: ISO_BODY, filter: `url(#${id}g)` }, outlineG);
         const outlineSym = el('path', { class: 'trace t-sym', d: ISO_BODY, opacity: 0 }, outlineG);
         const dots = ISO_DOTS.map((d) => {
@@ -256,12 +210,13 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
             `translate(${c[0] + o[0]} ${c[1] + o[1]}) scale(${s.toFixed(3)}) translate(${-c[0]} ${-c[1]})`;
 
         // Name: comes out downward over a soft edge just inside the bottom of the C, so no line shows.
-        const grad = el('linearGradient', { id: `${id}eg`, gradientUnits: 'userSpaceOnUse', x1: 0, y1: 0, x2: 0, y2: 6 }, defs);
+        const EDGE_IN = 44; // the fade starts just inside the bottom bar of the C
+        const grad = el('linearGradient', { id: `${id}eg`, gradientUnits: 'userSpaceOnUse', x1: 0, y1: EDGE_IN, x2: 0, y2: EDGE_IN + 6 }, defs);
         el('stop', { offset: 0, 'stop-color': '#000' }, grad);
         el('stop', { offset: 1, 'stop-color': '#fff' }, grad);
         const mask = el('mask', { id: `${id}e`, maskUnits: 'userSpaceOnUse', x: -100, y: -100, width: 300, height: 300 }, defs);
         el('rect', { x: -100, y: -100, width: 300, height: 300, fill: `url(#${id}eg)` }, mask);
-        const wordOuter = el('g', { mask: `url(#${id}e)` }, svg);
+        const wordOuter = el('g', { mask: `url(#${id}e)` }, stage);
         const word = el('g', {}, wordOuter);
         const fillG = el('g', { opacity: 0 }, word);
         const pixG = el('g', { filter: `url(#${id}g)`, opacity: 0 }, word);
@@ -272,7 +227,6 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
             el('path', { class: 'trace t-pix', d, 'stroke-width': sw }, pixG);
             el('path', { class: 'trace t-word', d, 'stroke-width': sw }, symG);
         }
-        const EDGE_IN = 44; // the fade starts just inside the bottom bar of the C
         const y0 = SHIFT + EDGE_IN - wordH; // the name starts tucked behind the centred icon
 
         const tag = tagRef.current;
@@ -305,7 +259,7 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
             });
             // the snake reveals the real outline of the C inside the cells it covers
             const step = t < B0 ? -1 : Math.min(STEPS - 1, Math.floor(snakeP(t) * STEPS));
-            if (step >= 0) drawnPath.setAttribute('d', cells.filter((c) => c.step <= step).map(padD).join(''));
+            if (step >= 0) outlineG.setAttribute('clip-path', `url(#${id}d${step})`);
             outlineG.setAttribute('visibility', step >= 0 ? 'visible' : 'hidden');
             cells.forEach((c, i) => {
                 const show = step >= 0 && t < ICON_END && (c.step === step || c.step === step - 1);
@@ -318,12 +272,9 @@ export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
             // the icon rises while the name comes out downward from behind it
             const mv = easeInOut(clamp((t - PLAN.move[0]) / (PLAN.move[1] - PLAN.move[0]), 0, 1));
             const shift = SHIFT * (1 - mv);
-            icon.setAttribute('transform', `translate(0 ${shift.toFixed(3)})`);
-            const y = y0 + (wordY - y0) * mv;
+            stage.setAttribute('transform', `translate(0 ${shift.toFixed(3)})`);
+            const y = y0 + (wordY - y0) * mv - shift; // in stage units
             word.setAttribute('transform', `translate(${wordX.toFixed(3)} ${y.toFixed(3)}) scale(${ws.toFixed(4)})`);
-            const edge = shift + EDGE_IN;
-            grad.setAttribute('y1', edge.toFixed(3));
-            grad.setAttribute('y2', (edge + 6).toFixed(3));
             const q = smooth(PLAN.wordFill[0], PLAN.wordFill[1], t);
             const out = t > PLAN.move[0];
             pixG.setAttribute('opacity', String(out ? 1 - q : 0));
